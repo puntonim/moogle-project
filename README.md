@@ -1,7 +1,7 @@
 Moogle
 ======
 
-The search engine for private data.
+The search engine for **private data**.
 
 Follow the steps in order to create a local development copy.
 
@@ -14,17 +14,14 @@ Register your own app at the providers websites and get an API client id and a s
 https://cloud.google.com/console/project
 Permissions: Drive API
 Gmail and Drive use the same key.
-
 - Facebook
 https://developers.facebook.com/apps
 Enable: Client OAuth Login, Embedded browser OAuth Login.
 Redirect URI: http://127.0.0.1:8000/tokens/add/facebook/callback
-
 - Twitter
 https://dev.twitter.com/apps
 Access level: Read-only
 Callback URL: http://127.0.0.1:8000/tokens/add/twitter/callback
-
 - Dropbox
 https://www.dropbox.com/developers/apps
 Permission type: File type
