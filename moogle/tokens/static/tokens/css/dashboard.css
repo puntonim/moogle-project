@@ -1,0 +1,23 @@
+.provider-container {
+    text-align: center;
+}
+
+.provider-container-title {
+    margin-bottom: 20px;
+}
+
+.provider-not-in-use-container {
+    margin-top: 50px;
+}
+
+.provider-in-use-container {
+    margin-top: 30px;
+}
+
+.alert {
+    width: 80%;
+    margin-top: 0px;
+    margin-right: auto;
+    margin-bottom: 10px;
+    margin-left: auto;
+}

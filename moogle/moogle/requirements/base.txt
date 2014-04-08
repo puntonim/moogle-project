@@ -1,0 +1,7 @@
+django==1.6.2
+south==0.8.4
+requests-oauthlib==0.4.0
+# which needs to be patched, see: requests-oauthlib-patch.txt
+# which requires:
+# requests
+# oauthlib

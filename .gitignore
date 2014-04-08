@@ -1,4 +1,26 @@
+# Python bytecode:
+__pycache__/
+*.py[cod]
+
+# Packaging files:
+*.egg*
+
+# SQLite3 database files:
+*.db
+*.sqlite3
+
+# Logs:
 *.log
-*.pot
-*.pyc
-local_settings.py
+
+# Mac:
+.DS_Store
+._*
+
+# PyCharm:
+.idea
+
+# Virtual environment
+ve
+
+# Optional local copy of environment variables
+vars.environment

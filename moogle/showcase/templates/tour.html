@@ -1,0 +1,142 @@
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- <link rel="shortcut icon" href="../../assets/ico/favicon.ico"> -->
+
+    <title>Moogle</title>
+
+    <!-- Bootstrap -->
+    <link href="{% static "bootstrap/css/bootstrap.min.css" %}" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link rel="stylesheet" type="text/css" href="{% static "showcase/css/tour.css" %}">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+
+<body>
+
+    <div class="site-wrapper">
+
+        <div class="site-wrapper-inner">
+
+            <div class="cover-container">
+
+                <div class="masthead clearfix">
+                    <div class="inner">
+                        <!-- <h3 class="masthead-brand">Cover</h3> -->
+                        <ul class="nav masthead-nav">
+                            <li class="active"><a href="#">Home</a></li>
+                            <li><a href="#">Features</a></li>
+                            <li><a href="#">Contact</a></li>
+                            <li><a href="#" data-toggle="modal" data-target="#signinModal">Sign in</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="inner cover">
+                    <div class="row">
+                        <img src="{% static "showcase/img/logo.png" %}">
+                    </div>
+                    {#<div class="row signup">#}
+                    {#    <a href="#">Sign up now</a>#}
+                    {#</div>#}
+                    <p class="lead">
+                        <button href="#" class="btn btn-lg btn-default signup" data-toggle="modal"
+                                data-target="#signupModal">
+                            Sign up now
+                        </button>
+                    </p>
+                </div>
+
+                {#<div class="mastfoot">#}
+                {#    <div class="inner">#}
+                {#        <p>Sign up now</p>#}
+                {#    </div>#}
+                {#</div>#}
+
+                <!-- Signup Modal -->
+                <div class="modal fade" id="signupModal" tabindex="-1" role="dialog" aria-labelledby="signupModalLabel"
+                     aria-hidden="true">
+                    <div class="modal-dialog modal-sm">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal"
+                                        aria-hidden="true">&times;</button>
+                                <h4 class="modal-title" id="signupModalLabel">Sign up</h4>
+                            </div>
+
+                            <form class="form-signup" role="form" action="{% url 'accounts_signup' %}" method="post">
+                                {% csrf_token %}
+                                <input name="username" type="text" class="form-control" placeholder="Username" required
+                                       autofocus>
+                                <input name="password1" type="password" class="form-control" placeholder="Password"
+                                       required>
+                                <input name="password2" type="password" class="form-control"
+                                       placeholder="Password repeat" required>
+                                <button class="btn btn-lg btn-primary btn-block" type="submit">Send</button>
+                            </form>
+
+                            {#<div class="modal-footer">#}
+                            {#    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>#}
+                            {#    <button type="button" class="btn btn-primary">Send</button>#}
+                            {#</div>#}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Signin Modal -->
+                <div class="modal fade" id="signinModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+                     aria-hidden="true">
+                    <div class="modal-dialog modal-sm">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal"
+                                        aria-hidden="true">&times;</button>
+                                <h4 class="modal-title" id="signinModalLabel">Sign in</h4>
+                            </div>
+
+                            <form class="form-signup" role="form" method="post"
+                                  action="{% url 'django.contrib.auth.views.login' %}">
+                                {% csrf_token %}
+                                <input name="username" type="text" class="form-control"
+                                       placeholder="Username" required autofocus>
+                                <input name="password" type="password" class="form-control"
+                                       placeholder="Password" required>
+                                <button class="btn btn-lg btn-primary btn-block" type="submit">Send</button>
+                            </form>
+
+                            {#<div class="modal-footer">#}
+                            {#    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>#}
+                            {#    <button type="button" class="btn btn-primary">Send</button>#}
+                            {#</div>#}
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+<!-- <script src="https://code.jquery.com/jquery.js"></script> -->
+<script src="{% static "jquery/jquery-2.1.0.min.js" %}"></script>
+<!-- Include all compiled plugins (below), or include individual files as needed -->
+<script src="{% static "bootstrap/js/bootstrap.min.js" %}"></script>
+
+</body>
+
+</html>

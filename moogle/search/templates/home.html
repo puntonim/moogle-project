@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block css %}
+    {{  block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static "search/css/home.css" %}">
+{% endblock css %}
+
+{% block title %}
+    {{  block.super }} > Home
+{% endblock title %}
+
+{% block content %}
+<div class="container">
+
+    <div class="row">
+        <div class="col-md-1">
+        </div>
+
+        <div class="col-md-10 provider-icons-container">
+
+            <form action="{% url 'search_search' %}" method="GET" class="search-form" role="search">
+                {% comment %}
+                    We could make a loop here and print all the provider icon automatically, but
+                    'explicit is better than implicit' in particular in templates where designers
+                    have to work too.
+                {% endcomment %}
+                {% if gmail %}
+                    <div name="gmail"
+                         class="gmail-provider-icon provider-icon-hover provider-icon icon">
+                    </div>
+                {% endif %}
+
+                {% if drive %}
+                    <div name="drive"
+                         class="drive-provider-icon provider-icon-hover provider-icon icon">
+                    </div>
+                {% endif %}
+
+                {% if facebook %}
+                    <div name="facebook"
+                         class="facebook-provider-icon provider-icon-hover provider-icon icon">
+                    </div>
+                {% endif %}
+
+                {% if twitter %}
+                    <div name="twitter"
+                         class="twitter-provider-icon provider-icon-hover provider-icon icon">
+                    </div>
+                {% endif %}
+
+                {% if dropbox %}
+                    <div name="dropbox"
+                         class="dropbox-provider-icon provider-icon-hover provider-icon icon">
+                    </div>
+                {% endif %}
+
+                {% if not is_all_providers %}
+                    <a href="{% url 'tokens_dashboard' %}"
+                       class="add-provider-icon icon"
+                       data-toggle="tooltip"
+                       title="Go to the Dashboard and add new providers!">
+                    </a>
+                {% endif %}
+
+                <div>
+                    <input type="text" name='q' class="form-control input-query" placeholder="Search">
+                    <button type="submit" class="btn btn-default submit-query">Submit</button>
+                </div>
+
+                {# Hidden input to mark which provider is selected #}
+                {% if gmail %}<input type="hidden" name="gmail" value="true">{% endif %}
+                {% if drive %}<input type="hidden" name="drive" value="true">{% endif %}
+                {% if facebook %}<input type="hidden" name="facebook" value="true">{% endif %}
+                {% if twitter %}<input type="hidden" name="twitter" value="true">{% endif %}
+                {% if dropbox %}<input type="hidden" name="dropbox" value="true">{% endif %}
+            </form>
+
+        </div>
+
+        <div class="col-md-1">
+        </div>
+    </div>
+
+</div>
+{% endblock content %}
+
+{% block js %}
+    <script type="text/javascript">
+        $(document).ready(function () {
+            // Activate the tooltips
+            $("[data-toggle='tooltip']").tooltip();
+
+            // Animate the search icons
+            $('.provider-icon').click(disableProvider);
+
+            //
+            $('form').submit(setHiddenInputs);
+        });
+
+        // Disable a provider icon
+        function disableProvider() {
+            $(this).addClass('provider-icon-off').removeClass('provider-icon-hover');
+            $(this).mouseout(function () {
+                $(this).addClass('provider-icon-off-hover');
+            });
+            $('.provider-icon-off').click(enableProvider);
+        }
+
+        // Enable a provider icon
+        function enableProvider() {
+            $(this).removeClass('provider-icon-off').removeClass('provider-icon-off-hover');
+            $(this).mouseout(function () {
+                $(this).addClass('provider-icon-hover');
+            });
+            $('.provider-icon').click(disableProvider);
+        }
+
+        // Set hidden input fields based on the current provider icon selection
+        function setHiddenInputs() {
+            $.each($('.provider-icon'), function() {
+                var varName = $(this).attr('name');
+                if ($(this).hasClass('provider-icon-off'))
+                    $('input[name=' + varName + ']').val('false');
+                else
+                    $('input[name=' + varName + ']').val('true');
+            });
+        }
+
+    </script>
+{% endblock js %}

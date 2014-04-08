@@ -1,0 +1,13 @@
+# Extend base requirements
+-r base.txt
+
+django-debug-toolbar
+# which requires:
+# sqlparse
+werkzeug
+bpython
+# which requires:
+# pygments
+django-extensions
+# which requires:
+# six

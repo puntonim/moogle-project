@@ -1,0 +1,120 @@
+Friday 2014.01.17 13:42:13
+
+
+***************************************************************************************************
+******************************               GENERICI               *******************************
+***************************************************************************************************
+
+-- ALTA PRIORITA ----------------------------------------------------------------------------------
+
+* PASSWORD PROVIDERS NELLA FIXTURE
+Providers.json non puo contenere le password delle mie app sui provider in chiaro
+
+* COLLECTSTATIC, STATIC_URL, MEDIA_URL
+
+---------------------------------------------------------------------------------------------------
+
+
+* Pagina linkata dalla dashboard che mi fa vedere i dettagli dei provider che ho gia collegato
+Da li posso rimuovere un provider
+Da li posso vedere se l'inidcizzazione e' completata
+Se la chiave e' ancora valida
+
+* Condividere db tra Django e altro:
+http://www.toptal.com/django/django-flask-and-redis-sharing-user-sessions-between-frameworks
+
+* FACEBOOK AUTH #_=_
+Quando aggiungo Facebook, dopo la redirect mi lascia un bruttissimo #_=_ nell'url
+
+* LINGUE
+Faccio tutto in lingua inglese? Uso il riconoscimento linguistico in Solr?
+
+
+-- BASSA PRIORITA ----------------------------------------------------------------------------------
+
+* UTENTI SOSPESI
+Se sospendo un utente non puo' piu' fare il login
+Ma se ha una sessione attiva (quindi e' loggato) e valida allora puo cmq usare il sito
+Devo creare una funzione per rimuovere la sessione di un utente qdo lo sospendo
+
+* PROFILO-MAGICO UTENTE
+Posso creare il profilo generico (MoogleProfile) di un utente
+Vedo due soluzioni
+
+Soluzione batch
+Un batch che gira periodicamente e su ogni utente cerca di estrarre il nome, l'email ect da tutti i profili collegati
+ a quell'utente (GoogleProfile, TwitterProfile, ...)
+Mette questi dati nel modello User o in un nuovo modello
+Qs soluzione non e' normalizzata (dati duplicati) ma offre migliori prestazioni in lettura
+
+Soluzione dinamica
+Un proxy model (MagicUser) costruito sul modello User
+https://docs.djangoproject.com/en/1.6/topics/db/models/#proxy-models
+Quando chiamo magic_user.name() questa funzione dinamicamente cerca tra tutti i profili collegati a
+ quell'utente (GoogleProfile, TwitterProfile, ...) finche trova il nome
+Soluzione normalizzata (no dati duplicati) ma piu lenta
+
+Collegata alla successiva
+
+* AGGIORNAMENTO PROFILI
+I profili tipo GoogleProfile, TwitterProfile vanno refreshati ad intervalli regolari, tipo ogni 30 gg
+
+---------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+***************************************************************************************************
+*******************************               RICERCA                ******************************
+***************************************************************************************************
+
+* CARATTERI STRANI
+Cosa succede se ho un file il cui nome contiene un carattere cinese? O uno status facebook?
+
+* FACEBOOK
+- Paging di sotto sezioni come commenti e likes (vedi doc), testare
+- Fare l'index di feeds (/me/feed) invece che di solo status (/me/statuses) (vedi doc e codice)
+- Se uno status viene cancellato dopo che l'ho indicizzato?
+
+* SE L'UTENTE NEGA L'AUTORIZZAZIONE DI UN PROVIDER?
+
+* REFRESH TOKENS
+L'ho fatto solo per Google, non per gli altri
+
+* GMAIL
+Quando prendo il contenuto del messaggio (email o chat) dovrei:
+ - se e' un'email e il mime e' html lo dovrei parsare come html
+ - se e' chat allora prendo la parte 2 (che e' html, la parte 1 e' xml) e lo parso
+ Chiaramente dovrei prendere piu di 100bytes perche' 100 caratteri sono neanche una riga
+
+* GMAIL LINK
+Link diretto alla email mi pare apra sempre l'ultima email del thread che non e' detto sia quella dove c'e' la keyword
+
+* GMAIL ATTIVARE IMAP AUTOMATICAMENTE
+Per collegare Gmail a Moogle l'utente deve attivare IMAP sulla sua casella Gmail
+Mi chiedo come faccia CloudMagic (il nostro competitor)
+Fare delle prove con CloudMagic
+Magari c'e' un modo attivare sto IMAP usando API
+
+* GMAIL CHAT
+Si puo cercare con GTalk ma non con Hangout
+Ho cercato molto ma non ho trovato alcun modo, secondo me nn ci sono le API ancora
+Per cercare basta fare un SELECT della cartella [Gmail]/Chat
+Attenzione che la cartella si puo chiamare [Google Mail]/Chat per cui usare la stessa tecnica con cui prendo la cartella
+ All mail
+Poi l'utente vuole vedere i 10 messaggi piu recenti che matchano la ricerca: qs msg possono essere email o chat
+Come fare? COme prima cosa lanciare una serach con UID (c'e' il commento nel codice) in modo che i risultati siano
+ numeri assoluti che rispecchiano l'ordine dei messaggi (email o chat)
+Descrivo ora una tecnica ottimizz per lavorare con liste grosse
+Dovrei fare prima un select della all mail e lanciare una uid search
+Poi una select della chat e lanciare una uid search
+A sto punto ho due liste immense che devo unire (nella lista union), liberare la mem della prima lista, ordinare e prendere solo gli ultimi
+ 10 risultati
+Ora prendo il piu piccolo dei rusltati, supponiamo sia 100
+Ora faccio scorrere la lista chat all'inverso finche trovo un num piu piccolo, supponiamo in posiz 5: taglio la lista e
+ considero solo da 6 alla fine (lista che chiamo chatl)
+Ora posso far passare ogni elem di union e vedere se sta in chatl, se faccio un select della cartella chat e fetcho il msg
+Se no allora faccio un select della cartella all mail e fetcho il msg
+Oppure faccio la differenza tra union e chatl e ottengo la lista delle sole email, poi prelevo le due liste separatamente

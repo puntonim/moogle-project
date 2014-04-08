@@ -1,0 +1,124 @@
+.provider-icons-container {
+    text-align: center;
+    margin-top: 20%;
+}
+
+.provider-icons-container .icon {
+    cursor: pointer;
+    display: inline-block;
+    width: 100px;
+    height: 90px;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+.provider-icons-container .provider-icon {
+    -o-transition: .5s;
+    -ms-transition: .5s;
+    -moz-transition: .5s;
+    -webkit-transition: .5s;
+    transition: .5s;
+}
+
+/* Gmail icon */
+.gmail-provider-icon {
+    background-image: url('/static/img/social_icons/gmail.png');
+    background-repeat: no-repeat;
+}
+.gmail-provider-icon.provider-icon-hover:hover {
+    background-image: url('/static/img/social_icons/gmail_bw_nok.png');
+    background-repeat: no-repeat;
+}
+.gmail-provider-icon.provider-icon-off {
+    background-image: url('/static/img/social_icons/gmail_bw.png') !important;
+    background-repeat: no-repeat;
+}
+.gmail-provider-icon.provider-icon-off.provider-icon-off-hover:hover {
+    background-image: url('/static/img/social_icons/gmail_bw_ok.png') !important;
+    background-repeat: no-repeat;
+}
+
+/* Drive icon */
+.drive-provider-icon {
+    background-image: url('/static/img/social_icons/drive.png');
+    background-repeat: no-repeat;
+}
+.drive-provider-icon.provider-icon-hover:hover {
+    background-image: url('/static/img/social_icons/drive_bw_nok.png');
+    background-repeat: no-repeat;
+}
+.drive-provider-icon.provider-icon-off {
+    background-image: url('/static/img/social_icons/drive_bw.png') !important;
+    background-repeat: no-repeat;
+}
+.drive-provider-icon.provider-icon-off.provider-icon-off-hover:hover {
+    background-image: url('/static/img/social_icons/drive_bw_ok.png') !important;
+    background-repeat: no-repeat;
+}
+
+/* Facebook icon */
+.facebook-provider-icon {
+    background-image: url('/static/img/social_icons/facebook.png');
+    background-repeat: no-repeat;
+}
+.facebook-provider-icon.provider-icon-hover:hover {
+    background-image: url('/static/img/social_icons/facebook_bw_nok.png');
+    background-repeat: no-repeat;
+}
+.facebook-provider-icon.provider-icon-off {
+    background-image: url('/static/img/social_icons/facebook_bw.png') !important;
+    background-repeat: no-repeat;
+}
+.facebook-provider-icon.provider-icon-off.provider-icon-off-hover:hover {
+    background-image: url('/static/img/social_icons/facebook_bw_ok.png') !important;
+    background-repeat: no-repeat;
+}
+
+/* Twitter icon */
+.twitter-provider-icon {
+    background-image: url('/static/img/social_icons/twitter.png');
+    background-repeat: no-repeat;
+}
+.twitter-provider-icon.provider-icon-hover:hover {
+    background-image: url('/static/img/social_icons/twitter_bw_nok.png');
+    background-repeat: no-repeat;
+}
+.twitter-provider-icon.provider-icon-off {
+    background-image: url('/static/img/social_icons/twitter_bw.png') !important;
+    background-repeat: no-repeat;
+}
+.twitter-provider-icon.provider-icon-off.provider-icon-off-hover:hover {
+    background-image: url('/static/img/social_icons/twitter_bw_ok.png') !important;
+    background-repeat: no-repeat;
+}
+
+/* Dropbox icon */
+.dropbox-provider-icon {
+    background-image: url('/static/img/social_icons/dropbox.png');
+    background-repeat: no-repeat;
+}
+.dropbox-provider-icon.provider-icon-hover:hover {
+    background-image: url('/static/img/social_icons/dropbox_bw_nok.png');
+    background-repeat: no-repeat;
+}
+.dropbox-provider-icon.provider-icon-off {
+    background-image: url('/static/img/social_icons/dropbox_bw.png') !important;
+    background-repeat: no-repeat;
+}
+.dropbox-provider-icon.provider-icon-off.provider-icon-off-hover:hover {
+    background-image: url('/static/img/social_icons/dropbox_bw_ok.png') !important;
+    background-repeat: no-repeat;
+}
+
+.input-query {
+    display: inline;
+    width: 65%;
+}
+
+.add-provider-icon {
+    background-image: url('/static/search/img/plus.png');
+    background-repeat: no-repeat;
+    width: 40px !important;
+    height: 40px !important;
+    margin-bottom: 30px;
+}
+

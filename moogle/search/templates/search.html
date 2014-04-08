@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block css %}
+    {{  block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static "search/css/search.css" %}">
+{% endblock css %}
+
+{% block title %}
+    Search
+{% endblock title %}
+
+{% block content %}
+    This is your search: {{ gets }}
+{% endblock content %}

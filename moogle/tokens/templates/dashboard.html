@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block css %}
+    {{  block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static "tokens/css/dashboard.css" %}">
+{% endblock css %}
+
+{% block title %}
+    Dashboard
+{% endblock title %}
+
+{% block content %}
+    <div id="messages-container container">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissable">
+                <button type="button" class="close" data-dismiss="alert"
+                        aria-hidden="true">&times;
+                </button>
+                {{ message|safe }}
+            </div>
+        {% endfor %}
+    </div>
+
+
+    {% if is_any_provider %}
+        <div class="provider-in-use-container provider-container">
+            <div class="provider-container-title">
+                You are now using
+                {% if not is_all_providers %}
+                     these
+                {% else %}
+                    <strong>all</strong>
+                {% endif %}
+                providers
+            </div>
+            <div>
+                <ul class="list-inline">
+                    {% comment %}
+                        We could make a loop here and print all the provider icon automatically,
+                        but 'explicit is better than implicit' in particular in templates where
+                        designers have to work too.
+                    {% endcomment %}
+                    {% if gmail %}
+                        <li><img src="{% static "img/social_icons/gmail.png" %}"></li>
+                    {% endif %}
+
+                    {% if drive %}
+                        <li><img src="{% static "img/social_icons/drive.png" %}"></li>
+                    {% endif %}
+
+                    {% if facebook %}
+                        <li><img src="{% static "img/social_icons/facebook.png" %}"></li>
+                    {% endif %}
+
+                    {% if twitter %}
+                        <li><img src="{% static "img/social_icons/twitter.png" %}"></li>
+                    {% endif %}
+
+                    {% if dropbox %}
+                        <li><img src="{% static "img/social_icons/dropbox.png" %}"></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    {% endif %}
+
+    {% if not is_all_providers %}
+        <div class="provider-not-in-use-container provider-container jumbotron">
+            <div class="provider-container-title">
+                Add new providers!
+            </div>
+            <div>
+                <ul class="list-inline">
+                    {% if not gmail %}
+                        <li>
+                            <a href="{% url 'tokens_add' 'gmail' %}">
+                                <img src="{% static "img/social_icons/gmail.png" %}">
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    {% if not drive %}
+                        <li>
+                            <a href="{% url 'tokens_add' 'drive' %}">
+                                <img src="{% static "img/social_icons/drive.png" %}">
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    {% if not facebook %}
+                        <li>
+                            <a href="{% url 'tokens_add' 'facebook' %}">
+                                <img src="{% static "img/social_icons/facebook.png" %}">
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    {% if not twitter %}
+                        <li>
+                            <a href="{% url 'tokens_add' 'twitter' %}">
+                                <img src="{% static "img/social_icons/twitter.png" %}">
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    {% if not dropbox %}
+                        <li>
+                            <a href="{% url 'tokens_add' 'dropbox' %}">
+                                <img src="{% static "img/social_icons/dropbox.png" %}">
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    {% endif %}
+{% endblock content %}
