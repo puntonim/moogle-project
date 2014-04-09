@@ -9,8 +9,8 @@ https://docs.djangoproject.com/en/1.6/ref/settings/
 """
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-import os
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+from os.path import join, normpath, dirname
+BASE_DIR = normpath(dirname(dirname(dirname(__file__))))
 
 
 # Quick-start development settings - unsuitable for production
@@ -64,7 +64,7 @@ WSGI_APPLICATION = 'moogle.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'NAME': normpath(join(BASE_DIR, 'db.sqlite3')),
     }
 }
 
@@ -87,12 +87,12 @@ STATIC_URL = '/static/'
 
 # Static files shared amongst all apps
 STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, 'static'),
+    normpath(join(BASE_DIR, 'static')),
 )
 
 # Templates shared amongst all apps
 TEMPLATE_DIRS = (
-    os.path.join(BASE_DIR, 'templates'),
+    normpath(join(BASE_DIR, 'templates')),
 )
 
 #LOGIN_URL = ''  # Default: '/accounts/login/'
