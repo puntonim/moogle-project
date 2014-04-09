@@ -187,6 +187,9 @@ The passwords are the API client ids and secrets you got while registering your 
 Virtualenvwrapper hook on activation:
 
     $ nano ~/.virtualenvs/magpie/bin/postactivate
+    # Settings
+    export MAGPIE_SETTINGS_MODULE=magpie.settings.local
+
     # Passwords
     export DRIVE_CLIENT_ID=...
     export DRIVE_CLIENT_SECRET=...
@@ -201,7 +204,10 @@ Virtualenvwrapper hook on activation:
 
 Virtualenvwrapper hook on deactivation:
 
-    $ nano ~/.virtualenvs/moogle/bin/predeactivate
+    $ nano ~/.virtualenvs/magpie/bin/predeactivate
+    # Settings
+    unset MAGPIE_SETTINGS_MODULE
+
     # Passwords
     unset DRIVE_CLIENT_ID
     unset DRIVE_CLIENT_SECRET
@@ -221,7 +227,7 @@ Now set the right `PYTHONPATH` (user your own *path*):
 Reactivate the virtual environment:
 
     $ deactivate
-    $ workon moogle
+    $ workon magpie
 
 #### 3.2. Using plain Virtualenv
     $ virtualenv ve
@@ -233,6 +239,9 @@ Virtualenv hook on activation (user your own *path* for `PYTHONPATH`):
     $ nano ve/bin/activate
     # PYTHONPATH
     export PYTHONPATH="/Users/my_user/workspace/moogle-project/magpie"
+
+    # Settings
+    export MAGPIE_SETTINGS_MODULE=magpie.settings.local
 
     # Passwords
     export DRIVE_CLIENT_ID=...
@@ -264,7 +273,11 @@ You might need it in case you accidentally remove your virtual environment and l
 
 ### 5. Install the requirements
     $ cd magpie
-    $ pip install -r magpie/requirements.txt
+    $ pip install -r magpie/requirements/local.txt
+
+
+### 6. Check the settings
+Check the settings file: `magpie/settings/local.py`
 
 
 TODO: complete this
