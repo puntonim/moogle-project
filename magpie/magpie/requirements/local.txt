@@ -1,0 +1,4 @@
+# Extend base requirements
+-r base.txt
+
+bpython
