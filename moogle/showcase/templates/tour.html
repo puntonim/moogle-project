@@ -40,7 +40,13 @@
                             <li class="active"><a href="#">Home</a></li>
                             <li><a href="#">Features</a></li>
                             <li><a href="#">Contact</a></li>
-                            <li><a href="#" data-toggle="modal" data-target="#signinModal">Sign in</a></li>
+                            <li>
+                                {% if not user %}
+                                    <a href="#" data-toggle="modal" data-target="#signinModal">
+                                        Sign in
+                                    </a>
+                                {% endif %}
+                            </li>
                         </ul>
                     </div>
                 </div>
@@ -53,10 +59,14 @@
                     {#    <a href="#">Sign up now</a>#}
                     {#</div>#}
                     <p class="lead">
-                        <button href="#" class="btn btn-lg btn-default signup" data-toggle="modal"
-                                data-target="#signupModal">
-                            Sign up now
-                        </button>
+                        {% if not user %}
+                            <button href="#" class="btn btn-lg btn-default signup" data-toggle="modal"
+                                    data-target="#signupModal">
+                                Sign up now
+                            </button>
+                        {% else %}
+                            <a href="{% url 'home' %}">Search now!</a>
+                        {% endif %}
                     </p>
                 </div>
 
@@ -67,8 +77,8 @@
                 {#</div>#}
 
                 <!-- Signup Modal -->
-                <div class="modal fade" id="signupModal" tabindex="-1" role="dialog" aria-labelledby="signupModalLabel"
-                     aria-hidden="true">
+                <div class="modal fade" id="signupModal" tabindex="-1" role="dialog"
+                     aria-labelledby="signupModalLabel" aria-hidden="true">
                     <div class="modal-dialog modal-sm">
                         <div class="modal-content">
                             <div class="modal-header">
@@ -77,15 +87,18 @@
                                 <h4 class="modal-title" id="signupModalLabel">Sign up</h4>
                             </div>
 
-                            <form class="form-signup" role="form" action="{% url 'accounts_signup' %}" method="post">
+                            <form class="form-signup" role="form"
+                                  action="{% url 'accounts_signup' %}" method="post">
                                 {% csrf_token %}
-                                <input name="username" type="text" class="form-control" placeholder="Username" required
-                                       autofocus>
-                                <input name="password1" type="password" class="form-control" placeholder="Password"
-                                       required>
+                                <input name="username" type="text" class="form-control"
+                                       placeholder="Username" required autofocus>
+                                <input name="password1" type="password" class="form-control"
+                                       placeholder="Password" required>
                                 <input name="password2" type="password" class="form-control"
                                        placeholder="Password repeat" required>
-                                <button class="btn btn-lg btn-primary btn-block" type="submit">Send</button>
+                                <button class="btn btn-lg btn-primary btn-block" type="submit">
+                                    Send
+                                </button>
                             </form>
 
                             {#<div class="modal-footer">#}
@@ -96,9 +109,14 @@
                     </div>
                 </div>
 
+                <div>
+                    <br /><br />
+                    TODO To be completed...
+                </div>
+
                 <!-- Signin Modal -->
-                <div class="modal fade" id="signinModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
-                     aria-hidden="true">
+                <div class="modal fade" id="signinModal" tabindex="-1" role="dialog"
+                     aria-labelledby="myModalLabel" aria-hidden="true">
                     <div class="modal-dialog modal-sm">
                         <div class="modal-content">
                             <div class="modal-header">
@@ -114,7 +132,9 @@
                                        placeholder="Username" required autofocus>
                                 <input name="password" type="password" class="form-control"
                                        placeholder="Password" required>
-                                <button class="btn btn-lg btn-primary btn-block" type="submit">Send</button>
+                                <button class="btn btn-lg btn-primary btn-block" type="submit">
+                                    Send
+                                </button>
                             </form>
 
                             {#<div class="modal-footer">#}
