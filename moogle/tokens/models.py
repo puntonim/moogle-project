@@ -119,12 +119,6 @@ class BearerToken(models.Model):
     # A getter and a setter property are defined on this field to automatize the conversion
     # from json text to python  objects.
     _access_token = models.TextField()
-    # `updates_cursor` is the cursor used to keep track of the position of the last update.
-    # Using a cursor during an update lets us get only the updates happened after the previous
-    # update.
-    # The cursor is text and it has different forms for different providers
-    # E.g. for Dropbox: AAFkqARCY6KnIayYJYqpcIP0-HMWsc4vf21aWJ...RMM1S2V0UoP3Ui_AXIJxtASbBuxveOuKw
-    updates_cursor = models.CharField(max_length=200, blank=True)
 
     objects = BearerTokenManager()
 
