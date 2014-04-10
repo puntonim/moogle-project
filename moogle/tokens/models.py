@@ -39,7 +39,7 @@ class Provider(models.Model):
     # provider.name returns the machine-friendly name
     # provider.get_name_display() returns the user-friendly name
     name = models.CharField(max_length=20, choices=NAME_CHOICES, unique=True)
-    redirect_url = models.CharField(max_length=200)  # Relative url, f.i.: /oauth/google/callback
+    redirect_url = models.CharField(max_length=200)  # Relative url like /tokens/add/drive/callback
     authorization_base_url = models.URLField()
     token_url = models.URLField()
     request_token_url = models.URLField(blank=True)  # Used only in Oauth1
@@ -49,9 +49,6 @@ class Provider(models.Model):
     # A getter and a setter property are defined on this field to automatize the conversion
     # from json text to python  objects.
     _scope = models.TextField(blank=True)  # some providers like Dropbox have no scope
-
-    def __str__(self):
-        return "{}".format(self.name)
 
     @property
     def scope(self):
@@ -96,6 +93,9 @@ class Provider(models.Model):
             msg = "You must set the environment variable: {}".format(var_name)
             raise ImproperlyConfigured(msg)
 
+    def __str__(self):
+        return "{}".format(self.name)
+
 
 class BearerToken(models.Model):
     """
@@ -122,15 +122,6 @@ class BearerToken(models.Model):
 
     objects = BearerTokenManager()
 
-    class Meta:
-        unique_together = ("user", "provider")
-
-    def __str__(self):
-        return "{}, {}".format(
-            self.provider.get_name_display(),
-            self.user.get_full_name() or self.user.get_username()
-        )
-
     # Getter and setter properties for _access_token to automatize the conversion from json text
     # to python objects.
     # The getter reads a json string from the db and returns a python dictionary.
@@ -145,3 +136,12 @@ class BearerToken(models.Model):
     @access_token.setter
     def access_token(self, value):
         self._access_token = json.dumps(value, indent=4)
+
+    class Meta:
+        unique_together = ("user", "provider")
+
+    def __str__(self):
+        return "{}, {}".format(
+            self.provider.get_name_display(),
+            self.user.get_full_name() or self.user.get_username()
+        )
