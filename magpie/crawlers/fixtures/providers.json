@@ -1,0 +1,67 @@
+[
+    {
+        "tablename": "crawlers.provider",
+        "id": 1,
+        "fields": {
+            "name": "drive",
+            "authorization_base_url": "https://accounts.google.com/o/oauth2/auth",
+            "token_url": "https://accounts.google.com/o/oauth2/token",
+            "request_token_url": "",
+            "scope": "[\r\n    \"https://www.googleapis.com/auth/userinfo.email\",\r\n    \"https://www.googleapis.com/auth/userinfo.profile\",\r\n    \"https://www.googleapis.com/auth/drive.readonly\"\r\n]",
+            "redirect_url": "/tokens/add/drive/callback",
+            "oauth_version": "2"
+        }
+    },
+    {
+        "tablename": "crawlers.provider",
+        "id": 2,
+        "fields": {
+            "name": "gmail",
+            "authorization_base_url": "https://accounts.google.com/o/oauth2/auth",
+            "token_url": "https://accounts.google.com/o/oauth2/token",
+            "request_token_url": "",
+            "scope": "[\r\n    \"https://www.googleapis.com/auth/userinfo.email\",\r\n    \"https://www.googleapis.com/auth/userinfo.profile\",\r\n    \"https://mail.google.com\"\r\n]",
+            "redirect_url": "/tokens/add/gmail/callback",
+            "oauth_version": "2"
+        }
+    },
+    {
+        "tablename": "crawlers.provider",
+        "id": 3,
+        "fields": {
+            "name": "facebook",
+            "authorization_base_url": "https://www.facebook.com/dialog/oauth",
+            "token_url": "https://graph.facebook.com/oauth/access_token",
+            "request_token_url": "",
+            "scope": "[\r\n    \"read_stream\",\r\n    \"email\"\r\n]",
+            "redirect_url": "/tokens/add/facebook/callback",
+            "oauth_version": "2"
+        }
+    },
+    {
+        "tablename": "crawlers.provider",
+        "id": 4,
+        "fields": {
+            "name": "dropbox",
+            "authorization_base_url": "https://www.dropbox.com/1/oauth2/authorize",
+            "token_url": "https://api.dropbox.com/1/oauth2/token",
+            "request_token_url": "",
+            "scope": "",
+            "redirect_url": "/tokens/add/dropbox/callback",
+            "oauth_version": "2"
+        }
+    },
+    {
+        "tablename": "crawlers.provider",
+        "id": 5,
+        "fields": {
+            "name": "twitter",
+            "authorization_base_url": "https://api.twitter.com/oauth/authorize",
+            "token_url": "https://api.twitter.com/oauth/access_token",
+            "request_token_url": "https://api.twitter.com/oauth/request_token",
+            "scope": "",
+            "redirect_url": "/tokens/add/twitter/callback",
+            "oauth_version": "1.0a"
+        }
+    }
+]
