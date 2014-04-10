@@ -1,0 +1,18 @@
+[
+    {
+        "tablename": "crawlers.bearertoken",
+        "id": 1,
+        "fields": {
+            "access_token": "{\n    \"refresh_token\": \"...0Rfgdero\", \n    \"token_type\": \"Bearer\", \n    \"expires_at\": 139734563.986751, \n    \"id_token\": \"...7Mbn1QgsdgBSu6czE\", \n    \"access_token\": \"ysdfs...BGyCkLKsdfYA\", \n    \"expires_in\": 3600\n}",
+            "provider_id": 2
+        }
+    },
+    {
+        "tablename": "crawlers.bearertoken",
+        "id": 2,
+        "fields": {
+            "access_token": "{\n    \"screen_name\": \"myuser\", \n    \"user_id\": \"45656766\", \n    \"oauth_token\": \"45654dfgdf...\", \n    \"oauth_token_secret\": \"dfsdfj...\"\n}",
+            "provider_id": 5
+        }
+    }
+]

@@ -10,6 +10,8 @@ The project has 2 main components:
 
 Follow the steps in order to create a *local development* copy.
 
+> *NOTE* The project is still in its early stages.
+
 Foreword
 --------
 Register your own app at the providers websites and get an API client id and a secret.
@@ -278,6 +280,22 @@ You might need it in case you accidentally remove your virtual environment and l
 
 ### 6. Check the settings
 Check the settings file: `magpie/settings/local.py`
+
+
+### 7. Create the db
+    $ python manage.py syncdb
+
+
+### 8. Import the fixtures
+    $ python manage.py loaddata crawlers/fixtures/providers.json
+
+Copy `crawlers/fixtures/sample_bearertoken.json.template` to `crawlers/fixtures/sample_bearertoken.json`.
+Add some user's bearer tokens, then import the fixture:
+
+    $ python manage.py loaddata crawlers/fixtures/sample_bearertoken.json
+
+
+
 
 
 TODO: complete this
