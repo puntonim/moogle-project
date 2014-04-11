@@ -44,17 +44,20 @@ class Provider(models.Model):
     token_url = models.URLField()
     request_token_url = models.URLField(blank=True)  # Used only in Oauth1
     oauth_version = models.CharField(max_length=5, blank=True)  # e.g. 2 or 1.0a
+    _scope = models.TextField(blank=True)  # some providers like Dropbox have no scope
+
     # `_scope` is json text containing a serialized list like:
     # ["https://www.googleapis.com/auth/userinfo.email", "https://mail.google.com"]
     # A getter and a setter property are defined on this field to automatize the conversion
     # from json text to python  objects.
-    _scope = models.TextField(blank=True)  # some providers like Dropbox have no scope
-
+    #
+    # `_scope` has a getter and a setter property to automatize the conversion from json text
+    # to python list.
     @property
     def scope(self):
         """
         Getter property for _scope to automatize the conversion from json text to python objects.
-        Read a json string from the db and return a python dictionary.
+        Read a json string from the db and return a python list.
         """
         try:
             return json.loads(self._scope)
@@ -65,7 +68,7 @@ class Provider(models.Model):
     def scope(self, value):
         """
         Setter property for _scope to automatize the conversion from json text to python objects.
-        Receive a python dictionary and store a json string to the db.
+        Receive a python list and store a json string to the db.
         """
         self._scope = json.dumps(value, indent=4)
 
@@ -107,6 +110,10 @@ class BearerToken(models.Model):
     # `user` is the resource owner
     user = models.ForeignKey(User)
     provider = models.ForeignKey(Provider)
+    _access_token = models.TextField()
+
+    objects = BearerTokenManager()
+
     # `_access_token` is json text containing a serialized dictionary like:
     #{
     #    "refresh_token": "1/RPFj6FA6UahmuPUj3NqDEhdvfYNnXHCSIvhm1d2Yoj0",
@@ -118,23 +125,27 @@ class BearerToken(models.Model):
     # This example is a OAuth2 token (from Google) but it can be also OAuth1 token (like Twitter)
     # A getter and a setter property are defined on this field to automatize the conversion
     # from json text to python  objects.
-    _access_token = models.TextField()
-
-    objects = BearerTokenManager()
-
+    #
     # Getter and setter properties for _access_token to automatize the conversion from json text
     # to python objects.
     # The getter reads a json string from the db and returns a python dictionary.
     @property
     def access_token(self):
+        """
+        Getter property for `_access_token` to automatize the conversion from json text to python
+        objects. Read a json string from the db and return a python dictionary.
+        """
         try:
             return json.loads(self._access_token)
         except ValueError:
             return None
 
-    # The setter receives a python dictionary and stores a json string to the db.
     @access_token.setter
     def access_token(self, value):
+        """
+        Setter property for `_access_token` to automatize the conversion from json text to python
+        objects. Receive a python dictionary and store a json string to the db.
+        """
         self._access_token = json.dumps(value, indent=4)
 
     class Meta:
