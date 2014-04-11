@@ -1,3 +1,6 @@
+TODO: Move to 2 files: moogle/README.md and magpie/README.md
+
+
 Moogle
 ======
 
@@ -10,7 +13,7 @@ The project has 2 main components:
 
 Follow the steps in order to create a *local development* copy.
 
-> *NOTE* The project is still in its early stages.
+**NOTE** The project is still in its early stages.
 
 Foreword
 --------
