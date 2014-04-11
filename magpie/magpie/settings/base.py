@@ -21,5 +21,5 @@ DATABASE = {
 }
 
 # Dropbox
-MAX_FILE_SIZE = 10*1024*1024  # 10 MB in bytes
-DROPBOX_TEMP_REPO_PATH = normpath(join(BASE_DIR, '_tmp', 'dropbox')),
+DROPBOX_MAX_FILE_SIZE = 10*1024*1024  # 10 MB in bytes
+DROPBOX_TEMP_REPO_PATH = normpath(join(BASE_DIR, '_tmp', 'dropbox'))

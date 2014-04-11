@@ -6,6 +6,9 @@ import json
 from magpie.settings import settings
 
 
+# TODO convert all this print to log.debug to console
+
+
 def setup_db():
     # TODO printing this in order to monitor how many times this happens
     print("*************************** Setup the db")
@@ -34,11 +37,14 @@ def session_autocommit():
     sex = Session()
     try:
         yield sex
+        print("*************************** Committing the session")
         sex.commit()
     except:
+        print("*************************** Rolling back the session")
         sex.rollback()
         raise
     finally:
+        print("*************************** Closing the session")
         sex.close()
 
 

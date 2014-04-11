@@ -1,41 +1,15 @@
 import os
+import json
 
-from sqlalchemy import Column, Integer, String, Enum, ForeignKey
+from sqlalchemy import Column, Integer, String, Enum, ForeignKey, Table
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, backref
 
 from .exceptions import ImproperlyConfigured
+from magpie.settings import settings
+
 
 Base = declarative_base()
-
-
-
-from sqlalchemy.types import TypeDecorator, VARCHAR
-import json
-
-class JSONEncodedDict(TypeDecorator):
-    """Represents an immutable structure as a json-encoded string.
-
-    Usage::
-
-        JSONEncodedDict(255)
-
-    """
-
-    impl = VARCHAR
-
-    def process_bind_param(self, value, dialect):
-        if value is not None:
-            value = json.dumps(value, indent=4)
-
-        return value
-
-    def process_result_value(self, value, dialect):
-        if value is not None:
-            value = json.loads(value)
-        return value
-
-
 
 
 class Provider(Base):
@@ -54,7 +28,37 @@ class Provider(Base):
     token_url = Column(String(256), nullable=False)
     request_token_url = Column(String(256), nullable=False)
     oauth_version = Column(String(5))
-    scope = Column(JSONEncodedDict(1024))
+    _scope = Column(String(1024))
+
+    # `_scope` is json text containing a serialized list like:
+    # ["https://www.googleapis.com/auth/userinfo.email", "https://mail.google.com"]
+    # A getter and a setter property are defined on this field to automatize the conversion
+    # from json text to python  objects.
+    #
+    # I tried to use a custom type from SQLAlchemy in order to manage JSON text, following this:
+    # http://docs.sqlalchemy.org/en/rel_0_9/core/types.html#marshal-json-strings
+    # But it didn't work out:
+    #  - the method `process_bind_param` was correctly called before saving to db
+    #  - but the method `process_result_value` was never called when reading from db
+    # Anyway this Python-level solution is always great and reliable.
+    @property
+    def scope(self):
+        """
+        Getter property for _scope to automatize the conversion from json text to python objects.
+        Read a json string from the db and return a python dictionary.
+        """
+        try:
+            return json.loads(self._scope)
+        except ValueError:
+            return None
+
+    @scope.setter
+    def scope(self, value):
+        """
+        Setter property for _scope to automatize the conversion from json text to python objects.
+        Receive a python dictionary and store a json string to the db.
+        """
+        self._scope = json.dumps(value, indent=4)
 
     @property
     def client_id(self):
@@ -92,11 +96,64 @@ class BearerToken(Base):
     provider_id = Column(Integer, ForeignKey('crawlers.provider.id'))
     # Set the other table (Provider) and the name of the reverse relationship (bearertokens)
     provider = relationship("Provider", backref=backref('bearertokens'))
-    access_token = Column(JSONEncodedDict(1024))
+    # `updates_cursor` is the cursor used to keep track of the position of the last update.
+    # Using a cursor during an update lets us get only the updates happened after the previous
+    # update. The cursor is text and it has different forms for different providers.
+    # E.g. for Dropbox: AAFkqARCY6KnIayYJYqpcIP0-HMWsc4vf21aWJ...RMM1S2V0UoP3Ui_AXIJxtASbBuxveOuKw
+    updates_cursor = Column(String(512))
+    _token_set = Column(String(1024))
 
     # TODO so far I don't need a User
     #user = ... foreign key to a User table
     #unique_together = ("user", "provider")
+
+    # `_token_set` is json text containing a serialized dictionary like:
+    #{
+    #    "refresh_token": "1/RPFj6FA6UahmuPUj3NqDEhdvfYNnXHCSIvhm1d2Yoj0",
+    #    "expires_in": 3600,
+    #    "token_type": "Bearer",
+    #    "access_token": "ya29.1.AADtN_VwezbeOQGkJE4_3ZDNZimrRf86Dn...pL8YB1rpVRhav0-mIiHEmV8",
+    #    "id_token": "eyJhbGciOiJSUzI1NiIsI...U3MWJlNZoempIreV572mbxH7Rm90eNQwfShPQnI49u8bZgc"
+    #}
+    # This example is a OAuth2 token (from Google) but it can be also OAuth1 token (like Twitter)
+    # A getter and a setter property are defined on this field to automatize the conversion
+    # from json text to python  objects.
+    #
+    # Getter and setter properties for _token_set to automatize the conversion from json text
+    # to python objects.
+    # The getter reads a json string from the db and returns a python dictionary.
+    @property
+    def token_set(self):
+        """
+        Getter property for `_token_set` to automatize the conversion from json text to python
+        objects. Read a json string from the db and return a python dictionary.
+        """
+        try:
+            return json.loads(self._token_set)
+        except ValueError:
+            return None
+
+    @token_set.setter
+    def token_set(self, value):
+        """
+        Setter property for `_token_set` to automatize the conversion from json text to python
+        objects. Receive a python dictionary and store a json string to the db.
+        """
+        self._token_set = json.dumps(value, indent=4)
+
+    @property
+    def access_token(self):
+        """
+        Getter property for the access_token stored in `token_set` dictionary.
+        """
+        return self.token_set.get('access_token', '')
+
+    @access_token.setter
+    def access_token(self, value):
+        raise NotImplementedError("You can NOT set access_token. Use token_set instead.")
+
+    def __repr__(self):
+        return "<BearerToken(id={}, provider={})>".format(self.id, self.provider.name)
 
 
 
