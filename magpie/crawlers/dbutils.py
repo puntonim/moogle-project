@@ -38,6 +38,10 @@ def session_autocommit():
     try:
         yield sex
         print("*************************** Committing the session")
+        print("Objects in session:")
+        print("\tNEW:", sex.new)
+        print("\tEDITED:", sex.dirty)
+        print("\tDELETED:", sex.deleted)
         sex.commit()
     except:
         print("*************************** Rolling back the session")

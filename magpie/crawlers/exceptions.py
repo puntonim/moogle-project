@@ -1,3 +1,7 @@
 class ImproperlyConfigured(Exception):
-    """Django is somehow improperly configured"""
+    """Magpie is somehow improperly configured"""
+    pass
+
+class InconsistentItemError(Exception):
+    """One of the items are not consistent"""
     pass

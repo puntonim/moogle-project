@@ -59,7 +59,7 @@ if __name__ == '__main__':
         debug.set_trace()
 
     elif sys.argv[1] == 'dropbox':
-        from crawlers.dropboxlib import DropboxCrawler
+        from crawlers.dropbox.synchronizer import DropboxSynchronizer
         from crawlers.dbutils import session_autocommit
         from crawlers.models import Provider
 
@@ -67,5 +67,6 @@ if __name__ == '__main__':
 
         with session_autocommit() as sex:
             provider = sex.query(Provider).filter_by(name=Provider.NAME_DROPBOX).one()
-            indexer = DropboxCrawler(bearertoken=provider.bearertokens[0])
-        indexer.update_index()
+            bearertoken = provider.bearertokens[0]
+
+        DropboxSynchronizer(bearertoken=bearertoken).run()
