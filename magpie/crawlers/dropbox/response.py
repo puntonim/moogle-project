@@ -1,4 +1,5 @@
-from ..exceptions import InconsistentItemError
+from ..exceptions import InconsistentItemError, EntryNotToBeIndexed
+from ..redisutils import RedisStore
 from .entry import DropboxResponseEntry
 
 
@@ -89,12 +90,18 @@ class DropboxResponse:
         `BearerToken`.
         """
 
+        redis = RedisStore()
         for entry_list in self.response_dict.get('entries', list()):
             try:
                 entry = DropboxResponseEntry(entry_list)
-                entry.store(bearertoken_id)
-            except InconsistentItemError as e:
-                # TODO log this
+                redis.add_to_download_buffer(entry, bearertoken_id)
+            except EntryNotToBeIndexed:
+                # This is probably a dir and we don't need to index it
                 continue
-            #except RedisStoringError as e:
-                # We got a serious problem
+            except InconsistentItemError as e:
+                # The current item is not consistent, like some important metadata are missing,
+                # we just skip it
+                # TODO log it anyway
+                continue
+        redis.flush_download_buffer()
+

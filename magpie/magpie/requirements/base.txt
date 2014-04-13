@@ -2,3 +2,5 @@ sqlalchemy==0.9.4
 dropbox==2.0.0
 # which requires:
 # urllib3
+redis
+hiredis

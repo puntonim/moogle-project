@@ -1,8 +1,8 @@
-from ..exceptions import InconsistentItemError
+from ..exceptions import InconsistentItemError, EntryNotToBeIndexed
 from magpie.settings import settings
 
 
-class DropboxResponseEntry(object):
+class DropboxResponseEntry:
     """
     A response got back from Dropbox is a Python dictionary (which is mapped to a
     `DropboxResponse`). This dictionary contains a `entries` key, which is a Python list of up to
@@ -95,14 +95,9 @@ class DropboxResponseEntry(object):
             size = self.metadata['bytes']
         except KeyError as e:
             raise InconsistentItemError('Some metadata are missing.') from e
-        if not is_dir and size <= settings.DROPBOX_MAX_FILE_SIZE:
-            return '+'
-
-    def store(self, bearertoken_id):
-        """
-        Store item in Redis in order to be later processed.
-        """
-        print("Storing {} in Redis with bearertoken_id={}".format(self, bearertoken_id))
+        if is_dir or size > settings.DROPBOX_MAX_FILE_SIZE:
+            raise EntryNotToBeIndexed
+        return '+'
 
     def __str__(self):
         return '<{}(path={}, operation={})>'.format(
