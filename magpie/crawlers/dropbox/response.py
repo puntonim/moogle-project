@@ -90,11 +90,11 @@ class DropboxResponse:
         `BearerToken`.
         """
 
-        redis = RedisStore()
+        redis_store = RedisStore(bearertoken_id)
         for entry_list in self.response_dict.get('entries', list()):
             try:
                 entry = DropboxResponseEntry(entry_list)
-                redis.add_to_download_buffer(entry, bearertoken_id)
+                redis_store.add_to_download_list_buffer(entry)
             except EntryNotToBeIndexed:
                 # This is probably a dir and we don't need to index it
                 continue
@@ -103,5 +103,5 @@ class DropboxResponse:
                 # we just skip it
                 # TODO log it anyway
                 continue
-        redis.flush_download_buffer()
+        redis_store.flush_download_list_buffer()
 

@@ -1,7 +1,7 @@
 from dropbox.client import DropboxClient  # Dropobox official library
 
 from ..dbutils import session_autocommit
-from magpie.settings import settings
+from ..redisutils import RedisStore
 from .file import DropboxFile
 
 
@@ -36,27 +36,26 @@ class DropboxDownloader:
     def run(self):
         print("mo scarico per", self.bearertoken_id)
 
-        # TODO now we read it from file but they should be in Redis
-        from os.path import normpath, join
-        TMP_REDIS_FILE = normpath(join(settings.DROPBOX_TEMP_REPO_PATH, '{}.txt'.format(
-            self.bearertoken_id)))
-        for line in open(TMP_REDIS_FILE):
-            _, path, operation = line.split('\t')
 
-            # Bare in mind that:
-            # + > they are only files (no dir because they have been filtered out previously)
-            # - > we don't know if they are files or dir but we don;t care since we delete:
-            #     name and name/*
+        # Gets all entries in redis dw list
+        # for each +: downloads the file and add an entry to redis ix list (w local file name)
+        # for each -: adds an entry to redis ix list
+        # Bear in mind that:
+        # + are only files (no dirs cause they have already been filtered out)
+        # - are we don't know if they are files or dir but we don't care since during
+        # indexing we ask solr to delete: name and name/*
 
-            # If the record is a - skip it
+        redis_store = RedisStore(self.bearertoken_id)
+        for redis_dw_entry in redis_store.iter_over_download_list():
 
-            # If the record is a + and has no local_path field:
-            #   download the file
-            #   add local_path field
+            print(redis_dw_entry.operation_type, redis_dw_entry.remote_path)
+
+            # TODO finish this
+
 
             # Download the file. We could use client.get_file or client.get_file_and_metadata,
             # but under the hood the actual call to the API is the same, cause that basic API
             # call returns the file plus its metadata.
-            content, metadata = self._client.get_file_and_metadata(path)
-            file = DropboxFile(content, metadata)
-            file.store_to_disk(self.bearertoken_id)
+            #content, metadata = self._client.get_file_and_metadata(path)
+            #file = DropboxFile(content, metadata)
+            #file.store_to_disk(self.bearertoken_id)

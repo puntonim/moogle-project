@@ -7,12 +7,15 @@ class DropboxSynchronizer:
         self.bearertoken = bearertoken
 
     def run(self):
+
+        # TODO temporary reset the cursor for debugging purpose only
+        from ..dbutils import session_autocommit
+        with session_autocommit() as sex:
+            self.bearertoken.updates_cursor = None
+
         DropboxCrawler(self.bearertoken).run()
 
-        #DropboxDownloader(self.bearertoken).run()
-        # gets all entries in redis w/ this bearertoken
-        # for each + with no local_path filed, downloads the file, updateds the local_path field
-        # w the local filepath
+        DropboxDownloader(self.bearertoken).run()
 
         #DropboxIndexer(self.bearertoken).run()
         # gets all the entries in redis with this bearertoken_id

@@ -60,7 +60,9 @@ class DropboxResponseEntry:
         self.path, self.metadata = self._sanity_check(entry_list)
         self.operation_type = self._find_operation_type()
 
-    def _sanity_check(self, entry_list):
+
+    @staticmethod
+    def _sanity_check(entry_list):
         """
         Sanity check to make sure this `entry_list` is a valid entry.
         """
