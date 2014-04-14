@@ -1,5 +1,7 @@
+import json
 from os.path import normpath, join, exists, split
 from os import mkdir
+
 from magpie.settings import settings
 
 
@@ -31,11 +33,18 @@ class DropboxFile:
         self.metadata = metadata
 
     def store_to_disk(self, bearertoken_id):
-        pass
+        content_file_path, metadata_file_path = self._find_valid_local_name(bearertoken_id)
+        with self.content,\
+             open(content_file_path, 'wb') as fout,\
+             open(metadata_file_path, 'w') as metaout:
+            # TODO shall we read chunk by chunk and write it? Do we have performance issue
+            # TODO if the file is 10MB?
+            fout.write(self.content.read())
+            metaout.write(json.dumps(self.metadata, indent=4))
 
     def _find_valid_local_name(self, bearertoken_id):
         """
-
+        ??????
         """
         # Create user folder inside DROPBOX_TEMP_REPO_PATH, named after the bearertoken_id.
         local_folder = normpath(join(settings.DROPBOX_TEMP_REPO_PATH, str(bearertoken_id)))
@@ -46,14 +55,11 @@ class DropboxFile:
         # metadata['path'] must exists otherwise it is a major issue.
         # It must be a file (we download only files, not folders) so it must not end with a '/'
         # otherwise this will compromise the os.split.
-        try:
-            remote_path = self.metadata['path']
-            assert not remote_path.endswith('/')
-        except (KeyError, AssertionError):
-            pass
+        remote_path = self.metadata['path']
+        assert not remote_path.endswith('/')
 
         # Split a path in a tuple: (until last '/' excluded, after last '/' excluded)
-        _, file_name = split(entry)
+        _, file_name = split(self.metadata['path'])
         local_file_path = normpath(join(local_folder, file_name))
 
         # We put all files in a single folder, we don't recreate the entire folders structure
@@ -66,4 +72,5 @@ class DropboxFile:
                 i = 0
             else:
                 i += 1
-        return local_file_path + str(i)
+        local_file_path = local_file_path + str(i)
+        return local_file_path, '{}.metadata'.format(local_file_path)

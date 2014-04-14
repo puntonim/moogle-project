@@ -36,26 +36,23 @@ class DropboxDownloader:
     def run(self):
         print("mo scarico per", self.bearertoken_id)
 
-
-        # Gets all entries in redis dw list
-        # for each +: downloads the file and add an entry to redis ix list (w local file name)
-        # for each -: adds an entry to redis ix list
-        # Bear in mind that:
-        # + are only files (no dirs cause they have already been filtered out)
-        # - are we don't know if they are files or dir but we don't care since during
-        # indexing we ask solr to delete: name and name/*
-
         redis_store = RedisStore(self.bearertoken_id)
         for redis_dw_entry in redis_store.iter_over_download_list():
 
             print(redis_dw_entry.operation_type, redis_dw_entry.remote_path)
 
-            # TODO finish this
+            # TODO
+            # for each +: downloads the file and add an entry to redis ix list (w local file name)
+            # for each -: adds an entry to redis ix list
+            # Bear in mind that:
+            # + are only files (no dirs cause they have already been filtered out)
+            # - are we don't know if they are files or dir but we don't care since during
+            # indexing we ask solr to delete: name and name/*
 
 
             # Download the file. We could use client.get_file or client.get_file_and_metadata,
             # but under the hood the actual call to the API is the same, cause that basic API
             # call returns the file plus its metadata.
-            #content, metadata = self._client.get_file_and_metadata(path)
-            #file = DropboxFile(content, metadata)
-            #file.store_to_disk(self.bearertoken_id)
+            content, metadata = self._client.get_file_and_metadata(redis_dw_entry.remote_path)
+            file = DropboxFile(content, metadata)
+            file.store_to_disk(self.bearertoken_id)

@@ -5,10 +5,11 @@ The search engine for *private data*.
 
 The project has 2 main components:
 
-- **moogle**: a website powered by Django where user can search their private data.
-- **magpie**: a web crawler to harvest and index private data.
+- **moogle**: a website which provides the main user interface.
+- **magpie**: the core engine which crawls and index private data from service providers.
 
 Follow the steps written in the README.md files in `magpie` and `moogle` folder in order to create a *local development* copy.
+
 **NOTE** The project is still in its early stages.
 
 
