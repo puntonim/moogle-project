@@ -49,6 +49,14 @@ class DropboxDownloader:
             # - are we don't know if they are files or dir but we don't care since during
             # indexing we ask solr to delete: name and name/*
 
+            if redis_dw_entry.operation_type == 'X':
+                if redis_dw_entry.remote_path == 'RESET':
+                    # TODO move it to the index list
+                    continue
+
+            if redis_dw_entry.operation_type == '-':
+                # TODO move it to the index list
+                continue
 
             # Download the file. We could use client.get_file or client.get_file_and_metadata,
             # but under the hood the actual call to the API is the same, cause that basic API
@@ -56,3 +64,4 @@ class DropboxDownloader:
             content, metadata = self._client.get_file_and_metadata(redis_dw_entry.remote_path)
             file = DropboxFile(content, metadata)
             file.store_to_disk(self.bearertoken_id)
+            # TODO now move it to the index list

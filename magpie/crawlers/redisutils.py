@@ -18,7 +18,8 @@ import redis
 
 from magpie.settings import settings
 from .exceptions import ImproperlyConfigured
-
+from .dropbox.entry import DropboxResponseEntry
+from .exceptions import InconsistentItemError, EntryNotToBeIndexed
 
 pool = 0
 
@@ -71,18 +72,51 @@ class RedisStore:
         #self.bearertoken_id = bearertoken_id
         self._download_list_name = 'token:{}:dw'.format(bearertoken_id)
         self._index_list_name = 'token:{}:ix'.format(bearertoken_id)
-        self._download_buffer = None
 
-    def add_to_download_list_buffer(self, entry):
+    @property
+    def _download_buffer(self):
         """
-        Add `DropboxResponseEntry` to the download pipeline (Redis' buffer).
-        Each entry in the download pipeline maps a file to be downloaded from Dropbox.
+        Redis' download list pipeline getter.
         """
-        print("Storing {} in Redis.".format(entry))
-
-        if not self._download_buffer:
+        try:
+            dw = self._download_buffer_cache
+        except AttributeError:
             r = open_redis_connection()
-            self._download_buffer = r.pipeline()
+            dw = self._download_buffer_cache = r.pipeline()
+        return dw
+
+    @_download_buffer.setter
+    def _download_buffer(self, value):
+        """
+        Redis' download list pipeline setter: open the pipeline only when first needed.
+        """
+        self._download_buffer_cache = value
+
+    def add_to_download_list_buffer(self, entry_list):
+        """
+        Add a `DropboxResponseEntry` to Redis' download list (through a pipeline which is a
+        buffer) based on some rules:
+            - if the `DropboxResponseEntry` is a dir, then it is skipped
+            - if the `DropboxResponseEntry` is a file whose size > settings.DROPBOX_MAX_FILE_SIZE,
+              then it is skipped
+            - if the `DropboxResponseEntry` has some inconsistent metadata, then it is skipped.
+
+        The download list is an ordered list (queue) where each entry maps a file to be
+        downloaded from Dropbox.
+        The syntax of each entry of Redis' download list is like: b"+/dir1/file2.txt".
+        """
+        try:
+            entry = DropboxResponseEntry(entry_list)
+        except EntryNotToBeIndexed:
+            # This is probably a dir and we don't need to index it
+            return
+        except InconsistentItemError as e:
+            # The current item is not consistent, like some important metadata are missing,
+            # we just skip it
+            # TODO log it anyway
+            return
+
+        print("Storing {} in Redis.".format(entry))
 
         self._download_buffer.rpush(
             self._download_list_name,
@@ -91,11 +125,17 @@ class RedisStore:
 
     def flush_download_list_buffer(self):
         """
-        Flush the download pipeline (Redis' buffer) to Redis.
-        Each entry in the download pipeline maps a file to be downloaded from Dropbox.
+        Flush the pipeline (Redis' buffer) which buffers the download list to Redis.
+        Each entry in the download list maps a file to be downloaded from Dropbox.
         """
         if self._download_buffer:
             self._download_buffer.execute()
+
+    def add_reset(self):
+        """
+        Add a reset instruction to Redis' download list (through a pipeline which is a buffer).
+        """
+        self._download_buffer.rpush(self._download_list_name, 'XRESET')
 
     def iter_over_download_list(self):
         """

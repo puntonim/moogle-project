@@ -1,6 +1,4 @@
-from ..exceptions import InconsistentItemError, EntryNotToBeIndexed
 from ..redisutils import RedisStore
-from .entry import DropboxResponseEntry
 
 
 class DropboxResponse:
@@ -54,7 +52,7 @@ class DropboxResponse:
         return self.response_dict.get('cursor', '')
 
     @property
-    def reset(self):
+    def is_reset(self):
         """
         Show that we need to delete all the entry we have stored for the current user.
         """
@@ -69,21 +67,9 @@ class DropboxResponse:
 
     def parse(self, bearertoken_id):
         """
-        Create a `DropboxResponseEntry` for each entry in `response_dict` and store them to Redis
-        using `bearertoken_id` to bind each entry to its `BearerToken`.
-
-        Every `DropboxResponseEntry` is a file which has been added or removed in Dropbox.
-        In Redis the structure of a `DropboxResponseEntry` is:
-            id = file path (lower case, but dropbox is case insensitive)
-            operation = '+' for adding (there is no editing in Dropbox), '-' for deleting
-            bearertoken_id = number to bind this entry ...
-
-        There can be multiple operations on the same file. For instance a file might have been
-        added first and then deleted, in such case Dropbox will send us 2 operations on the same
-        file (in the right chronological order). The net effect is given only by the last
-        operation, so this is the only operation we need to keep track.
-        We can easily get this: for each item, we search in Redis if there is already an item w/
-        the same id, if so we update it.
+        Parse a response got back from Dropbox after an update query.
+        Create a `RedisStore` for the current `bearertoken_id` and add each entry of the
+        `response_dict['entries']` list to the download list of the `RedisStore`.
 
         Parameters:
         bearertoken_id -- the identifier to bind this response to a Dropbox user (using his
@@ -91,17 +77,11 @@ class DropboxResponse:
         """
 
         redis_store = RedisStore(bearertoken_id)
+
+        if self.is_reset:
+            redis_store.add_reset()
+
         for entry_list in self.response_dict.get('entries', list()):
-            try:
-                entry = DropboxResponseEntry(entry_list)
-                redis_store.add_to_download_list_buffer(entry)
-            except EntryNotToBeIndexed:
-                # This is probably a dir and we don't need to index it
-                continue
-            except InconsistentItemError as e:
-                # The current item is not consistent, like some important metadata are missing,
-                # we just skip it
-                # TODO log it anyway
-                continue
+            redis_store.add_to_download_list_buffer(entry_list)
         redis_store.flush_download_list_buffer()
 
