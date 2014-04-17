@@ -11,3 +11,8 @@ class InconsistentItemError(Exception):
 class EntryNotToBeIndexed(Exception):
     """A entry that should not be indexed like a dir in Dropbox"""
     pass
+
+
+class RedisDownloadEntryInconsistentError(Exception):
+    """An inconsistent `RedisDownloadEntry`"""
+    pass

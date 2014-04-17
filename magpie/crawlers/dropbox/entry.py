@@ -12,7 +12,7 @@ class DropboxResponseEntry:
     Parameters:
     entry_list -- a file added or removed to Dropbox by its owner. It is a Python list made of 2
     elements:
-     - path: a Python string which maps the path of the file.
+     - remote_path: a Python string which maps the remote path of the file.
      - metadata: a Python dictionary with metadata about the file.
     There can be 3 different cases:
         1) A directory to add:
@@ -57,7 +57,7 @@ class DropboxResponseEntry:
     """
 
     def __init__(self, entry_list):
-        self.path, self.metadata = self._sanity_check(entry_list)
+        self.remote_path, self.metadata = self._sanity_check(entry_list)
         self.operation_type = self._find_operation_type()
 
 
@@ -69,16 +69,16 @@ class DropboxResponseEntry:
         if not len(entry_list) == 2:
             raise InconsistentItemError("This entry is not a tuple with 2 elements.")
 
-        path = entry_list[0]
+        remote_path = entry_list[0]
         metadata = entry_list[1]
 
-        if not path:
-            raise InconsistentItemError("This entry has no path.")
+        if not remote_path:
+            raise InconsistentItemError("This entry has no remote path.")
 
-        if not isinstance(path, str):
-            raise InconsistentItemError("The path of this entry is not a string.")
+        if not isinstance(remote_path, str):
+            raise InconsistentItemError("The remote path of this entry is not a string.")
 
-        return path, metadata
+        return remote_path, metadata
 
     def _find_operation_type(self):
         """
@@ -102,6 +102,6 @@ class DropboxResponseEntry:
         return '+'
 
     def __str__(self):
-        return '<{}(path={}, operation={})>'.format(
-            self.__class__.__name__, self.path, self.operation_type
+        return '<{}(remote_path={}, operation={})>'.format(
+            self.__class__.__name__, self.remote_path, self.operation_type
         )

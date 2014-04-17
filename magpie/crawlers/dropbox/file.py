@@ -1,5 +1,5 @@
 import json
-from os.path import normpath, join, exists, split
+from os.path import normpath, join, exists, split, basename
 from os import mkdir
 
 from magpie.settings import settings
@@ -31,14 +31,17 @@ class DropboxFile:
     def __init__(self, content, metadata):
         self.content = content
         self.metadata = metadata
+        self.local_name = ''
 
     def store_to_disk(self, bearertoken_id):
         content_file_path, metadata_file_path = self._find_valid_local_name(bearertoken_id)
+        self.local_name = basename(content_file_path)
+
         with self.content,\
              open(content_file_path, 'wb') as fout,\
              open(metadata_file_path, 'w') as metaout:
             # TODO shall we read chunk by chunk and write it? Do we have performance issue
-            # TODO if the file is 10MB?
+            # TODO if the file is 10MB (10Mb is the max file size)?
             fout.write(self.content.read())
             metaout.write(json.dumps(self.metadata, indent=4))
 

@@ -92,9 +92,28 @@ class RedisStore:
         """
         self._download_buffer_cache = value
 
+    @property
+    def _index_buffer(self):
+        """
+        Redis' index list pipeline getter.
+        """
+        try:
+            ix = self._index_buffer_cache
+        except AttributeError:
+            r = open_redis_connection()
+            ix = self._index_buffer_cache = r.pipeline()
+        return ix
+
+    @_index_buffer.setter
+    def _index_buffer(self, value):
+        """
+        Redis' index list pipeline setter: open the pipeline only when first needed.
+        """
+        self._index_buffer_cache = value
+
     def add_to_download_list_buffer(self, entry_list):
         """
-        Add a `DropboxResponseEntry` to Redis' download list (through a pipeline which is a
+        Add a `DropboxResponseEntry` to Redis' download list (through a pipeline, which is a
         buffer) based on some rules:
             - if the `DropboxResponseEntry` is a dir, then it is skipped
             - if the `DropboxResponseEntry` is a file whose size > settings.DROPBOX_MAX_FILE_SIZE,
@@ -115,12 +134,12 @@ class RedisStore:
             # we just skip it
             # TODO log it anyway
             return
-
-        print("Storing {} in Redis.".format(entry))
+        # TODO
+        print("Storing {} in dw Redis.".format(entry))
 
         self._download_buffer.rpush(
             self._download_list_name,
-            '{}{}'.format(entry.operation_type, entry.path)
+            '{}{}'.format(entry.operation_type, entry.remote_path)
         )
 
     def flush_download_list_buffer(self):
@@ -162,6 +181,34 @@ class RedisStore:
         # closure. This closure will be called for each iteration and the result is returned
         # until the result is None.
         return iter(_lpop_dw, None)
+
+    def add_to_index_list_buffer(self, entry):
+        """
+        Add a `RedisDownloadEntry` to Redis' index list (through a pipeline, which is a
+        buffer).
+
+        The index list is an ordered list (queue) where each entry maps a file to be
+        indexed by Solr.
+        The syntax of each entry of Redis' download list is like: b"+/dir1/file2.txt".
+
+        Parameters:
+        entry -- a `RedisDownloadEntry` instance.
+        """
+        # TODO
+        print("Storing {} in ix Redis.".format(entry))
+
+        self._index_buffer.rpush(
+            self._index_list_name,
+            '{}{}'.format(entry.operation_type, entry.remote_path)
+        )
+
+    def flush_index_list_buffer(self):
+        """
+        Flush the pipeline (Redis' buffer) which buffers the index list to Redis.
+        Each entry in the index list maps a file to be indexed by Solr.
+        """
+        if self._index_buffer:
+            self._index_buffer.execute()
 
 
 class RedisDownloadEntry:
