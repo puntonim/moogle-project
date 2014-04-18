@@ -1,4 +1,4 @@
-from utils.redis import RedisStore
+from utils.redis import RedisDownloadList
 from utils.exceptions import InconsistentItemError, EntryNotToBeIndexed
 from .responseentry import DropboxResponseEntry
 
@@ -78,23 +78,22 @@ class DropboxResponse:
         `BearerToken`.
         """
 
-        redis_store = RedisStore(bearertoken_id)
+        redis = RedisDownloadList(bearertoken_id)
 
         if self.is_reset:
-            redis_store.add_reset()
+            redis.buffer_add_reset()
 
         entries = self.response_dict.get('entries', list())
         for entry in self._entries_to_dropboxresponseentries(entries):
             # `entry` is a `DropboxResponseEntry` instance.
-            redis_store.add_to_download_list_buffer(entry)
-        redis_store.flush_download_list_buffer()
+            redis.buffer(entry)
+        redis.flush_buffer()
 
     @staticmethod
     def _entries_to_dropboxresponseentries(entries):
         """
         Iter over all entries in the response.
-        `entries` is a list of items; each item will be converted to a `DropboxResponseEntry`
-        instance.
+        `entries` is a list of items; each item is converted to a `DropboxResponseEntry` instance.
         """
 
         def _lpop():

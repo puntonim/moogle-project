@@ -1,4 +1,4 @@
-from utils.redis import RedisStore
+from utils.redis import RedisIndexList
 
 
 class DropboxIndexer:
@@ -14,8 +14,8 @@ class DropboxIndexer:
         """
         ....
         """
-        redis_store = RedisStore(self.bearertoken_id)
-        for redis_entry in redis_store.iter_over_index_list():
+        redis = RedisIndexList(self.bearertoken_id)
+        for redis_entry in redis.iterate():
             print(redis_entry)
 
             # for each +, tells solr to index the local file

@@ -1,18 +1,4 @@
-"""
-This module contains 2 things:
-1) The open_redis_connection() to be called anywhere in the code when we need to talk to Redis.
-It is build such as it uses a unique connection pool (in case of TCP socket connection, while
-no connection pool in required in case of unix socket connection). It returns a `redis.StrictRedis`
-object, see: http://redis-py.readthedocs.org/en/latest/index.html#redis.StrictRedis
-Use it like this:
-    redis = open_redis_connection()
-    print(redis.info())
-
-2) RedisStore class with some helper methods to do some operations required by this codebase.
-Use it like this:
-    redis_store = RedisStore()
-    redis_store.store_entry_to_be_downloaded(...)
-"""
+from abc import ABCMeta
 
 import redis
 
@@ -60,143 +46,68 @@ def _build_connection_pool():
     return None
 
 
-class RedisStore:
+class AbstractRedisList(metaclass=ABCMeta):
     """
-    Class with some helper methods to do some operations required by this codebase.
-    Use it like this:
-        redis_store = RedisStore()
-        redis_store.store_entry_to_be_downloaded(...)
+    Abstract class to manage a single list (queue) in Redis.
     """
-    def __init__(self, bearertoken_id):
-        #self.bearertoken_id = bearertoken_id
-        self._download_list_name = 'token:{}:dw'.format(bearertoken_id)
-        self._index_list_name = 'token:{}:ix'.format(bearertoken_id)
-
     @property
-    def _download_buffer(self):
+    def _pipeline(self):
         """
-        Redis' download list pipeline getter.
+        Redis list pipeline getter. A pipeline is a buffer.
         """
         try:
-            dw = self._download_buffer_cache
+            b = self._pipeline_cache
         except AttributeError:
             r = open_redis_connection()
-            dw = self._download_buffer_cache = r.pipeline()
-        return dw
+            b = self._pipeline_cache = r.pipeline()
+        return b
 
-    @_download_buffer.setter
-    def _download_buffer(self, value):
+    @_pipeline.setter
+    def _pipeline(self, value):
         """
-        Redis' download list pipeline setter: open the pipeline only when first needed.
+        Redis list pipeline setter: it opens the pipeline only when first needed. A pipeline is a
+        buffer.
         """
-        self._download_buffer_cache = value
+        self._pipeline_cache = value
 
-    @property
-    def _index_buffer(self):
+    def buffer(self, entry):
         """
-        Redis' index list pipeline getter.
-        """
-        try:
-            ix = self._index_buffer_cache
-        except AttributeError:
-            r = open_redis_connection()
-            ix = self._index_buffer_cache = r.pipeline()
-        return ix
-
-    @_index_buffer.setter
-    def _index_buffer(self, value):
-        """
-        Redis' index list pipeline setter: open the pipeline only when first needed.
-        """
-        self._index_buffer_cache = value
-
-    def add_reset(self):
-        """
-        Add a reset instruction to Redis' download list (through a pipeline which is a buffer).
-        """
-        self._download_buffer.rpush(self._download_list_name, 'XRESET')
-
-    def _add_to_list_buffer(self, buffer, list_name, entry):
-        """
-        Add a `DropboxResponseEntry` or `RedisEntry` to Redis' download or index list (through
-        a pipeline, which is a buffer).
-        The download list and the index list are ordered lists (queue) where each entry maps a
-        file to be downloaded from Dropbox or indexed by Solr.
-        The syntax of each entry of a Redis' list is like: b"+/dir1/file2.txt".
+        Add a entry to this Redis list (through a pipeline, which is a buffer).
+        `entry` must have 2 string attributes: operation_type and remote_path and it will be
+        saved in Redis w/ the syntax: b"+/dir1/file2.txt".
 
         Parameter:
-        buffer -- a Redis' pipeline.
-        list_name -- name of the Redis' list.
-        entry -- a `DropboxResponseEntry` or `RedisEntry` instance.
+        entry -- a `DropboxResponseEntry` or `RedisEntry` instance or any other object with two
+        attributes: operation_type and remote_path.
         """
         # TODO
         print("Storing {} in Redis.".format(entry))
 
-        buffer.rpush(
-            list_name,
+        self._pipeline.rpush(
+            self._list_name,
             '{}{}'.format(entry.operation_type, entry.remote_path)
         )
 
-    def add_to_download_list_buffer(self, entry):
+    def flush_buffer(self):
         """
-        Add a `DropboxResponseEntry` to Redis' download list (through a pipeline, which is a
-        buffer).
-        The download list is an ordered list (queue) where each entry maps a file to be
-        downloaded from Dropbox.
-        The syntax of each entry of Redis' download list is like: b"+/dir1/file2.txt".
+        Flush the pipeline (Redis' buffer) to Redis.
+        """
+        if self._pipeline:
+            self._pipeline.execute()
 
-        Parameter:
-        entry -- a `DropboxResponseEntry` instance.
+    def iterate(self):
         """
-        self._add_to_list_buffer(self._download_buffer, self._download_list_name, entry)
-
-    def add_to_index_list_buffer(self, entry):
-        """
-        Add a `RedisEntry` to Redis' index list (through a pipeline, which is a
-        buffer).
-        The index list is an ordered list (queue) where each entry maps a file to be
-        indexed by Solr.
-        The syntax of each entry of Redis' index list is like: b"+/dir1/file2.txt".
-
-        Parameters:
-        entry -- a `RedisEntry` instance.
-        """
-        self._add_to_list_buffer(self._index_buffer, self._index_list_name, entry)
-
-    def flush_download_list_buffer(self):
-        """
-        Flush the pipeline (Redis' buffer) which buffers the download list to Redis.
-        Each entry in the download list maps a file to be downloaded from Dropbox.
-        """
-        if self._download_buffer:
-            self._download_buffer.execute()
-
-    def flush_index_list_buffer(self):
-        """
-        Flush the pipeline (Redis' buffer) which buffers the index list to Redis.
-        Each entry in the index list maps a file to be indexed by Solr.
-        """
-        if self._index_buffer:
-            self._index_buffer.execute()
-
-    def _iter_over_list(self, list_name):
-        """
-        Iterate over the Redis download or index list for the current `bearertoken_id`.
+        Iterate over the Redis list.
         Return a iterator object which iterates over `RedisEntry` objects.
-        It's an internal method used by `iter_over_download_list()` and
-        `iter_over_index_list()`.
-
-        Parameter:
-        list_name -- name of the Redis' list.
         """
         r = open_redis_connection()
 
         def _lpop():
             """
-            Pop from the head of the Redis list for the current `bearertoken_id`.
+            Pop from the head of the Redis list.
             Convert the item to `RedisEntry`.
             """
-            entry = r.lpop(list_name)
+            entry = r.lpop(self._list_name)
             if entry:
                 entry = RedisEntry(entry)
             return entry
@@ -206,25 +117,37 @@ class RedisStore:
         # until the result is None.
         return iter(_lpop, None)
 
-    def iter_over_download_list(self):
-        """
-        Iterate over the Redis download list for the current `bearertoken_id`.
-        Usage:
-            redis_store = RedisStore(self.bearertoken_id)
-            for redis_dw_entry in redis_store.iter_over_download_list():
-                print(redis_dw_entry.operation_type, redis_dw_entry.remote_path)
-        """
-        return self._iter_over_list(self._download_list_name)
 
-    def iter_over_index_list(self):
+class RedisDownloadList(AbstractRedisList):
+    """
+    A Redis list which maps Dropbox files.
+    Entries of the list in Redis have this form: "+/dir1/file2.txt".
+    The first char can be:
+      '+' if it is a file to download
+      '-' if it is a file to delete
+    'XRESET' means that the entire Dropbox root folder must be deleted.
+    """
+    def __init__(self, bearertoken_id):
+        self._list_name = 'token:{}:dw'.format(bearertoken_id)
+
+    def buffer_add_reset(self):
         """
-        Iterate over the Redis index list for the current `bearertoken_id`.
-        Usage:
-            redis_store = RedisStore(self.bearertoken_id)
-            for redis_dw_entry in redis_store.iter_over_download_list():
-                print(redis_dw_entry.operation_type, redis_dw_entry.remote_path)
+        Add a reset instruction to Redis' download list (through a pipeline which is a buffer).
         """
-        return self._iter_over_list(self._index_list_name)
+        self._pipeline.rpush(self._list_name, 'XRESET')
+
+
+class RedisIndexList(AbstractRedisList):
+    """
+    A Redis list which maps files to index with Solr.
+    Entries of the list in Redis have this form: "+/dir1/file2.txt".
+    The first char can be:
+      '+' if it is a file already downloaded locally and ready to be indexed
+      '-' if it is a file to delete from the index
+    'XRESET' means that the entire index must be deleted.
+    """
+    def __init__(self, bearertoken_id):
+        self._list_name = 'token:{}:ix'.format(bearertoken_id)
 
 
 class RedisEntry:

@@ -1,6 +1,6 @@
 from dropbox.client import DropboxClient  # Dropobox official library
 
-from utils.redis import RedisStore
+from utils.redis import RedisDownloadList, RedisIndexList
 from .dropboxfile import DropboxFile
 
 
@@ -36,8 +36,9 @@ class DropboxDownloader:
         """
         print("Downloading for bearerid: ", self.bearertoken_id)
 
-        redis_store = RedisStore(self.bearertoken_id)
-        for redis_entry in redis_store.iter_over_download_list():
+        redis_dw = RedisDownloadList(self.bearertoken_id)
+        redis_ix = RedisIndexList(self.bearertoken_id)
+        for redis_entry in redis_dw.iterate():
             # `redis_entry` is a `RedisEntry` instance.
 
             # If:
@@ -67,5 +68,5 @@ class DropboxDownloader:
                 # Update `remote_path` attribute with the local name
                 redis_entry.remote_path = file.local_name
 
-            redis_store.add_to_index_list_buffer(redis_entry)
-        redis_store.flush_index_list_buffer()
+            redis_ix.buffer(redis_entry)
+        redis_ix.flush_buffer()
