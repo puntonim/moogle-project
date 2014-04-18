@@ -1,8 +1,6 @@
 from dropbox.client import DropboxClient  # Dropobox official library
 
-from ..dbutils import session_autocommit
 from ..redisutils import RedisStore
-from ..exceptions import RedisDownloadEntryInconsistentError
 from .file import DropboxFile
 
 
@@ -12,15 +10,13 @@ class DropboxDownloader:
     stored internally.
 
     Parameters:
-    bearertoken -- the beartoken owner of the Dropbox account. This bearertoken
+    bearertoken_id -- the id of the `BearToken` owner of the Dropbox account.
+    access_token -- the access token of the `BearToken` owner of the Dropbox account.
     """
 
-    def __init__(self, bearertoken):
-        with session_autocommit() as sex:
-            # Add bearertoken to the current session.
-            bearertoken = sex.merge(bearertoken)
-            self.bearertoken_id = bearertoken.id
-            self.access_token = bearertoken.access_token
+    def __init__(self, bearertoken_id, access_token):
+        self.bearertoken_id = bearertoken_id
+        self.access_token = access_token
 
     @property
     def _client(self):
@@ -56,10 +52,10 @@ class DropboxDownloader:
             # '+': they are only files (no dirs cause they have already been filtered out)
             # '-': we don't know if they are files or dir but we don't care since during
             #      indexing we ask Solr to delete: name and name/*
+            # And a sanity check is run when creating a `RedisDownloadEntry` instance.
 
             # TODO
             print(redis_dw_entry.operation_type, redis_dw_entry.remote_path)
-            self._sanity_check(redis_dw_entry)
 
             if redis_dw_entry.operation_type == '+':
                 # Download the file. We could use client.get_file or client.get_file_and_metadata,
@@ -73,17 +69,3 @@ class DropboxDownloader:
 
             redis_store.add_to_index_list_buffer(redis_dw_entry)
         redis_store.flush_index_list_buffer()
-
-    @staticmethod
-    def _sanity_check(redis_dw_entry):
-        """
-        `redis_dw_entry` is a `RedisDownloadEntry` instance.
-        Valid values for `operation` attribute are: '+', '-', 'X'.
-        If the `operation` is 'X' the `remote_path` must be 'RESET'.
-        """
-        if not redis_dw_entry.operation_type in ['+', '-', 'X']:
-            raise RedisDownloadEntryInconsistentError("The operation must be '+', '-' or 'X'.")
-
-        if redis_dw_entry.operation_type == 'X' and not redis_dw_entry.remote_path == 'RESET':
-            raise RedisDownloadEntryInconsistentError("If the operation is 'X' the remote_path"
-                                                      "must be 'REST'.")

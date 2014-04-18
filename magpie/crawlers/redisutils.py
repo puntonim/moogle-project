@@ -19,7 +19,8 @@ import redis
 from magpie.settings import settings
 from .exceptions import ImproperlyConfigured
 from .dropbox.entry import DropboxResponseEntry
-from .exceptions import InconsistentItemError, EntryNotToBeIndexed
+from .exceptions import InconsistentItemError, EntryNotToBeIndexed, \
+    RedisDownloadEntryInconsistentError
 
 pool = 0
 
@@ -222,3 +223,18 @@ class RedisDownloadEntry:
     def __init__(self, redis_bytes_string):
         self.operation_type = redis_bytes_string[:1].decode(encoding='UTF-8')
         self.remote_path = redis_bytes_string[1:].decode(encoding='UTF-8')
+        self._sanity_check()
+
+    def _sanity_check(self):
+        """
+        `redis_dw_entry` is a `RedisDownloadEntry` instance.
+        A `redis_dw_entry` is consistent if:
+            - `operation` is: '+' or '-' or 'X'.
+            - `remote_path` is 'RESET' if `operation` is 'X'.
+        """
+        if not self.operation_type in ['+', '-', 'X']:
+            raise RedisDownloadEntryInconsistentError("The operation must be '+', '-' or 'X'.")
+
+        if self.operation_type == 'X' and not self.remote_path == 'RESET':
+            raise RedisDownloadEntryInconsistentError("If the operation is 'X' the remote_path"
+                                                      "must be 'REST'.")
