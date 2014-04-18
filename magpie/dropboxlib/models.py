@@ -5,8 +5,7 @@ from sqlalchemy import Column, Integer, String, Enum, ForeignKey, Table
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, backref
 
-from .exceptions import ImproperlyConfigured
-from magpie.settings import settings
+from utils.exceptions import ImproperlyConfigured
 
 
 Base = declarative_base()

@@ -18,9 +18,7 @@ import redis
 
 from magpie.settings import settings
 from .exceptions import ImproperlyConfigured
-from .dropbox.entry import DropboxResponseEntry
-from .exceptions import InconsistentItemError, EntryNotToBeIndexed, \
-    RedisDownloadEntryInconsistentError
+from .exceptions import RedisDownloadEntryInconsistentError
 
 pool = 0
 
@@ -112,36 +110,58 @@ class RedisStore:
         """
         self._index_buffer_cache = value
 
-    def add_to_download_list_buffer(self, entry_list):
+    def add_reset(self):
+        """
+        Add a reset instruction to Redis' download list (through a pipeline which is a buffer).
+        """
+        self._download_buffer.rpush(self._download_list_name, 'XRESET')
+
+    def _add_to_list_buffer(self, buffer, list_name, entry):
+        """
+        Add a `DropboxResponseEntry` or `RedisEntry` to Redis' download or index list (through
+        a pipeline, which is a buffer).
+        The download list and the index list are ordered lists (queue) where each entry maps a
+        file to be downloaded from Dropbox or indexed by Solr.
+        The syntax of each entry of a Redis' list is like: b"+/dir1/file2.txt".
+
+        Parameter:
+        buffer -- a Redis' pipeline.
+        list_name -- name of the Redis' list.
+        entry -- a `DropboxResponseEntry` or `RedisEntry` instance.
+        """
+        # TODO
+        print("Storing {} in Redis.".format(entry))
+
+        buffer.rpush(
+            list_name,
+            '{}{}'.format(entry.operation_type, entry.remote_path)
+        )
+
+    def add_to_download_list_buffer(self, entry):
         """
         Add a `DropboxResponseEntry` to Redis' download list (through a pipeline, which is a
-        buffer) based on some rules:
-            - if the `DropboxResponseEntry` is a dir, then it is skipped
-            - if the `DropboxResponseEntry` is a file whose size > settings.DROPBOX_MAX_FILE_SIZE,
-              then it is skipped
-            - if the `DropboxResponseEntry` has some inconsistent metadata, then it is skipped.
-
+        buffer).
         The download list is an ordered list (queue) where each entry maps a file to be
         downloaded from Dropbox.
         The syntax of each entry of Redis' download list is like: b"+/dir1/file2.txt".
-        """
-        try:
-            entry = DropboxResponseEntry(entry_list)
-        except EntryNotToBeIndexed:
-            # This is probably a dir and we don't need to index it
-            return
-        except InconsistentItemError as e:
-            # The current item is not consistent, like some important metadata are missing,
-            # we just skip it
-            # TODO log it anyway
-            return
-        # TODO
-        print("Storing {} in dw Redis.".format(entry))
 
-        self._download_buffer.rpush(
-            self._download_list_name,
-            '{}{}'.format(entry.operation_type, entry.remote_path)
-        )
+        Parameter:
+        entry -- a `DropboxResponseEntry` instance.
+        """
+        self._add_to_list_buffer(self._download_buffer, self._download_list_name, entry)
+
+    def add_to_index_list_buffer(self, entry):
+        """
+        Add a `RedisEntry` to Redis' index list (through a pipeline, which is a
+        buffer).
+        The index list is an ordered list (queue) where each entry maps a file to be
+        indexed by Solr.
+        The syntax of each entry of Redis' index list is like: b"+/dir1/file2.txt".
+
+        Parameters:
+        entry -- a `RedisEntry` instance.
+        """
+        self._add_to_list_buffer(self._index_buffer, self._index_list_name, entry)
 
     def flush_download_list_buffer(self):
         """
@@ -151,58 +171,6 @@ class RedisStore:
         if self._download_buffer:
             self._download_buffer.execute()
 
-    def add_reset(self):
-        """
-        Add a reset instruction to Redis' download list (through a pipeline which is a buffer).
-        """
-        self._download_buffer.rpush(self._download_list_name, 'XRESET')
-
-    def iter_over_download_list(self):
-        """
-        Iterate over the Redis download list for the current `bearertoken_id`.
-        Return a iterator object which iterates over `RedisDownloadEntry` objects.
-        Usage:
-            redis_store = RedisStore(self.bearertoken_id)
-            for redis_dw_entry in redis_store.iter_over_download_list():
-                print(redis_dw_entry.operation_type, redis_dw_entry.remote_path)
-        """
-        r = open_redis_connection()
-
-        def _lpop_dw():
-            """
-            Pop from the head of the Redis download list for the current `bearertoken_id`.
-            Convert the item to `RedisDownloadEntry`.
-            """
-            redis_entry = r.lpop(self._download_list_name)
-            if redis_entry:
-                redis_entry = RedisDownloadEntry(redis_entry)
-            return redis_entry
-
-        # The first argument of iter must be a callable, that's why we created the _lpop_dw()
-        # closure. This closure will be called for each iteration and the result is returned
-        # until the result is None.
-        return iter(_lpop_dw, None)
-
-    def add_to_index_list_buffer(self, entry):
-        """
-        Add a `RedisDownloadEntry` to Redis' index list (through a pipeline, which is a
-        buffer).
-
-        The index list is an ordered list (queue) where each entry maps a file to be
-        indexed by Solr.
-        The syntax of each entry of Redis' download list is like: b"+/dir1/file2.txt".
-
-        Parameters:
-        entry -- a `RedisDownloadEntry` instance.
-        """
-        # TODO
-        print("Storing {} in ix Redis.".format(entry))
-
-        self._index_buffer.rpush(
-            self._index_list_name,
-            '{}{}'.format(entry.operation_type, entry.remote_path)
-        )
-
     def flush_index_list_buffer(self):
         """
         Flush the pipeline (Redis' buffer) which buffers the index list to Redis.
@@ -211,8 +179,55 @@ class RedisStore:
         if self._index_buffer:
             self._index_buffer.execute()
 
+    def _iter_over_list(self, list_name):
+        """
+        Iterate over the Redis download or index list for the current `bearertoken_id`.
+        Return a iterator object which iterates over `RedisEntry` objects.
+        It's an internal method used by `iter_over_download_list()` and
+        `iter_over_index_list()`.
 
-class RedisDownloadEntry:
+        Parameter:
+        list_name -- name of the Redis' list.
+        """
+        r = open_redis_connection()
+
+        def _lpop():
+            """
+            Pop from the head of the Redis list for the current `bearertoken_id`.
+            Convert the item to `RedisEntry`.
+            """
+            entry = r.lpop(list_name)
+            if entry:
+                entry = RedisEntry(entry)
+            return entry
+
+        # The first argument of iter must be a callable, that's why we created the _lpop()
+        # closure. This closure will be called for each iteration and the result is returned
+        # until the result is None.
+        return iter(_lpop, None)
+
+    def iter_over_download_list(self):
+        """
+        Iterate over the Redis download list for the current `bearertoken_id`.
+        Usage:
+            redis_store = RedisStore(self.bearertoken_id)
+            for redis_dw_entry in redis_store.iter_over_download_list():
+                print(redis_dw_entry.operation_type, redis_dw_entry.remote_path)
+        """
+        return self._iter_over_list(self._download_list_name)
+
+    def iter_over_index_list(self):
+        """
+        Iterate over the Redis index list for the current `bearertoken_id`.
+        Usage:
+            redis_store = RedisStore(self.bearertoken_id)
+            for redis_dw_entry in redis_store.iter_over_download_list():
+                print(redis_dw_entry.operation_type, redis_dw_entry.remote_path)
+        """
+        return self._iter_over_list(self._index_list_name)
+
+
+class RedisEntry:
     """
     A entry of a Redis download list.
 
@@ -227,7 +242,7 @@ class RedisDownloadEntry:
 
     def _sanity_check(self):
         """
-        `redis_dw_entry` is a `RedisDownloadEntry` instance.
+        `redis_dw_entry` is a `RedisEntry` instance.
         A `redis_dw_entry` is consistent if:
             - `operation` is: '+' or '-' or 'X'.
             - `remote_path` is 'RESET' if `operation` is 'X'.
@@ -238,3 +253,8 @@ class RedisDownloadEntry:
         if self.operation_type == 'X' and not self.remote_path == 'RESET':
             raise RedisDownloadEntryInconsistentError("If the operation is 'X' the remote_path"
                                                       "must be 'REST'.")
+
+    def __str__(self):
+        return '<{}(operation_type={}, remote_path={})>'.format(
+            self.__class__.__name__, self.operation_type, self.remote_path
+        )

@@ -1,4 +1,4 @@
-from ..exceptions import InconsistentItemError, EntryNotToBeIndexed
+from utils.exceptions import InconsistentItemError, EntryNotToBeIndexed
 from magpie.settings import settings
 
 
@@ -83,6 +83,11 @@ class DropboxResponseEntry:
     def _find_operation_type(self):
         """
         Find out if this `entry_list` is a file/dir added ('+') or deleted ('-').
+        Rules:
+            - if it is a dir, then raise `EntryNotToBeIndexed`.
+            - if it is a file with size > settings.DROPBOX_MAX_FILE_SIZE, then raise
+              `EntryNotToBeIndexed`.
+            - if it has some inconsistent metadata, then raise `InconsistentItemError`.
         """
         # If there is no metadata it is a file to delete
         if not self.metadata:
@@ -102,6 +107,6 @@ class DropboxResponseEntry:
         return '+'
 
     def __str__(self):
-        return '<{}(remote_path={}, operation={})>'.format(
+        return '<{}(remote_path={}, operation_type={})>'.format(
             self.__class__.__name__, self.remote_path, self.operation_type
         )

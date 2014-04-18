@@ -13,14 +13,14 @@ if __name__ == '__main__':
         """
         Setup the SQLAlchemy db as configured in the settings.
         """
-        from crawlers.dbutils import setup_db
+        from utils.db import setup_db
         setup_db()
 
     elif sys.argv[1] == 'loaddata':
         """
         Load a fixture into the database.
         """
-        from crawlers.dbutils import loaddata
+        from utils.db import loaddata
         path = normpath(join(environ['PWD'], sys.argv[2]))
         loaddata(path)
 
@@ -30,7 +30,7 @@ if __name__ == '__main__':
         """
         # TODO it should import from all models.py in all packages
 
-        from crawlers.dbutils import Session, get_all_models_classes
+        from utils.db import Session, get_all_models_classes
 
         # Import all models
         models_names = []
@@ -59,9 +59,9 @@ if __name__ == '__main__':
         debug.set_trace()
 
     elif sys.argv[1] == 'dropbox':
-        from crawlers.dropbox.synchronizer import DropboxSynchronizer
-        from crawlers.dbutils import session_autocommit
-        from crawlers.models import Provider
+        from dropboxlib.synchronizer import DropboxSynchronizer
+        from utils.db import session_autocommit
+        from dropboxlib.models import Provider
 
         print("START DROPBOX")
 

@@ -12,18 +12,13 @@ Friday 2014.01.17 13:42:13
 ---------------------------------------------------------------------------------------------------
 
 
-* CRAWLERS
-Crawlers ask for updates (to Dropbox, facebook, Twitter)
-Updates are sent back in block, e.g. Dropbox sends 1k items per time
-Crawlers loop more time until all item are received
+* USE MSG IN Synchronizer
+The Synchronizer launches: Crawler, Downloader, Indexer in sequence
+We could use msg instead i.e. launching a masg after each step.
 
-WHAT THEY DO NOW
-For each single item they send it to the Indexer which sends it to Solr
+* REFACTOR MODULE redisutils
+The module became too big
 
-HOW THEY CAN DO IT BETTER
-Items are added to Redis
-For each block/item a msg is sent
-The indexer pools for msg, reads items in Redis and sends them to Solr
 
 
 -- BASSA PRIORITA ----------------------------------------------------------------------------------

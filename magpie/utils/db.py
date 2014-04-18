@@ -12,7 +12,7 @@ from magpie.settings import settings
 def setup_db():
     # TODO printing this in order to monitor how many times this happens
     print("*************************** Setup the db")
-    from .models import Base
+    from dropbox.models import Base
     Base.metadata.create_all(engine)
 
 
@@ -60,7 +60,7 @@ def get_all_models_classes():
     # TODO should be improved in order to search all models, not only `crawler.models`
 
     from inspect import getmembers
-    import crawlers.models as models
+    import dropbox.crawlers.models as models
 
     def is_Base_subclass(cls):
         """

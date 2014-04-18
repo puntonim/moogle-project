@@ -1,4 +1,6 @@
-from ..redisutils import RedisStore
+from utils.redis import RedisStore
+from utils.exceptions import InconsistentItemError, EntryNotToBeIndexed
+from .responseentry import DropboxResponseEntry
 
 
 class DropboxResponse:
@@ -81,7 +83,44 @@ class DropboxResponse:
         if self.is_reset:
             redis_store.add_reset()
 
-        for entry_list in self.response_dict.get('entries', list()):
-            redis_store.add_to_download_list_buffer(entry_list)
+        entries = self.response_dict.get('entries', list())
+        for entry in self._entries_to_dropboxresponseentries(entries):
+            # `entry` is a `DropboxResponseEntry` instance.
+            redis_store.add_to_download_list_buffer(entry)
         redis_store.flush_download_list_buffer()
+
+    @staticmethod
+    def _entries_to_dropboxresponseentries(entries):
+        """
+        Iter over all entries in the response.
+        `entries` is a list of items; each item will be converted to a `DropboxResponseEntry`
+        instance.
+        """
+
+        def _lpop():
+            """
+            Pop from the head of the list.
+            Convert the item to `DropboxResponseEntry`.
+            """
+            while True:
+                try:
+                    entry = entries.pop(0)
+                    entry = DropboxResponseEntry(entry)
+                    return entry
+                except IndexError:
+                    # `entry_list` is empty, return None to stop the iter
+                    return None
+                except EntryNotToBeIndexed:
+                    # The entry is probably a dir and we don't need to index it
+                    continue
+                except InconsistentItemError as e:
+                    # The entry is not consistent, like some important metadata are missing,
+                    # we just skip it
+                    # TODO log it anyway
+                    continue
+
+        # The first argument of iter must be a callable, that's why we created the _lpop()
+        # closure. This closure will be called for each iteration and the result is returned
+        # until the result is None.
+        return iter(_lpop, None)
 

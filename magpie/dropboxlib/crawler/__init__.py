@@ -1,6 +1,6 @@
 from dropbox.client import DropboxClient  # Dropobox official library
 
-from ..dbutils import session_autocommit
+from utils.db import session_autocommit
 from .response import DropboxResponse
 
 

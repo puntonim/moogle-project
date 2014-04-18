@@ -14,5 +14,5 @@ class EntryNotToBeIndexed(Exception):
 
 
 class RedisDownloadEntryInconsistentError(Exception):
-    """An inconsistent `RedisDownloadEntry`"""
+    """An inconsistent `RedisEntry`"""
     pass
