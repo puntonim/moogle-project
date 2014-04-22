@@ -38,7 +38,7 @@ if __name__ == '__main__':
             model_name = cls.__name__
             models_names.append(model_name)
             globals()[model_name] = getattr(
-                __import__('dropboxlib.models', fromlist=[model_name]), model_name)
+                __import__('models', fromlist=[model_name]), model_name)
 
         # Create a new session
         sex = Session()
@@ -61,7 +61,7 @@ if __name__ == '__main__':
     elif sys.argv[1] == 'dropbox':
         from dropboxlib.synchronizer import DropboxSynchronizer
         from utils.db import session_autocommit
-        from dropboxlib.models import Provider
+        from models import Provider
 
         print("START DROPBOX")
 
@@ -74,7 +74,7 @@ if __name__ == '__main__':
     elif sys.argv[1] == 'twitter':
         from twitterlib.synchronizer import TwitterSynchronizer
         from utils.db import session_autocommit
-        from dropboxlib.models import Provider
+        from models import Provider
 
         print("START TWITTER")
 

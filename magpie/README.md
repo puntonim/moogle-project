@@ -111,7 +111,7 @@ Activate the virtual environment:
 ------------------------------------------------------------
 Optionally make a copy of the environment variables (the passwords) in the file:
 
-    icecreamshop/icecreamshop/settings/vars.environment
+    magpie/magpie/settings/vars.environment
 
 This file will be IGNORED by Git, so it will be stored only in your local machine.
 You might need it in case you accidentally remove your virtual environment and lose your passwords.
@@ -135,9 +135,9 @@ Check the settings file: `magpie/settings/local.py`
 
 8. Import the fixtures
 ----------------------
-    $ python manage.py loaddata crawlers/fixtures/providers.json
+    $ python manage.py loaddata fixtures/providers.json
 
-Copy `crawlers/fixtures/sample_bearertoken.json.template` to `crawlers/fixtures/sample_bearertoken.json`.
+Copy `fixtures/sample_bearertoken.json.template` to `fixtures/sample_bearertoken.json`.
 Add some user's bearer tokens, then import the fixture:
 
-    $ python manage.py loaddata crawlers/fixtures/sample_bearertoken.json
+    $ python manage.py loaddata fixtures/sample_bearertoken.json
