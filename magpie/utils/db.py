@@ -12,7 +12,7 @@ from magpie.settings import settings
 def setup_db():
     # TODO printing this in order to monitor how many times this happens
     print("*************************** Setup the db")
-    from dropboxlib.models import Base
+    from models import Base
     Base.metadata.create_all(engine)
 
 

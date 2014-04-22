@@ -1,4 +1,4 @@
-from utils.redis import RedisDownloadList
+from ..redis import RedisDropboxDownloadList
 from utils.exceptions import InconsistentItemError, EntryNotToBeIndexed
 from .responseentry import DropboxResponseEntry
 
@@ -78,7 +78,7 @@ class DropboxResponse:
         `BearerToken`.
         """
 
-        redis = RedisDownloadList(bearertoken_id)
+        redis = RedisDropboxDownloadList(bearertoken_id)
 
         if self.is_reset:
             redis.buffer_add_reset()

@@ -13,8 +13,8 @@ class EntryNotToBeIndexed(Exception):
     pass
 
 
-class RedisEntryInconsistentError(Exception):
-    """An inconsistent `RedisEntry`"""
+class RedisDropboxEntryInconsistentError(Exception):
+    """An inconsistent `RedisDropboxEntry`"""
     pass
 
 class TwitterResponseError(Exception):

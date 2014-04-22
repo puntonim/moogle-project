@@ -1,4 +1,4 @@
-from utils.redis import RedisIndexList
+from ..redis import RedisDropboxIndexList
 
 
 class DropboxIndexer:
@@ -14,9 +14,9 @@ class DropboxIndexer:
         """
         ....
         """
-        redis = RedisIndexList(self.bearertoken_id)
+        redis = RedisDropboxIndexList(self.bearertoken_id)
         for redis_entry in redis.iterate():
-            # `redis_entry` is a `RedisEntry` instance.
+            # `redis_entry` is a `RedisDropboxEntry` instance.
 
             # If:
             #   - `redis_entry.is_del()`: delete the file from Sorl
@@ -29,13 +29,13 @@ class DropboxIndexer:
             #     already been filtered out)
             #   - entries with `redis_entry.is_del()`: we don't know if they are files or dir
             #     but we don't care since during indexing we ask Solr to delete: name and name/*
-            # And a sanity check is run when creating a `RedisEntry` instance.
+            # And a sanity check is run when creating a `RedisDropboxEntry` instance.
 
             if redis_entry.is_del():
                 print('DEL:', redis_entry.remote_path)
 
             if redis_entry.is_reset():
-                print('REST')
+                print('RESET')
 
             if redis_entry.is_add():
                 print('ADD:', redis_entry.remote_path)

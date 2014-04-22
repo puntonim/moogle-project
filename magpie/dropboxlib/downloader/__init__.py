@@ -1,6 +1,6 @@
 from dropbox.client import DropboxClient  # Dropobox official library
 
-from utils.redis import RedisDownloadList, RedisIndexList
+from ..redis import RedisDropboxDownloadList, RedisDropboxIndexList
 from .dropboxfile import DropboxFile
 
 
@@ -36,10 +36,10 @@ class DropboxDownloader:
         """
         print("Downloading for bearerid: ", self.bearertoken_id)
 
-        redis_dw = RedisDownloadList(self.bearertoken_id)
-        redis_ix = RedisIndexList(self.bearertoken_id)
+        redis_dw = RedisDropboxDownloadList(self.bearertoken_id)
+        redis_ix = RedisDropboxIndexList(self.bearertoken_id)
         for redis_entry in redis_dw.iterate():
-            # `redis_entry` is a `RedisEntry` instance.
+            # `redis_entry` is a `RedisDropboxEntry` instance.
 
             # If:
             #   - `redis_entry.is_del()`: move the entry to the index list
@@ -53,7 +53,7 @@ class DropboxDownloader:
             #     already been filtered out)
             #   - entries with `redis_entry.is_del()`: we don't know if they are files or dir
             #     but we don't care since during indexing we ask Solr to delete: name and name/*
-            # And a sanity check is run when creating a `RedisEntry` instance.
+            # And a sanity check is run when creating a `RedisDropboxEntry` instance.
 
             # TODO
             print(redis_entry.operation_type, redis_entry.remote_path)
