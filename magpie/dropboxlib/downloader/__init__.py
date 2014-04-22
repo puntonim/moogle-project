@@ -42,23 +42,23 @@ class DropboxDownloader:
             # `redis_entry` is a `RedisEntry` instance.
 
             # If:
-            #   - `redis_entry.operation` is '-': move the entry to the index list
-            #   - `redis_entry.operation` is 'X' and `redis_entry.remote_path` is 'RESET':
-            #     move the entry to the index list
-            #   - `redis_entry.operation` is '+': download the file locally, update
+            #   - `redis_entry.is_del()`: move the entry to the index list
+            #   - `redis_entry.is_reset()`: move the entry to the index list
+            #   - `redis_entry.is_add()`: download the file locally, update
             #     `redis_entry.remote_path` with the local file name, move the entry to the
             #     index list
             #
             # Bear in mind that:
-            # '+': they are only files (no dirs cause they have already been filtered out)
-            # '-': we don't know if they are files or dir but we don't care since during
-            #      indexing we ask Solr to delete: name and name/*
+            #   - entries with `redis_entry.is_add()` are only files (no dirs cause they have
+            #     already been filtered out)
+            #   - entries with `redis_entry.is_del()`: we don't know if they are files or dir
+            #     but we don't care since during indexing we ask Solr to delete: name and name/*
             # And a sanity check is run when creating a `RedisEntry` instance.
 
             # TODO
             print(redis_entry.operation_type, redis_entry.remote_path)
 
-            if redis_entry.operation_type == '+':
+            if redis_entry.is_add():
                 # Download the file. We could use client.get_file or client.get_file_and_metadata,
                 # but under the hood the actual call to the API is the same, cause that basic API
                 # call returns the file plus its metadata.

@@ -110,7 +110,8 @@ class DropboxResponse:
                     # `entry_list` is empty, return None to stop the iter
                     return None
                 except EntryNotToBeIndexed:
-                    # The entry is probably a dir and we don't need to index it
+                    # The entry is probably a dir or not a textual file and we don't need to
+                    # index it
                     continue
                 except InconsistentItemError as e:
                     # The entry is not consistent, like some important metadata are missing,

@@ -4,7 +4,7 @@ import redis
 
 from magpie.settings import settings
 from .exceptions import ImproperlyConfigured
-from .exceptions import RedisDownloadEntryInconsistentError
+from .exceptions import RedisEntryInconsistentError
 
 pool = 0
 
@@ -152,10 +152,10 @@ class RedisIndexList(AbstractRedisList):
 
 class RedisEntry:
     """
-    A entry of a Redis download list.
+    A entry of a Redis list.
 
     Parameters:
-    redis_bytes_string -- a original entry of a Redis download list, like: b"+/dir1/file2.txt"
+    redis_bytes_string -- a original entry of a Redis list, like: b"+/dir1/file2.txt"
     It is a bytes string in Python.
     """
     def __init__(self, redis_bytes_string):
@@ -165,17 +165,28 @@ class RedisEntry:
 
     def _sanity_check(self):
         """
-        `redis_dw_entry` is a `RedisEntry` instance.
-        A `redis_dw_entry` is consistent if:
+        A `RedisEntry` instance is consistent if:
             - `operation` is: '+' or '-' or 'X'.
             - `remote_path` is 'RESET' if `operation` is 'X'.
         """
         if not self.operation_type in ['+', '-', 'X']:
-            raise RedisDownloadEntryInconsistentError("The operation must be '+', '-' or 'X'.")
+            raise RedisEntryInconsistentError("The operation must be '+', '-' or 'X'.")
 
         if self.operation_type == 'X' and not self.remote_path == 'RESET':
-            raise RedisDownloadEntryInconsistentError("If the operation is 'X' the remote_path"
+            raise RedisEntryInconsistentError("If the operation is 'X' the remote_path"
                                                       "must be 'REST'.")
+
+    def is_add(self):
+        """True if the `operation_type` is '+'."""
+        return self.operation_type == '+'
+
+    def is_del(self):
+        """True if the `operation_type` is '-'."""
+        return self.operation_type == '-'
+
+    def is_reset(self):
+        """True if the `operation_type` is 'X' and remote_path is 'RESET'."""
+        return self.remote_path == 'RESET'
 
     def __str__(self):
         return '<{}(operation_type={}, remote_path={})>'.format(

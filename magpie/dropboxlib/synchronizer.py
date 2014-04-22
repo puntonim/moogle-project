@@ -24,8 +24,8 @@ class DropboxSynchronizer:
         self._TMP_reset_cursor()
 
         print(">>>>>> START CRAWLING")
-        # `DropboxCrawler` parameter is a `BearerToken` instance because it needs to update its
-        # cursor.
+        # `DropboxCrawler` receives a `BearerToken` argument because it needs to update
+        # its cursor.
         DropboxCrawler(self.bearertoken).run()
         print(">>>>>> END CRAWLING")
 

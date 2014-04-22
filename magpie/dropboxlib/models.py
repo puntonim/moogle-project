@@ -151,6 +151,42 @@ class BearerToken(Base):
     def access_token(self, value):
         raise NotImplementedError("You can NOT set access_token. Use token_set instead.")
 
+    @property
+    def oauth_token(self):
+        """
+        Getter property for the oauth_token stored in `token_set` dictionary.
+        Used by OAuth 1.0a (Twitter).
+        """
+        return self.token_set.get('oauth_token', '')
+
+    @oauth_token.setter
+    def oauth_token(self, value):
+        raise NotImplementedError("You can NOT set oauth_token. Use token_set instead.")
+
+    @property
+    def oauth_token_secret(self):
+        """
+        Getter property for the oauth_token_secret stored in `token_set` dictionary.
+        Used by OAuth 1.0a (Twitter).
+        """
+        return self.token_set.get('oauth_token_secret', '')
+
+    @oauth_token_secret.setter
+    def oauth_token_secret(self, value):
+        raise NotImplementedError("You can NOT set oauth_token_secret. Use token_set instead.")
+
+    @property
+    def user_id(self):
+        """
+        Getter property for the user_id stored in `token_set` dictionary.
+        Used by OAuth 1.0a (Twitter).
+        """
+        return self.token_set.get('user_id', '')
+
+    @user_id.setter
+    def user_id(self, value):
+        raise NotImplementedError("You can NOT set user_id. Use token_set instead.")
+
     def __repr__(self):
         return "<BearerToken(id={}, provider={})>".format(self.id, self.provider.name)
 

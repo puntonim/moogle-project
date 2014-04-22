@@ -1,3 +1,5 @@
+from os.path import splitext, basename
+
 from utils.exceptions import InconsistentItemError, EntryNotToBeIndexed
 from magpie.settings import settings
 
@@ -58,6 +60,7 @@ class DropboxResponseEntry:
 
     def __init__(self, entry_list):
         self.remote_path, self.metadata = self._sanity_check(entry_list)
+        self._filter()
         self.operation_type = self._find_operation_type()
 
 
@@ -80,19 +83,23 @@ class DropboxResponseEntry:
 
         return remote_path, metadata
 
-    def _find_operation_type(self):
+    def _filter(self):
         """
-        Find out if this `entry_list` is a file/dir added ('+') or deleted ('-').
-        Rules:
-            - if it is a dir, then raise `EntryNotToBeIndexed`.
-            - if it is a file with size > settings.DROPBOX_MAX_FILE_SIZE, then raise
-              `EntryNotToBeIndexed`.
-            - if it has some inconsistent metadata, then raise `InconsistentItemError`.
+        Filter based on rules as follows:
+        a. If it is a deletion, then there is no metadata, so we don't know if the file is a file
+           or a dir (a dir can be named 'mydir.txt' and a file can be named 'myfile' so we cannot
+           guess it simply from the name) -> It is a valid entry (in Solr we will then delete
+           file_name and file_name/*).
+        b. If it is a dir (and it can only be an addition, since we know that it is a dir from the
+           metadata and the presence of the metadata means it is an addition) -> It is NOT a valid
+           entry, raise an exception.
+        c. If its size is > settings.DROPBOX_MAX_FILE_SIZE -> It is NOT a valid entry, raise an
+           exception.
+        d. If it has inconsistent metadata -> It is a NOT valid entry, raise an exception.
+        e. If the file extension is not in settings.DROPBOX_FILE_EXT_FILTER -> It is NOT a valid
+           entry, raise an exception.
+        f. In all the other cases -> It is a valid entry.
         """
-        # If there is no metadata it is a file to delete
-        if not self.metadata:
-            return '-'
-
         # If there is a metadata,
         #   and it is not a dir (so it's a file),
         #   and its size is allowed,
@@ -100,10 +107,30 @@ class DropboxResponseEntry:
         try:
             is_dir = self.metadata['is_dir']
             size = self.metadata['bytes']
-        except KeyError as e:
+            path = self.metadata['path']
+        except KeyError as e:  # Case d.
             raise InconsistentItemError('Some metadata are missing.') from e
-        if is_dir or size > settings.DROPBOX_MAX_FILE_SIZE:
+
+        try:
+            ext = splitext(basename(path))[1][1:].lower()
+        except Exception as e:  # Case d.
+            raise InconsistentItemError('The file extension is not consistent.') from e
+
+        # Cases b., c., e.
+        if is_dir or \
+           size > settings.DROPBOX_MAX_FILE_SIZE or \
+           ext not in settings.DROPBOX_FILE_EXT_FILTER:
             raise EntryNotToBeIndexed
+
+        # Case a., f.: nothing to do
+
+    def _find_operation_type(self):
+        """
+        Find out if this `entry_list` is a file added ('+') or deleted ('-').
+        """
+        # If there is no metadata it is a file to delete, otherwise it is a file to add
+        if not self.metadata:
+            return '-'
         return '+'
 
     def __str__(self):

@@ -16,7 +16,26 @@ class DropboxIndexer:
         """
         redis = RedisIndexList(self.bearertoken_id)
         for redis_entry in redis.iterate():
-            print(redis_entry)
+            # `redis_entry` is a `RedisEntry` instance.
 
-            # for each +, tells solr to index the local file
-            # for each -, deletes the record from Solr (name and name/*)
+            # If:
+            #   - `redis_entry.is_del()`: delete the file from Sorl
+            #   - `redis_entry.is_reset()`: delete the entire index from Solr
+            #   - `redis_entry.is_add()`: add the file to Solr (the file has already
+            #     been downloaded locally)
+            #
+            # Bear in mind that:
+            #   - entries with `redis_entry.is_add()` are only files (no dirs cause they have
+            #     already been filtered out)
+            #   - entries with `redis_entry.is_del()`: we don't know if they are files or dir
+            #     but we don't care since during indexing we ask Solr to delete: name and name/*
+            # And a sanity check is run when creating a `RedisEntry` instance.
+
+            if redis_entry.is_del():
+                print('DEL:', redis_entry.remote_path)
+
+            if redis_entry.is_reset():
+                print('REST')
+
+            if redis_entry.is_add():
+                print('ADD:', redis_entry.remote_path)
