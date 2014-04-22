@@ -17,7 +17,7 @@ Backbone.js|Angular.js?
 Nginx
 Gunicorn
 unicornherder?
-redis|memcached?
+Redis
 Git
 Jenkins
 fabric|ansible?

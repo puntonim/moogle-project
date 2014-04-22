@@ -19,6 +19,9 @@ We could use msg instead i.e. launching a masg after each step.
 * REFACTOR MODULE redisutils
 The module became too big
 
+* Twitter
+There is a rate limit of 180 req per access_token every 15 min
+https://dev.twitter.com/docs/rate-limiting/1.1/limits
 
 
 -- BASSA PRIORITA ----------------------------------------------------------------------------------
@@ -28,5 +31,7 @@ Aggiungere: favorited, favorite_count, retweet_count (v. doc)
 
 * GOOGLE +
 Da aggiungere
+
+* Replace settings.DROPBOX_FILE_EXT_FILTER w/ a setting coming from Moogle
 
 ---------------------------------------------------------------------------------------------------

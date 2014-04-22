@@ -6,7 +6,7 @@ But as the main developer suggests there, the approach used there is too "heavy"
 The one described here is a better fix
 I should submit a pull request
 
-File: /Users/nimiq/.virtualenvs/moogle/lib/python3.3/site-packages/
+File: .virtualenvs/moogle/lib/python3.3/site-packages/
       requests_oauthlib/compliance_fixes/facebook.py
 
 import sys

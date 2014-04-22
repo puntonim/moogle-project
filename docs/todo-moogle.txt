@@ -7,10 +7,8 @@ Friday 2014.01.17 13:42:13
 
 -- ALTA PRIORITA ----------------------------------------------------------------------------------
 
-* PASSWORD PROVIDERS NELLA FIXTURE
-Providers.json non puo contenere le password delle mie app sui provider in chiaro
-
-* COLLECTSTATIC, STATIC_URL, MEDIA_URL
+* Moogle.tokens.models.BearerToken
+Rename access_token to _token_set and use properties like in Magpie
 
 ---------------------------------------------------------------------------------------------------
 
@@ -58,6 +56,9 @@ Collegata alla successiva
 
 * AGGIORNAMENTO PROFILI
 I profili tipo GoogleProfile, TwitterProfile vanno refreshati ad intervalli regolari, tipo ogni 30 gg
+
+* Add a configuration for Dropbox
+Something that will replace settings.DROPBOX_FILE_EXT_FILTER in Magpie
 
 ---------------------------------------------------------------------------------------------------
 
