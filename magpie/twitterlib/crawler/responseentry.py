@@ -11,7 +11,7 @@ class TwitterResponseEntry:
             "in_reply_to_status_id": null,
             "in_reply_to_screen_name": null,
             "id_str": "453848727191830528",
-            "text": "#Brunetta \"non sei degno di essere nano\"",
+            "text": "#Superman said \"Hello world\"",
             "in_reply_to_user_id": null,
             "coordinates": null,
             "geo": null,
@@ -31,7 +31,7 @@ class TwitterResponseEntry:
                             0,
                             9
                         ],
-                        "text": "Brunetta"
+                        "text": "Superman"
                     }
                 ],
                 "symbols": [],
@@ -53,3 +53,15 @@ class TwitterResponseEntry:
     @property
     def id_str(self):
         return self.entry_dict['id_str']
+
+    @property
+    def text(self):
+        return self.entry_dict['text'].encode('ascii', 'backslashreplace')
+
+    @property
+    def lang(self):
+        return self.entry_dict['lang']
+
+    @property
+    def created_at(self):
+        return self.entry_dict['created_at']

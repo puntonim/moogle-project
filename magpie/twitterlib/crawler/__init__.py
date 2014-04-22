@@ -48,7 +48,7 @@ class TwitterCrawler:
 
                 # Parse the response.
                 response = TwitterResponse(r)
-                response.parse()
+                response.parse(self.bearertoken.id)
 
                 # Pagination
                 if is_first_loop:

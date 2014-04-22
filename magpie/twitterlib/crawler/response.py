@@ -1,5 +1,6 @@
 from utils.exceptions import TwitterResponseError
 from .responseentry import TwitterResponseEntry
+from ..redis import RedisTwitterList
 
 
 class TwitterResponse:
@@ -17,21 +18,27 @@ class TwitterResponse:
 
         self._sanity_check()
 
-    def parse(self):
+    def parse(self, bearertoken_id):
+        redis = RedisTwitterList(bearertoken_id)
+
         is_first_entry = True
         for entry in self._entries_to_twitterresponseentries():
             # `entry` is a `TwitterResponseEntry` instance.
 
+            #print(entry.entry_dict['text'])
+            redis.buffer(entry)
+
             # Pagination
-            if entry:
-                self.has_more = True
+            # We suppose that if there is at least an entry in this response, then the response
+            # is not complete and a new query should be run (this is not exactly true, but it
+            # works since it stops when the response has no entry).
+            self.has_more = True
             if is_first_entry:
                 self.updates_cursor = entry.id_str
                 is_first_entry = False
             self.max_id = str(int(entry.id_str) - 1)
 
-            #print(json.dumps(entry.entry_dict, indent=4))
-            print(entry.entry_dict['text'])
+        redis.flush_buffer()
 
     def _entries_to_twitterresponseentries(self):
         """
