@@ -13,6 +13,10 @@ class EntryNotToBeIndexed(Exception):
     pass
 
 
-class RedisDownloadEntryInconsistentError(Exception):
+class RedisEntryInconsistentError(Exception):
     """An inconsistent `RedisEntry`"""
+    pass
+
+class TwitterResponseError(Exception):
+    """An error response was received from Twitter"""
     pass

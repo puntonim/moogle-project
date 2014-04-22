@@ -38,7 +38,7 @@ if __name__ == '__main__':
             model_name = cls.__name__
             models_names.append(model_name)
             globals()[model_name] = getattr(
-                __import__('crawlers.models', fromlist=[model_name]), model_name)
+                __import__('dropboxlib.models', fromlist=[model_name]), model_name)
 
         # Create a new session
         sex = Session()
@@ -70,3 +70,16 @@ if __name__ == '__main__':
             bearertoken = provider.bearertokens[0]
 
         DropboxSynchronizer(bearertoken=bearertoken).run()
+
+    elif sys.argv[1] == 'twitter':
+        from twitterlib.synchronizer import TwitterSynchronizer
+        from utils.db import session_autocommit
+        from dropboxlib.models import Provider
+
+        print("START TWITTER")
+
+        with session_autocommit() as sex:
+            provider = sex.query(Provider).filter_by(name=Provider.NAME_TWITTER).one()
+            bearertoken = provider.bearertokens[0]
+
+        TwitterSynchronizer(bearertoken=bearertoken).run()

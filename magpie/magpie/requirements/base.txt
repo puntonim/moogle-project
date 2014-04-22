@@ -2,5 +2,9 @@ sqlalchemy==0.9.4
 dropbox==2.0.0
 # which requires:
 # urllib3
-redis
-hiredis
+redis==2.9.1
+hiredis==0.1.2
+requests-oauthlib==0.4.0
+# which requires:
+# requests, oauthlib
+# requests-oauthlib needs to be patched to work with Python3
