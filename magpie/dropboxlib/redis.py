@@ -4,9 +4,9 @@ from utils.redis import AbstractRedisList, open_redis_connection
 from utils.exceptions import RedisDropboxEntryInconsistentError
 
 
-class AbstractDropboxRedisList(AbstractRedisList, metaclass=ABCMeta):
+class AbstractRedisDropboxList(AbstractRedisList, metaclass=ABCMeta):
     """
-    Abstract class to manage a single list (queue) in Redis.
+    Abstract class to manage a single Dropbox list (queue) in Redis.
     """
     def buffer(self, entry):
         """
@@ -49,7 +49,7 @@ class AbstractDropboxRedisList(AbstractRedisList, metaclass=ABCMeta):
         return iter(_lpop, None)
 
 
-class RedisDropboxDownloadList(AbstractDropboxRedisList):
+class RedisDropboxDownloadList(AbstractRedisDropboxList):
     """
     A Redis list which maps Dropbox files.
     Entries of the list in Redis have this form: "+/dir1/file2.txt".
@@ -68,7 +68,7 @@ class RedisDropboxDownloadList(AbstractDropboxRedisList):
         self._pipeline.rpush(self._list_name, 'XRESET')
 
 
-class RedisDropboxIndexList(AbstractDropboxRedisList):
+class RedisDropboxIndexList(AbstractRedisDropboxList):
     """
     A Redis list which maps files to index with Solr.
     Entries of the list in Redis have this form: "+/dir1/file2.txt".
