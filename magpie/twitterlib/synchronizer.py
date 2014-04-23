@@ -1,5 +1,5 @@
 from .crawler import TwitterCrawler
-#from .indexer import TwitterIndexer
+from .indexer import TwitterIndexer
 from utils.db import session_autocommit
 
 
@@ -28,9 +28,9 @@ class TwitterSynchronizer:
         TwitterCrawler(self.bearertoken).run()
         print(">>>>>> END CRAWLING")
 
-        #print("\n\n>>>>>> START INDEXING")
-        #TwitterIndexer(self._bearertoken_id, self._access_token).run()
-        #print(">>>>>> END INDEXING")
+        print("\n\n>>>>>> START INDEXING")
+        TwitterIndexer(self._bearertoken_id, self._access_token).run()
+        print(">>>>>> END INDEXING")
 
 
 

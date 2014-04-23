@@ -34,6 +34,45 @@ class RedisTwitterList(AbstractRedisList, metaclass=ABCMeta):
             }
         )
 
-
     def iterate(self):
-        pass
+        """
+        Iterate over the Redis list.
+        Return an iterator object which iterates over `RedisTwitterEntry` objects.
+        """
+        r = open_redis_connection()
+
+        def _lpop():
+            """
+            Pop from the head of the Redis list..............
+            Convert the item to `RedisDropboxEntry`.
+            """
+            tweet_id = r.lpop(self._list_name)
+            if not tweet_id:
+                return None
+
+            hash_name = '{}:{}'.format(self._list_name, tweet_id.decode(encoding='UTF-8'))
+            tweet_dict = r.hgetall(hash_name)
+            r.delete(hash_name)
+
+            return RedisTwitterEntry(tweet_id, tweet_dict)
+
+        # The first argument of iter must be a callable, that's why we created the _lpop()
+        # closure. This closure will be called for each iteration and the result is returned
+        # until the result is None.
+        return iter(_lpop, None)
+
+
+class RedisTwitterEntry:
+    """
+    A Twitter entry of a Redis list.
+
+    Parameters:
+    redis_bytes_string -- a original entry of a Redis list, like: b"+/dir1/file2.txt"
+    It is a bytes string in Python.
+    """
+
+    def __init__(self, tweet_id, tweet_dict):
+        self.id = tweet_id.decode(encoding='UTF-8')
+        self.lang = tweet_dict[b'lang'].decode(encoding='UTF-8')
+        self.created_at = tweet_dict[b'created_at'].decode(encoding='UTF-8')
+        self.text = tweet_dict[b'text'].decode(encoding='UTF-8')

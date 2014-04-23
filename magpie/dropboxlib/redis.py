@@ -29,7 +29,7 @@ class AbstractRedisDropboxList(AbstractRedisList, metaclass=ABCMeta):
     def iterate(self):
         """
         Iterate over the Redis list.
-        Return a iterator object which iterates over `RedisDropboxEntry` objects.
+        Return an iterator object which iterates over `RedisDropboxEntry` objects.
         """
         r = open_redis_connection()
 
@@ -83,15 +83,15 @@ class RedisDropboxIndexList(AbstractRedisDropboxList):
 
 class RedisDropboxEntry:
     """
-    A entry of a Redis list.
+    A Dropbox entry of a Redis list.
 
     Parameters:
-    redis_bytes_string -- a original entry of a Redis list, like: b"+/dir1/file2.txt"
-    It is a bytes string in Python.
+    entry -- a original entry of a Redis list, like: b"+/dir1/file2.txt". It is a bytes string
+    in Python.
     """
-    def __init__(self, redis_bytes_string):
-        self.operation_type = redis_bytes_string[:1].decode(encoding='UTF-8')
-        self.remote_path = redis_bytes_string[1:].decode(encoding='UTF-8')
+    def __init__(self, entry):
+        self.operation_type = entry[:1].decode(encoding='UTF-8')
+        self.remote_path = entry[1:].decode(encoding='UTF-8')
         self._sanity_check()
 
     def _sanity_check(self):

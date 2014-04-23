@@ -4,6 +4,7 @@ from sqlalchemy.orm import sessionmaker
 import json
 
 from magpie.settings import settings
+import models
 
 
 # TODO convert all this print to log.debug to console
@@ -12,8 +13,7 @@ from magpie.settings import settings
 def setup_db():
     # TODO printing this in order to monitor how many times this happens
     print("*************************** Setup the db")
-    from models import Base
-    Base.metadata.create_all(engine)
+    models.Base.metadata.create_all(engine)
 
 
 def _start_engine():
@@ -60,7 +60,6 @@ def get_all_models_classes():
     # TODO should be improved in order to search all models, not only `crawler.models`
 
     from inspect import getmembers
-    import dropboxlib.models as models
 
     def is_Base_subclass(cls):
         """
