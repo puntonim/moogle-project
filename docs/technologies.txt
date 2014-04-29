@@ -20,7 +20,9 @@ unicornherder?
 Redis
 Git
 Jenkins
-fabric|ansible?
+Ansible
+Vagrant
+Docker
 unittest|py.test
 webdriver
 virtualenv

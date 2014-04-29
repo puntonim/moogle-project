@@ -76,9 +76,12 @@ class TwitterCrawler:
         """
         return ('https://api.twitter.com/1.1/statuses/user_timeline.json?' +
                 'trim_user=true&' +
-                'count=25&' +  # Number of tweets returned
+                'count=100&' +  # Number of tweets returned
                 'user_id={}&'.format(self.bearertoken.user_id) +
-                #'user_id=6253282&'  # +  # TODO @twitterapi
+                #'user_id=6253282&' +  # TODO DEBUG @twitterapi
+                #'user_id=14885549&' +  # TODO DEBUG @ForbesTech
+                #'user_id=7144422&' +  # TODO DEBUG @lifehacker
+                #'user_id=20536157&' +  # TODO DEBUG @google
                 '{}&'.format(self.build_since_id_parameter()) +
                 '{}'.format(self.build_max_id_parameter(max_id))
         )

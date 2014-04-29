@@ -18,4 +18,4 @@ class TwitterIndexer:
         for redis_entry in redis.iterate():
             # `redis_entry` is a `RedisTwitterEntry` instance.
 
-            print(redis_entry.id, redis_entry.text)
+            print(redis_entry.id, redis_entry.text_clean)

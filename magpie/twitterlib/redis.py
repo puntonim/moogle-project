@@ -31,6 +31,7 @@ class RedisTwitterList(AbstractRedisList, metaclass=ABCMeta):
                 'text': entry.text,
                 'lang': entry.lang,
                 'created_at': entry.created_at,
+                'text_clean': entry.text_clean,
             }
         )
 
@@ -76,3 +77,4 @@ class RedisTwitterEntry:
         self.lang = tweet_dict[b'lang'].decode(encoding='UTF-8')
         self.created_at = tweet_dict[b'created_at'].decode(encoding='UTF-8')
         self.text = tweet_dict[b'text'].decode(encoding='UTF-8')
+        self.text_clean = tweet_dict[b'text_clean'].decode(encoding='UTF-8')
