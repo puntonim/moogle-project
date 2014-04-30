@@ -188,7 +188,8 @@ class BearerToken(Base):
         raise NotImplementedError("You can NOT set user_id. Use token_set instead.")
 
     def __repr__(self):
-        return "<BearerToken(id={}, provider={})>".format(self.id, self.provider.name)
+        provider_name = self.provider.name if self.provider else ''
+        return "<BearerToken(id={}, provider={})>".format(self.id, provider_name)
 
 
 
