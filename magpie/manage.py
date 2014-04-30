@@ -83,3 +83,16 @@ if __name__ == '__main__':
             bearertoken = provider.bearertokens[0]
 
         TwitterSynchronizer(bearertoken=bearertoken).run()
+
+    elif sys.argv[1] == 'facebook':
+        from facebooklib.synchronizer import FacebookSynchronizer
+        from utils.db import session_autocommit
+        from models import Provider
+
+        print("START FACEBOOK")
+
+        with session_autocommit() as sex:
+            provider = sex.query(Provider).filter_by(name=Provider.NAME_FACEBOOK).one()
+            bearertoken = provider.bearertokens[0]
+
+        FacebookSynchronizer(bearertoken=bearertoken).run()
