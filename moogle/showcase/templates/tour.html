@@ -41,7 +41,7 @@
                             <li><a href="#">Features</a></li>
                             <li><a href="#">Contact</a></li>
                             <li>
-                                {% if not user %}
+                                {% if not user.is_authenticated %}
                                     <a href="#" data-toggle="modal" data-target="#signinModal">
                                         Sign in
                                     </a>
@@ -59,7 +59,7 @@
                     {#    <a href="#">Sign up now</a>#}
                     {#</div>#}
                     <p class="lead">
-                        {% if not user %}
+                        {% if not user.is_authenticated %}
                             <button href="#" class="btn btn-lg btn-default signup" data-toggle="modal"
                                     data-target="#signupModal">
                                 Sign up now
