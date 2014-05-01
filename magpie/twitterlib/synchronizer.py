@@ -18,9 +18,8 @@ class TwitterSynchronizer:
             self._access_token = bearertoken.access_token
 
     def run(self):
-
         # TODO temporary reset the cursor for debugging purpose only
-        ###self._TMP_reset_cursor()
+        self._TMP_reset_cursor() #######
 
         print(">>>>>> START CRAWLING")
         # `DropboxCrawler` receives a `BearerToken` argument because it needs to update

@@ -5,7 +5,7 @@ from utils.redis import AbstractRedisList, open_redis_connection
 
 class RedisTwitterList(AbstractRedisList, metaclass=ABCMeta):
     """
-    Abstract class to manage a single list (queue) in Redis.
+    List (queue) of Twitter tweets in Redis.
     """
 
     def __init__(self, bearertoken_id):
@@ -41,6 +41,7 @@ class RedisTwitterList(AbstractRedisList, metaclass=ABCMeta):
         Return an iterator object which iterates over `RedisTwitterEntry` objects.
         """
         r = open_redis_connection()
+        pipeline = r.pipeline()
 
         def _lpop():
             """
@@ -53,23 +54,39 @@ class RedisTwitterList(AbstractRedisList, metaclass=ABCMeta):
 
             hash_name = '{}:{}'.format(self._list_name, tweet_id.decode(encoding='UTF-8'))
             tweet_dict = r.hgetall(hash_name)
-            r.delete(hash_name)
+            # Delete the hash through a pipeline. The use of a pipeline is to avoid a sort
+            # of bug. The bug was the following:
+            # entry = r.hgetall(hash_name)  -- READ
+            # r.delete(hash_name)           -- DELETE
+            # Sometimes the DELETE happens before the READ causing the read value to be None: this
+            # is very very weird, but it happened sometimes. Using a pipeline solve this.
+            pipeline.delete(hash_name)
 
             return RedisTwitterEntry(tweet_id, tweet_dict)
+
+        def _lpop_mgr():
+            """
+            Wrap _lpop in a try-except block to make sure the pipeline is executed even in case
+            of exception.
+            """
+            try:
+                item = _lpop()
+                if not item:
+                    pipeline.execute()
+                return item
+            except:
+                pipeline.execute()
+                raise
 
         # The first argument of iter must be a callable, that's why we created the _lpop()
         # closure. This closure will be called for each iteration and the result is returned
         # until the result is None.
-        return iter(_lpop, None)
+        return iter(_lpop_mgr, None)
 
 
 class RedisTwitterEntry:
     """
-    A Twitter entry of a Redis list.
-
-    Parameters:
-    redis_bytes_string -- a original entry of a Redis list, like: b"+/dir1/file2.txt"
-    It is a bytes string in Python.
+    A Twitter entry (tweet) of a Redis list.
     """
 
     def __init__(self, tweet_id, tweet_dict):

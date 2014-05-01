@@ -18,22 +18,34 @@ class TwitterResponse:
 
         self._sanity_check()
 
+    def _sanity_check(self):
+        """
+        Check whether the current response got from Twitter is an error response.
+        """
+        # If the HTTP status code is not 200, then it is an error.
+        # https://dev.twitter.com/docs/error-codes-responses
+        if self.response.status_code != 200:
+            msg = 'HTTP Status: {}\n{}'.format(self.response.status_code, self.response.json())
+            raise TwitterResponseError(msg)
+        # TODO implement a check on rate limit error (max 180 GET requests per access_token
+        # TODO every 15 min): https://dev.twitter.com/docs/rate-limiting/1.1/limits
+
     def parse(self, bearertoken_id):
         redis = RedisTwitterList(bearertoken_id)
 
-        is_first_entry = True
+        is_first_entry = True  # for updates cursor
         for entry in self._entries_to_twitterresponseentries():
             # `entry` is a `TwitterResponseEntry` instance.
 
-            #print(entry.entry_dict['text'])
+            #print(entry.texts)
             redis.buffer(entry)
 
-            # Pagination
+            # Pagination.
             # We suppose that if there is at least an entry in this response, then the response
             # is not complete and a new query should be run (this is not exactly true, but it
             # works since it stops when the response has no entry).
-            self.has_more = True
             if is_first_entry:
+                self.has_more = True
                 self.updates_cursor = entry.id_str
                 is_first_entry = False
             self.max_id = str(int(entry.id_str) - 1)
@@ -43,7 +55,7 @@ class TwitterResponse:
     def _entries_to_twitterresponseentries(self):
         """
         Iter over all entries in the response.
-        `entries` is a list of items; each item is converted to a `DropboxResponseEntry` instance.
+        Each entry in the response is converted to a `TwitterResponseEntry` instance.
         """
 
         rj = self.response.json()
@@ -51,7 +63,7 @@ class TwitterResponse:
         def _lpop():
             """
             Pop from the head of the list.
-            Convert the item to `DropboxResponseEntry`.
+            Convert the item to `TwitterResponseEntry`.
             """
             while True:
                 try:
@@ -75,14 +87,3 @@ class TwitterResponse:
         # closure. This closure will be called for each iteration and the result is returned
         # until the result is None.
         return iter(_lpop, None)
-
-    def _sanity_check(self):
-        """
-        Check whether the current response got from Twitter is an error response.
-        """
-        if self.response.status_code != 200:
-            # If the HTTP status code is not 200, then it is an error
-            msg = 'HTTP Status: {}\n{}'.format(self.response.status_code, self.response.json())
-            raise TwitterResponseError(msg)
-        # TODO implement a check on rate limit error (max 180 GET requests per access_token
-        # TODO every 15 min): https://dev.twitter.com/docs/rate-limiting/1.1/limits
