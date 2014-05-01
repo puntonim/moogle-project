@@ -12,9 +12,6 @@ from os.path import join, normpath, dirname
 
 BASE_DIR = normpath(dirname(dirname(dirname(__file__))))
 
-DATABASE_NAME = ""
-DATABASE_CONNECTION = "sqlite:///{}/magpie.db".format(BASE_DIR)
-
 DATABASE = {
     'ENGINE': 'sqlite:///',
     'NAME': normpath(join(BASE_DIR, 'magpie.db')),
