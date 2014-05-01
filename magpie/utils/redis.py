@@ -24,11 +24,11 @@ def open_redis_connection():
         if pool == 0:
             pool = _build_connection_pool()
         # TODO change this prints to log.debug to console
-        print("+++++++++++++++++++++++++++ Opening a connection to Redis")
+        print("+++++++++++++++++++++++++++ Opening a TCP connection to Redis")
         return redis.StrictRedis(connection_pool=pool)
 
     if 'UNIX_SOCKET' in settings.REDIS:
-        print("+++++++++++++++++++++++++++ Opening a connection to Redis")
+        print("+++++++++++++++++++++++++++ Opening a SOCKET connection to Redis")
         return redis.Redis(unix_socket_path=settings.REDIS['UNIX_SOCKET']['PATH'])
 
     raise ImproperlyConfigured('You must set proper Redis connection details in the'

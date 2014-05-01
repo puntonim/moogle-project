@@ -17,6 +17,12 @@ class RedisDropboxEntryInconsistentError(Exception):
     """An inconsistent `RedisDropboxEntry`"""
     pass
 
+
 class TwitterResponseError(Exception):
+    """An error response was received from Twitter"""
+    pass
+
+
+class FacebookResponseError(Exception):
     """An error response was received from Twitter"""
     pass

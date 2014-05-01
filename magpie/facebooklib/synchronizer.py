@@ -1,5 +1,5 @@
 from .crawler import FacebookCrawler
-#from .indexer import FacebookIndexer
+from .indexer import FacebookIndexer
 from utils.db import session_autocommit
 
 
@@ -18,9 +18,8 @@ class FacebookSynchronizer:
             self._access_token = bearertoken.access_token
 
     def run(self):
-
         # TODO temporary reset the cursor for debugging purpose only
-        self._TMP_reset_cursor()
+        ###self._TMP_reset_cursor() #########
 
         print(">>>>>> START CRAWLING")
         # `FacebookCrawler` receives a `BearerToken` argument because it needs to update
@@ -28,9 +27,9 @@ class FacebookSynchronizer:
         FacebookCrawler(self.bearertoken).run()
         print(">>>>>> END CRAWLING")
 
-        #print("\n\n>>>>>> START INDEXING")
-        #TwitterIndexer(self._bearertoken_id, self._access_token).run()
-        #print(">>>>>> END INDEXING")
+        print("\n\n>>>>>> START INDEXING")
+        FacebookIndexer(self._bearertoken_id, self._access_token).run()
+        print(">>>>>> END INDEXING")
 
 
 
