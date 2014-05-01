@@ -24,6 +24,9 @@ We will refer to this folder as *repository root*.
 
 3. Create a virtual environment
 -------------------------------
+You can create virtual environments using Virtualenvwrapper or Virtualenv.
+I usually use Virtualenvwrapper in development and Virtualenv in production.
+
 ### 3.1. Using Virtualenvwrapper
     $ mkvirtualenv magpie
 
