@@ -35,6 +35,10 @@ class FacebookResponse:
     def parse(self, bearertoken_id):
         redis = RedisFacebookList(bearertoken_id)
 
+        ########
+        import json
+        print(json.dumps(self.response.json(), indent=4))
+
         # Pagination: next parameter.
         self._build_next_parameter()
 

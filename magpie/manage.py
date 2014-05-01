@@ -9,6 +9,10 @@ if __name__ == '__main__':
     # TODO use argparse
     # See https://github.com/united-academics/uarepocamp/blob/master/campaign/scripts/send_bulk_email2.py
 
+    # TODO delete me
+    def _reset_cursor(bearertoken):
+        bearertoken.updates_cursor = None
+
     if sys.argv[1] == 'syncdb':
         """
         Setup the SQLAlchemy db as configured in the settings.
@@ -68,6 +72,11 @@ if __name__ == '__main__':
         with session_autocommit() as sex:
             provider = sex.query(Provider).filter_by(name=Provider.NAME_DROPBOX).one()
             bearertoken = provider.bearertokens[0]
+            try:
+                if sys.argv[2] == 'resetcursor':
+                    _reset_cursor(bearertoken)
+            except IndexError:
+                pass
 
         DropboxSynchronizer(bearertoken=bearertoken).run()
 
@@ -81,6 +90,11 @@ if __name__ == '__main__':
         with session_autocommit() as sex:
             provider = sex.query(Provider).filter_by(name=Provider.NAME_TWITTER).one()
             bearertoken = provider.bearertokens[0]
+            try:
+                if sys.argv[2] == 'resetcursor':
+                    _reset_cursor(bearertoken)
+            except IndexError:
+                pass
 
         TwitterSynchronizer(bearertoken=bearertoken).run()
 
@@ -94,5 +108,12 @@ if __name__ == '__main__':
         with session_autocommit() as sex:
             provider = sex.query(Provider).filter_by(name=Provider.NAME_FACEBOOK).one()
             bearertoken = provider.bearertokens[0]
+            try:
+                if sys.argv[2] == 'resetcursor':
+                    _reset_cursor(bearertoken)
+            except IndexError:
+                pass
 
         FacebookSynchronizer(bearertoken=bearertoken).run()
+
+
