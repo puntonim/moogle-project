@@ -1,22 +1,22 @@
-# Python bytecode:
+# Python bytecode
 __pycache__
 *.py[cod]
 
-# Packaging files:
+# Packaging files
 *.egg*
 
-# SQLite3 database files:
+# SQLite3 database files
 *.db
 *.sqlite3
 
-# Logs:
+# Logs
 *.log
 
-# Mac:
+# Mac
 .DS_Store
 ._*
 
-# PyCharm:
+# PyCharm
 .idea
 
 # Virtual environment

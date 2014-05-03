@@ -11,6 +11,7 @@ if __name__ == '__main__':
 
     # TODO delete me
     def _reset_cursor(bearertoken):
+        print("Resetting the cursor...")
         bearertoken.updates_cursor = None
 
     if sys.argv[1] == 'syncdb':
