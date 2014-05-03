@@ -1,5 +1,6 @@
 from abc import ABCMeta
 
+from .entry import RedisTwitterEntry
 from utils.redis import AbstractRedisList, open_redis_connection
 
 
@@ -15,7 +16,7 @@ class RedisTwitterList(AbstractRedisList, metaclass=ABCMeta):
         """
 
         Parameters:
-        entry -- A `TwitterResponseEntry` instance.
+        entry -- A `ApiTwitterEntry` instance.
         """
         # TODO
         print("Storing {} in Redis.".format(entry))
@@ -45,7 +46,7 @@ class RedisTwitterList(AbstractRedisList, metaclass=ABCMeta):
 
         def _lpop():
             """
-            Pop from the head of the Redis list..............
+            Pop from the head of the Twitter Redis list and get the hash entry.
             Convert the item to `RedisDropboxEntry`.
             """
             tweet_id = r.lpop(self._list_name)
@@ -82,16 +83,3 @@ class RedisTwitterList(AbstractRedisList, metaclass=ABCMeta):
         # closure. This closure will be called for each iteration and the result is returned
         # until the result is None.
         return iter(_lpop_mgr, None)
-
-
-class RedisTwitterEntry:
-    """
-    A Twitter entry (tweet) of a Redis list.
-    """
-
-    def __init__(self, tweet_id, tweet_dict):
-        self.id = tweet_id.decode(encoding='UTF-8')
-        self.lang = tweet_dict[b'lang'].decode(encoding='UTF-8')
-        self.created_at = tweet_dict[b'created_at'].decode(encoding='UTF-8')
-        self.text = tweet_dict[b'text'].decode(encoding='UTF-8')
-        self.text_clean = tweet_dict[b'text_clean'].decode(encoding='UTF-8')

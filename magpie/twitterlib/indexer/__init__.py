@@ -1,4 +1,9 @@
+import logging
+
 from ..redis import RedisTwitterList
+
+
+log = logging.getLogger('twitter')
 
 
 class TwitterIndexer:
@@ -18,4 +23,9 @@ class TwitterIndexer:
         for redis_entry in redis.iterate():
             # `redis_entry` is a `RedisTwitterEntry` instance.
 
-            print(redis_entry.id, redis_entry.text_clean)
+            log.debug('id={}\n'.format(redis_entry.id) +
+                      'lang={}\n'.format(redis_entry.lang) +
+                      'created_at={}\n'.format(redis_entry.created_at) +
+                      'text={}\n'.format(redis_entry.text) +
+                      'text_clean={}\n'.format(redis_entry.text_clean)
+            )

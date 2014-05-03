@@ -1,6 +1,12 @@
+import logging
+import json
+
 from utils.exceptions import TwitterResponseError
-from .responseentry import TwitterResponseEntry
+from ..entry import ApiTwitterEntry
 from ..redis import RedisTwitterList
+
+
+log = logging.getLogger('twitter')
 
 
 class TwitterResponse:
@@ -16,6 +22,7 @@ class TwitterResponse:
         self.max_id = ''
         self.has_more = False
 
+        log.debug('Response got:\n{}'.format(json.dumps(self.response.json(), indent=4)))
         self._sanity_check()
 
     def _sanity_check(self):
@@ -34,8 +41,8 @@ class TwitterResponse:
         redis = RedisTwitterList(bearertoken_id)
 
         is_first_entry = True  # for updates cursor
-        for entry in self._entries_to_twitterresponseentries():
-            # `entry` is a `TwitterResponseEntry` instance.
+        for entry in self._entries_to_apitwitterentries():
+            # `entry` is a `ApiTwitterEntry` instance.
 
             #print(entry.texts)
             redis.buffer(entry)
@@ -52,10 +59,10 @@ class TwitterResponse:
 
         redis.flush_buffer()
 
-    def _entries_to_twitterresponseentries(self):
+    def _entries_to_apitwitterentries(self):
         """
         Iter over all entries in the response.
-        Each entry in the response is converted to a `TwitterResponseEntry` instance.
+        Each entry in the response is converted to a `ApiTwitterEntry` instance.
         """
 
         rj = self.response.json()
@@ -63,25 +70,16 @@ class TwitterResponse:
         def _lpop():
             """
             Pop from the head of the list.
-            Convert the item to `TwitterResponseEntry`.
+            Convert the item to `ApiTwitterEntry`.
             """
             while True:
                 try:
                     entry = rj.pop(0)
-                    entry = TwitterResponseEntry(entry)
+                    entry = ApiTwitterEntry(entry)
                     return entry
                 except IndexError:
                     # `self.response` is empty, return None to stop the iter
                     return None
-                #except EntryNotToBeIndexed:
-                    # The entry is probably a dir or not a textual file and we don't need to
-                    # index it
-                #    continue
-                #except InconsistentItemError as e:
-                    # The entry is not consistent, like some important metadata are missing,
-                    # we just skip it
-                    # TODO log it anyway
-                #    continue
 
         # The first argument of iter must be a callable, that's why we created the _lpop()
         # closure. This closure will be called for each iteration and the result is returned

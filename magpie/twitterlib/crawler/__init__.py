@@ -1,7 +1,11 @@
+import logging
 from requests_oauthlib import OAuth1Session
 
 from utils.db import session_autocommit
 from .response import TwitterResponse
+
+
+log = logging.getLogger('twitter')
 
 
 class TwitterCrawler:
@@ -43,6 +47,7 @@ class TwitterCrawler:
                 self.bearertoken = sex.merge(self.bearertoken)
 
                 resource_url = self.build_resource_url(max_id)
+                log.debug("Querying at:\n{}".format(resource_url))
 
                 # Query Twitter.
                 # Note: the correctness of the response is checked when creating TwitterResponse(r).
