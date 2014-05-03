@@ -46,14 +46,12 @@ class TwitterCrawler:
                 # Add bearertoken to the current session.
                 self.bearertoken = sex.merge(self.bearertoken)
 
-                resource_url = self.build_resource_url(max_id)
+                resource_url = self._build_resource_url(max_id)
                 log.debug("Querying at:\n{}".format(resource_url))
 
                 # Query Twitter.
                 # Note: the correctness of the response is checked when creating TwitterResponse(r).
                 r = self._client.get(resource_url)
-                # TODO log this
-                print('{}\n>>>>>>>>>>>>>{}'.format(resource_url, r.status_code))
 
                 # Parse the response.
                 response = TwitterResponse(r)
@@ -63,10 +61,10 @@ class TwitterCrawler:
                 if is_first_loop:
                     updates_cursor = response.updates_cursor
                     is_first_loop = False
-                max_id = response.max_id
 
                 # Continue only in case Twitter `has_more` items to send.
                 if response.has_more:
+                    max_id = response.max_id
                     continue
                 break
 
@@ -74,7 +72,7 @@ class TwitterCrawler:
         # completed
         self._update_updates_cursor(updates_cursor)
 
-    def build_resource_url(self, max_id):
+    def _build_resource_url(self, max_id):
         """
         Build the URL to use to query Twitter.
         The URL is build such as it manages the pagination.
@@ -86,16 +84,16 @@ class TwitterCrawler:
         return ('https://api.twitter.com/1.1/statuses/user_timeline.json?' +
                 'trim_user=true&' +
                 'count=100&' +  # Number of tweets returned
-                #'user_id={}&'.format(self.bearertoken.user_id) +
+                'user_id={}&'.format(self.bearertoken.user_id) +
                 #'user_id=6253282&' +  # TODO DEBUG @twitterapi
                 #'user_id=14885549&' +  # TODO DEBUG @ForbesTech
-                'user_id=7144422&' +  # TODO DEBUG @lifehacker
+                #'user_id=7144422&' +  # TODO DEBUG @lifehacker
                 #'user_id=20536157&' +  # TODO DEBUG @google
-                '{}&'.format(self.build_since_id_parameter()) +
-                '{}'.format(self.build_max_id_parameter(max_id))
+                '{}&'.format(self._build_since_id_parameter()) +
+                '{}'.format(self._build_max_id_parameter(max_id))
         )
 
-    def build_since_id_parameter(self):
+    def _build_since_id_parameter(self):
         """
         Build the since_id parameter used for pagination as explained here:
         https://dev.twitter.com/docs/working-with-timelines
@@ -110,7 +108,7 @@ class TwitterCrawler:
         return ''
 
     @staticmethod
-    def build_max_id_parameter(max_id):
+    def _build_max_id_parameter(max_id):
         """
         Build the max_id parameter for pagination as explained here:
         https://dev.twitter.com/docs/working-with-timelines

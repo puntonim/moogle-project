@@ -143,8 +143,10 @@ class RedisTwitterEntry(AbstractTwitterEntry):
             b'id': '453848727191830528',
             b'lang': 'en',
             b'created_at': 'Wed Apr 09 10:55:43 +0000 2014',
-            b'text': '',
-            b'text_clean': '',
+            b'text': 'RT @nixcraft: Redesigned Firefox 29 for Windows, Mac, Linux, and
+             Android released https://t.co/XS1nnIUn7I Download http://t.co/qnev9sI9xY',
+            b'text_clean': 'RT @nixcraft: Redesigned Firefox 29 for Windows, Mac, Linux, and
+             Android released  Download'
         }
     """
     def __init__(self, tweet_id, tweet_dict):

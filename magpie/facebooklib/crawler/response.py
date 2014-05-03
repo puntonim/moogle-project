@@ -24,7 +24,8 @@ class ApiFacebookResponse:
         self.has_more = False
         self.next = ''
 
-        log.debug('Response got:\n{}'.format(json.dumps(self.response.json(), indent=4)))
+        log.debug('Response got: {}\n{}'.format(self.response.status_code,
+                                                json.dumps(self.response.json(), indent=4)))
         self._sanity_check()
 
     def _sanity_check(self):
