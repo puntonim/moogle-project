@@ -38,6 +38,15 @@ LOGGING_DICT = {
             'backupCount': 0,  # max 1 file
             'formatter': 'advanced',
         },
+        'twitter_hl': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': normpath(join(LOG_FOLDER, 'twitter.log')),
+            'mode': 'a',
+            'maxBytes': 1048576*5,  # max 5 Mbyte
+            'backupCount': 0,  # max 1 file
+            'formatter': 'advanced',
+        },
     },
 
     'loggers': {
@@ -47,6 +56,11 @@ LOGGING_DICT = {
         },
         'facebook': {
             'handlers': ['facebook_hl'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'twitter': {
+            'handlers': ['twitter_hl'],
             'level': 'DEBUG',
             'propagate': False,
         },
