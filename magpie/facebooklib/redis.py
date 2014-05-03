@@ -23,7 +23,7 @@ class RedisFacebookList(AbstractRedisList, metaclass=ABCMeta):
         """
 
         Parameters:
-        entry -- A `FacebookEntry` instance.
+        entry -- A `ApiFacebookEntry` instance.
         """
         # TODO
         print("Storing {} in Redis.".format(entry))
