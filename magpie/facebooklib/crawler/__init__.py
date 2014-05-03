@@ -1,7 +1,11 @@
+import logging
 from requests_oauthlib import OAuth2Session
 
 from utils.db import session_autocommit
-from .response import FacebookResponse
+from .response import ApiFacebookResponse
+
+
+log = logging.getLogger('facebook')
 
 
 class FacebookCrawler:
@@ -40,7 +44,8 @@ class FacebookCrawler:
                 # Add bearertoken to the current session.
                 self.bearertoken = sex.merge(self.bearertoken)
 
-                resource_url = self.build_resource_url(next)
+                resource_url = self._build_resource_url(next)
+                log.debug("Querying at:\n{}".format(resource_url))
 
                 # Query Twitter.
                 # Note: the correctness of the response is checked when creating
@@ -48,7 +53,7 @@ class FacebookCrawler:
                 r = self._client.get(resource_url)
 
                 # Parse the response.
-                response = FacebookResponse(r)
+                response = ApiFacebookResponse(r)
                 response.parse(self.bearertoken.id)
 
                 # Pagination
@@ -66,7 +71,7 @@ class FacebookCrawler:
         # completed
         self._update_updates_cursor(updates_cursor)
 
-    def build_resource_url(self, next):
+    def _build_resource_url(self, next):
         """
         Build the URL to use to query Facebook.
         The URL is build such as it manages the pagination.
@@ -78,16 +83,16 @@ class FacebookCrawler:
         # TODO I might want to add more fields like comments or likes, but bare in mind that
         # TODO when doing so, you want to use: .limit(x)
         # TODO https://developers.facebook.com/docs/graph-api/using-graph-api/
-        fields = 'fields=id,message,updated_time'
+        fields = 'fields=id,from,type,created_time,updated_time,message'
 
         # The cursor
-        since = self.build_since_parameter()
+        since = self._build_since_parameter()
 
         if next:
             return '{}&{}'.format(next, since)
-        return 'https://graph.facebook.com/v2.0/me/statuses?{}&{}'.format(fields, since)
+        return 'https://graph.facebook.com/v2.0/me/feed?{}&{}'.format(fields, since)
 
-    def build_since_parameter(self):
+    def _build_since_parameter(self):
         """
         Build the since parameter used for pagination as explained here:
         https://developers.facebook.com/docs/graph-api/using-graph-api/#paging

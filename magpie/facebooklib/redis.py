@@ -1,5 +1,6 @@
 from abc import ABCMeta
 
+from .entry import RedisFacebookEntry
 from utils.redis import AbstractRedisList, open_redis_connection
 
 
@@ -11,14 +12,24 @@ class RedisFacebookList(AbstractRedisList, metaclass=ABCMeta):
     def __init__(self, bearertoken_id):
         self._list_name = 'facebook:token:{}'.format(bearertoken_id)
 
+    @staticmethod
+    def _is_indexable(entry):
+        """
+        Decide whether an entry has to be indexed or not.
+        """
+        return entry.message
+
     def buffer(self, entry):
         """
 
         Parameters:
-        entry -- A `FacebookResponseEntry` instance.
+        entry -- A `FacebookEntry` instance.
         """
         # TODO
         print("Storing {} in Redis.".format(entry))
+
+        if not self._is_indexable(entry):
+            return
 
         self._pipeline.rpush(
             self._list_name,
@@ -28,6 +39,10 @@ class RedisFacebookList(AbstractRedisList, metaclass=ABCMeta):
         self._pipeline.hmset(
             '{}:{}'.format(self._list_name, entry.id),
             {
+                'from_name': entry.from_name,
+                'from_id': entry.from_id,
+                'type': entry.type,
+                'created_time': entry.created_time,
                 'updated_time': entry.updated_time,
                 'message': entry.message,
             }
@@ -79,13 +94,3 @@ class RedisFacebookList(AbstractRedisList, metaclass=ABCMeta):
         # closure. This closure will be called for each iteration and the result is returned
         # until the result is None.
         return iter(_lpop_mgr, None)
-
-
-class RedisFacebookEntry:
-    """
-    A Facebook entry (post) of a Redis list.
-    """
-    def __init__(self, post_id, post_dict):
-        self.id = post_id.decode(encoding='UTF-8')
-        self.message = post_dict[b'message'].decode(encoding='UTF-8')
-        self.updated_time = post_dict[b'updated_time'].decode(encoding='UTF-8')

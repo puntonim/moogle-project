@@ -1,4 +1,9 @@
+import logging
+
 from ..redis import RedisFacebookList
+
+
+log = logging.getLogger('facebook')
 
 
 class FacebookIndexer:
@@ -18,5 +23,11 @@ class FacebookIndexer:
         for redis_entry in redis.iterate():
             # `redis_entry` is a `RedisFacebookEntry` instance.
 
-            print(redis_entry.id, redis_entry.message)
-
+            log.debug('id={}\n'.format(redis_entry.id) +
+                      'from_name={}\n'.format(redis_entry.from_name) +
+                      'from_id={}\n'.format(redis_entry.from_id) +
+                      'type={}\n'.format(redis_entry.type) +
+                      'created_time={}\n'.format(redis_entry.created_time) +
+                      'updated_time={}\n'.format(redis_entry.updated_time) +
+                      'message={}\n'.format(redis_entry.message)
+            )

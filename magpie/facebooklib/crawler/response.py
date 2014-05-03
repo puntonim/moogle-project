@@ -1,12 +1,17 @@
 from datetime import datetime
 from calendar import timegm
+import logging
+import json
 
 from utils.exceptions import FacebookResponseError
-from .responseentry import FacebookResponseEntry
+from ..entry import ApiFacebookEntry
 from ..redis import RedisFacebookList
 
 
-class FacebookResponse:
+log = logging.getLogger('facebook')
+
+
+class ApiFacebookResponse:
     """
 
     Parameters:
@@ -19,6 +24,7 @@ class FacebookResponse:
         self.has_more = False
         self.next = ''
 
+        log.debug('Response got:\n{}'.format(json.dumps(self.response.json(), indent=4)))
         self._sanity_check()
 
     def _sanity_check(self):
@@ -35,15 +41,12 @@ class FacebookResponse:
     def parse(self, bearertoken_id):
         redis = RedisFacebookList(bearertoken_id)
 
-        ########
-        import json
-        print(json.dumps(self.response.json(), indent=4))
-
         # Pagination: next parameter.
         self._build_next_parameter()
 
         is_first_entry = True  # for updates cursor
-        for entry in self._entries_to_facebookresponseentries():
+        for entry in self._entries_to_apifacebookentries():
+            # `entry` is a `ApiFacebookEntry` instance.
 
             #print(entry.id, entry.message)
             redis.buffer(entry)
@@ -68,10 +71,10 @@ class FacebookResponse:
         datestamp = datetime.strptime(entry.updated_time, '%Y-%m-%dT%H:%M:%S+0000')
         self.updates_cursor = timegm(datestamp.utctimetuple())  # Conversion to unix time.
 
-    def _entries_to_facebookresponseentries(self):
+    def _entries_to_apifacebookentries(self):
         """
         Iter over all entries in the response.
-        Each entry in the response is converted to a `FacebookResponseEntry` instance.
+        Each entry in the response is converted to a `ApiFacebookEntry` instance.
         """
 
         rj = self.response.json()
@@ -80,25 +83,16 @@ class FacebookResponse:
         def _lpop():
             """
             Pop from the head of the list.
-            Convert the item to `FacebookResponseEntry`.
+            Convert the item to `ApiFacebookEntry`.
             """
             while True:
                 try:
-                    entry = data.pop(0)
-                    entry = FacebookResponseEntry(entry)
+                    entry = data.pop(0)  # Raise IndexError when completely consumed.
+                    entry = ApiFacebookEntry(entry)
                     return entry
                 except IndexError:
-                    # `self.response` is empty, return None to stop the iter
+                    # `self.response` is empty, return None to stop the iter.
                     return None
-                #except EntryNotToBeIndexed:
-                    # The entry is probably a dir or not a textual file and we don't need to
-                    # index it
-                #    continue
-                #except InconsistentItemError as e:
-                    # The entry is not consistent, like some important metadata are missing,
-                    # we just skip it
-                    # TODO log it anyway
-                #    continue
 
         # The first argument of iter must be a callable, that's why we created the _lpop()
         # closure. This closure will be called for each iteration and the result is returned
