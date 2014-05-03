@@ -1,0 +1,37 @@
+Friday 2014.05.02 11:20:13
+
+STATUSES
+
+
+1. INTRO
+========
+Statuses are all the statuses that I posted on facebook (easy to understand) over the time
+
+Technically in the API statuses are an edge of user: /me/statuses (more general: /user-id/statuses)
+Statuses are a subset of feeds: https://developers.facebook.com/docs/graph-api/reference/user/feed/
+
+
+2. URL
+======
+(GET) /v2.0./me/statuses
+
+
+3. WHAT TO STORE
+================
+id
+message
+updated_time
+
+
+4. ISSUES
+=========
+4.1. PARTIAL HISTORY
+--------------------
+Statuses older than 2011 are not shown.
+
+Solution: use feed.
+
+
+4.2. STATUS EDITS
+-----------------
+See same point in feed.

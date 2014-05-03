@@ -1,0 +1,241 @@
+Friday 2014.01.24 23:58:13
+
+FACEBOOK
+
+
+0. INTRO
+1. LINKS
+2. OAUTH
+    2.1. TOKEN EXPIRATION
+3. QUERY FOR BASIC PROFILE
+    3.1. SCOPE
+    3.2. EXAMPLE
+    3.3. RESPONSE
+4. QUERY FOR MOOGLE
+    4.1. WHAT'S INDEXED
+    4.2. FULL TEXT SEARCH AVAILABILITY
+    4.3. QUERY: STATUSES
+    4.4. QUERY: FEED
+    4.5. QUERY: FQL SEARCH, STATUS
+    4.6. QUERY: FQL SEARCH, STREAM
+    4.7. SCOPE
+    4.8. PAGINATION
+APPENDIX A. REALTIME UPDATES
+APPENDIX B. QUERY INTROSPECTION
+
+
+
+
+
+0. INTRO
+========
+Facebook's API are named: Graph API (OpenGraph is something different which has nothing to do with what we do here)
+Graph APIs can be used directly or through a query language named FQL
+
+Facebook Query Language (FQL)
+"It provides advanced features not available in the Graph API."
+
+I managed to accomplish the query using the python library: facebook-sdk
+The library doesn't managed the authorization
+It is a third party library se we cannot consider it completely reliable:
+https://developers.facebook.com/docs/other-sdks
+The library doesn't support Python 3
+
+But most notably I managed to accomplish the authorization step using the universal library requests-oauthlib;
+and to make queries using requests-oauthlib and regular REST calls
+
+
+
+2. LINKS
+===========
+App setting:
+https://developers.facebook.com/apps
+
+Tool to play around:
+https://developers.facebook.com/tools/explorer
+
+API (Graph API):
+https://developers.facebook.com/docs/graph-api/reference
+https://developers.facebook.com/docs/graph-api/using-graph-api/
+
+FQL:
+https://developers.facebook.com/docs/technical-guides/fql/
+
+Third party libraries:
+https://developers.facebook.com/docs/other-sdks
+Python third party library:
+https://github.com/pythonforfacebook/facebook-sdk
+Doc:
+https://facebook-sdk.readthedocs.org/en/latest/
+
+Install the library with:
+pip install facebook-sdk (no python 3)
+
+
+
+2. OAUTH
+========
+Facebook uses OAuth2
+
+2.1. TOKEN EXPIRATION
+---------------------
+User Access Tokens last 60 days, it is written inside the token itself: "expires_in": "5183152"
+The official doc (https://developers.facebook.com/docs/facebook-login/access-tokens/#termtokens) states:
+"User access tokens come in two forms: short-lived tokens and long-lived tokens. Short-lived tokens usually have a
+lifetime of about an hour or two, while long-lived tokens usually have a lifetime of about 60 days. You should not
+depend on these lifetimes remaining the same - the lifetime may change without warning or expire early."
+
+When a token is expired we should get a response like:
+ http status 400
+{
+  "error": {
+    "message": "Error validating access token: Session has expired on Feb 6, 2014 4:00am. The current time is Feb 6, 2014 5:23am.",
+    "type": "OAuthException",
+    "code": 190,
+    "error_subcode": 463
+  }
+}
+I have seen this error once using the tool
+
+
+
+3. QUERY FOR BASIC PROFILE
+==========================
+3.1. SCOPE
+----------
+No scope is required for basic info
+In order to read the email address, a scope is required: "email"
+
+3.2. EXAMPLE
+------------
+Query through regular REST calls (through requests-oauthlib):
+(GET) https://graph.facebook.com/v2.0/me
+
+3.3. RESPONSE
+-------------
+In JSON:
+{
+  "id": "1522956429",
+  "name": "Paulo Van Der Kofje",
+  "first_name": "Paulo",
+  "last_name": "Van Der Kofje",
+  "link": "https://www.facebook.com/puntonim",
+  "gender": "male",
+  "email": "puntonim@gmail.com",
+  "timezone": 1,
+  "locale": "en_GB",
+  "verified": true,
+  "updated_time": "2014-01-24T18:08:10+0000",
+  "username": "puntonim",
+}
+
+
+
+
+4. QUERY FOR MOOGLE
+===================
+I decided to use regular REST calls (through requests-oauthlib) and not the third party library
+The reasons are: first a third party library is not completely reliable, second the calls are quite basic (not files
+transfer in this case) so there is no need of special techniques like connection pools
+
+4.1. WHAT'S INDEXED
+-------------------
+"Any status, link, photo or video posted on your wall by you or a friend of yours, with a status message."
+If a post is edited or deleted after Moogle indexed it, the post in Moogle won't be updated.
+
+
+4.2. FULL TEXT SEARCH AVAILABILITY
+----------------------------------
+No full text search service either in Facebook website and API
+Se we have to read all the feeds (entries of my wall) or statuses and send them to Solr
+I decided to start with statuses (/me/statuses), later on we will index feeds (/me/feed, which includes statuses
+plus anything is on my wall)
+
+
+Anyway, with Graph API, we have 4 options.
+
+4.3. QUERY: STATUSES
+--------------------
+Read all my statuses: /v2.0/me/statuses
+Issue: you can read back until 2011 or so, anyway you cannot read the entire history.
+To read the entire history you need #2.
+See statuses folder.
+
+4.4. QUERY: FEED
+----------------
+Read my entire wall: my statuses, likes and comments on my statuses, links and photo I posted and anything I would
+see if I browse to my wall in Facebook website
+/v2.0/me/feed
+See feed folder.
+
+4.5. QUERY: FQL SEARCH, STATUS
+------------------------------
+Keyword search against statuses using FQL
+NOTE: this is limited in time and number so you cannot get old statuses
+Plus FQL doesn't use pagination for results, so it is useless for my app
+SELECT message FROM status WHERE uid = me() AND strpos(lower(message), 'prague') >=0
+This is not a full text search but only a limited keyword search
+(In FQL the only indexed fields for the table status are: status_id e uid
+So it is possible to create a query with a WHERE clause containing only those fields
+But it says "Additional filters on other columns can be specified but they may make the query less efficient."
+That's why it is possible to filter also by message
+https://developers.facebook.com/docs/reference/fql/status/)
+
+4.6. QUERY: FQL SEARCH, STREAM
+------------------------------
+4) Keyword search against my wall using FQL:
+NOTE: this is limited in time and number so you cannot get old statuses
+SELECT
+action_links, actor_id, app_data, app_id, attachment, attribution, call_to_action, claim_count, comment_info, created_time, description, description_tags, expiration_timestamp, feed_targeting, filter_key, impressions, is_exportable, is_hidden, is_popular, is_published, like_info, message, message_tags, parent_post_id, permalink, place, post_id, privacy, promotion_status, scheduled_publish_time, share_count, share_info, source_id, subscribed, tagged_ids, target_id, targeting, timeline_visibility, type, updated_time, via_id, viewer_id, with_location, with_tags, xid, likes
+FROM stream
+WHERE source_id = me()
+AND (
+strpos(lower(message), 'unittest') >=0
+OR strpos(lower(attachment.name), 'unittest') >=0
+OR strpos(lower(attachment.caption), 'unittest') >=0
+OR strpos(lower(attachment.href), 'unittest') >=0
+OR strpos(lower(attachment.description), 'unittest') >=0
+)
+
+
+4.7. SCOPE
+----------
+For all the 4 options described in the previous section the scope required is: read_stream
+
+
+4.8. PAGINATION
+---------------
+Results are paginated and we must call the url in paging > next to get a new page of results
+E.g. in the end of the page:
+"paging": {
+"previous": "https://graph.facebook.com/1522956429/statuses?limit=25&since=1390148940&__paging_token=10203300267177108",
+"next": "https://graph.facebook.com/1522956429/statuses?limit=25&until=1343575899&__paging_token=4415609238035"
+}
+
+Sub elements like comments and likes can be paginated as well with cursors
+E.g. in the end of a comments sub element:
+"paging": {
+  "cursors": {
+    "after": "MQ==",
+    "before": "MQ=="
+  }
+It's not very clear to me what to do in this case and I cannot test it on my profile
+But I think that if the paging has only cursors but not next, then there is no more results
+TODO: investigate this with some proper test
+https://developers.facebook.com/docs/graph-api/using-graph-api/#paging
+
+
+
+APPENDIX A. REALTIME UPDATES
+============================
+Facebook can push real time updates to my app:
+https://developers.facebook.com/docs/graph-api/real-time-updates/
+
+
+
+APPENDIX B. QUERY INTROSPECTION
+===============================
+To see all "fields" (edges or whatever) of a, object:
+https://developers.facebook.com/docs/graph-api/using-graph-api/v2.0#introspection
+
+Example: /v2.0./me?metadata=1

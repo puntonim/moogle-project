@@ -5,7 +5,7 @@ Friday 2014.01.17 13:42:13
 
 * Expired access token?
 
-* Facebook, Twitter, Dropbox: can we build some inheritance relationships for FacebookResponse
+* Facebook, Twitter, Dropbox: can we build some inheritance relationships for ApiFacebookResponse
 and similar?
 
 ---------------------------------------------------------------------------------------------------
@@ -33,6 +33,11 @@ Indexing:
 - read facebook index list in redis
 - index those entries
 - check that facebook index list in redis is empty and there is no hash
+
+* Facebook: store details for links, photo, video, like:
+name -- for links, photo
+caption -- for links, photo
+description -- for links
 
 -- LOW PRIORITY -----------------------------------------------------------------------------------
 
