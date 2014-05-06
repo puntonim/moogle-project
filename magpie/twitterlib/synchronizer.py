@@ -1,22 +1,12 @@
 from .crawler import TwitterCrawler
 from .indexer import TwitterIndexer
-from utils.db import session_autocommit
+from synchronizer import AbstractSynchronizer
 
 
-class TwitterSynchronizer:
+class TwitterSynchronizer(AbstractSynchronizer):
     """
-
-    Parameters:
-    bearertoken -- a `BearerToken` owner of the owner of the Twitter account to synchronize with.
+    Manage the synchronization with Twitter.
     """
-    def __init__(self, bearertoken):
-        self.bearertoken = bearertoken
-        with session_autocommit() as sex:
-            # Add bearertoken to the current session.
-            bearertoken = sex.merge(self.bearertoken)
-            self._bearertoken_id = bearertoken.id
-            self._access_token = bearertoken.access_token
-
     def run(self):
         print(">>>>>> START CRAWLING")
         # `DropboxCrawler` receives a `BearerToken` argument because it needs to update
