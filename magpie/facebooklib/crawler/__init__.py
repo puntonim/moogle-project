@@ -1,83 +1,38 @@
 import logging
 from requests_oauthlib import OAuth2Session
 
-from utils.db import session_autocommit
 from .response import ApiFacebookResponse
+from crawler import AbstractCrawler
 
 
 log = logging.getLogger('facebook')
 
 
-class FacebookCrawler:
+class FacebookCrawler(AbstractCrawler):
     """
     Web crawler to query Facebook and collect posts for a `bearertoken`.
 
     Parameters:
     bearertoken -- a `models.BearerToken`
     """
-    def __init__(self, bearertoken):
-        self.bearertoken = bearertoken
+    def _init_client(self):
+        return OAuth2Session(
+            client_id=self.bearertoken.provider.client_id,
+            token=self.bearertoken.token_set
+        )
 
-    @property
-    def _client(self):
-        """
-        A `OAuth1Session` for the current `bearertoken`.
-        It is a cached attribute so that it is a singleton.
-        """
-        try:
-            cl = self._client_cached
-        except AttributeError:
-            cl = self._client_cached = OAuth2Session(
-                client_id=self.bearertoken.provider.client_id,
-                token=self.bearertoken.token_set
-            )
-        return cl
+    @staticmethod
+    def _init_response(*args, **kwargs):
+        return ApiFacebookResponse(*args, **kwargs)
 
-    def run(self):
-        """
-        Crawl Facebook for new posts and write en entry for each item to Redis.
-        """
-        is_first_loop = True  # for pagination
-        next = ''  # for pagination
-        while True:
-            with session_autocommit() as sex:
-                # Add bearertoken to the current session.
-                self.bearertoken = sex.merge(self.bearertoken)
-
-                resource_url = self._build_resource_url(next)
-                log.debug("Querying at:\n{}".format(resource_url))
-
-                # Query Twitter.
-                # Note: the correctness of the response is checked when creating
-                # TwitterResponse(r).
-                r = self._client.get(resource_url)
-
-                # Parse the response.
-                response = ApiFacebookResponse(r)
-                response.parse(self.bearertoken.id)
-
-                # Pagination
-                if is_first_loop:
-                    updates_cursor = response.updates_cursor
-                    is_first_loop = False
-
-                # Continue only in case Facebook `has_more` items to send.
-                if response.has_more:
-                    next = response.next
-                    continue
-                break
-
-        # Update the updates_cursor only at the end, when everything has been successfully
-        # completed
-        self._update_updates_cursor(updates_cursor)
-
-    def _build_resource_url(self, next):
+    def _build_resource_url(self, pagination_cursor):
         """
         Build the URL to use to query Facebook.
         The URL is build such as it manages the pagination.
 
         Parameters:
-        next -- the next parameter got from Facebook when the response has more pages.
+        pagination_cursor -- the `next` parameter got from Facebook when the response
+        has more pages.
         """
         # Fields filter
         # TODO I might want to add more fields like comments or likes, but bare in mind that
@@ -88,9 +43,12 @@ class FacebookCrawler:
         # The cursor
         since = self._build_since_parameter()
 
-        if next:
-            return '{}&{}'.format(next, since)
-        return 'https://graph.facebook.com/v2.0/me/feed?{}&{}'.format(fields, since)
+        url = 'https://graph.facebook.com/v2.0/me/feed?{}&{}'.format(fields, since)
+        if pagination_cursor:
+            url = '{}&{}'.format(pagination_cursor, since)
+
+        log.debug("Querying URL:\n{}".format(url))
+        return url
 
     def _build_since_parameter(self):
         """
@@ -105,14 +63,3 @@ class FacebookCrawler:
         if cur:
             return 'since={}'.format(cur)
         return ''
-
-    def _update_updates_cursor(self, new_updates_cursor):
-        """
-        Update the updates_cursor parameter on the database.
-        """
-        if new_updates_cursor:
-            with session_autocommit() as sex:
-                # Add bearertoken to the current session.
-                bearertoken = sex.merge(self.bearertoken)
-
-                bearertoken.updates_cursor = new_updates_cursor
