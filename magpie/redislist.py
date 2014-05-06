@@ -45,9 +45,6 @@ class AbstractRedisList(metaclass=ABCMeta):
         # TODO
         print("Storing {} in Redis.".format(entry))
 
-        if not self._is_indexable(entry):
-            return
-
         # Redis list to store all ids of entities
         self._pipeline.rpush(
             self._list_name,
@@ -63,13 +60,6 @@ class AbstractRedisList(metaclass=ABCMeta):
             hash_dict[field_name] = getattr(entry, field_name)
 
         self._pipeline.hmset(hash_name, hash_dict)
-
-    @staticmethod
-    def _is_indexable(entry):
-        """
-        Decide whether an entry has to be indexed or not.
-        """
-        return True
 
     def flush_buffer(self):
         """

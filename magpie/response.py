@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod
 
-from utils.exceptions import ResponseError
+from utils.exceptions import ResponseError, InconsistentItemError, EntryNotToBeIndexed
 
 
 class AbstractApiResponse(metaclass=ABCMeta):
@@ -31,7 +31,7 @@ class AbstractApiResponse(metaclass=ABCMeta):
     def parse(self, bearertoken_id):
         redis = self._init_redis_list(bearertoken_id)
 
-        self._hook_parse_entire_response()
+        self._hook_parse_entire_response(redis)
 
         is_first_entry = True
         entry = None
@@ -54,7 +54,7 @@ class AbstractApiResponse(metaclass=ABCMeta):
     def _init_redis_list(self, *args, **kwargs):
         pass
 
-    def _hook_parse_entire_response(self):
+    def _hook_parse_entire_response(self, redis):
         pass
 
     def _hook_parse_first_entry(self, entry):
@@ -77,29 +77,38 @@ class AbstractApiResponse(metaclass=ABCMeta):
         Each entry in the response is converted to a `Api<Provider>Entry` instance.
         """
 
-        entries_list = self._extract_entries_list(self.response.json())
+        entries_list = self._extract_entries_list()
 
         def _lpop():
             """
             Pop from the head of the list.
-            Convert the item to `ApiFacebookEntry`.
+            Convert the item to `Api<Provider>Entry`.
             """
-            try:
-                entry = entries_list.pop(0)  # Raise IndexError when completely consumed.
-                entry = self._init_api_provider_entry(entry)
-                return entry
-            except IndexError:
-                # `self.response` is empty, return None to stop the iter.
-                return None
+            while True:
+                try:
+                    entry = entries_list.pop(0)  # Raise IndexError when completely consumed.
+                    entry = self._init_api_provider_entry(entry)
+                    return entry
+                except IndexError:
+                    # `self.response` is empty, return None to stop the iter.
+                    return None
+                except EntryNotToBeIndexed:
+                    # The entry is probably a dir or not a textual file and we don't need to
+                    # index it
+                    continue
+                except InconsistentItemError as e:
+                    # The entry is not consistent, like some important metadata are missing,
+                    # we just skip it
+                    # TODO log it anyway
+                    continue
 
         # The first argument of iter must be a callable, that's why we created the _lpop()
         # closure. This closure will be called for each iteration and the result is returned
         # until the result is None.
         return iter(_lpop, None)
 
-    @staticmethod
-    def _extract_entries_list(data_dict):
-        return data_dict
+    def _extract_entries_list(self):
+        return self.response.json()
 
     @abstractmethod
     def _init_api_provider_entry(self, *args, **kwargs):

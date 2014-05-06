@@ -36,7 +36,7 @@ class ApiFacebookResponse(AbstractApiResponse):
     def _init_redis_list(self, *args, **kwargs):
         return RedisFacebookList(*args, **kwargs)
 
-    def _hook_parse_entire_response(self):
+    def _hook_parse_entire_response(self, redis):
         # Pagination cursor: the `next` key of this page.
         self._build_pagination_cursor()
 
@@ -60,6 +60,5 @@ class ApiFacebookResponse(AbstractApiResponse):
     def _init_api_provider_entry(self, *args, **kwargs):
         return ApiFacebookEntry(*args, **kwargs)
 
-    @staticmethod
-    def _extract_entries_list(data_dict):
-        return data_dict.get('data', list())
+    def _extract_entries_list(self):
+        return self.response.json().get('data', list())

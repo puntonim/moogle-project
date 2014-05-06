@@ -11,12 +11,5 @@ class RedisFacebookList(AbstractRedisList):
         return 'facebook:token:{}'.format(bearertoken_id)
 
     @staticmethod
-    def _is_indexable(entry):
-        """
-        A Facebook entry is indexable only if there is a `message`.
-        """
-        return entry.message
-
-    @staticmethod
     def _init_redis_provider_entry(*args, **kwargs):
         return RedisFacebookEntry(*args, **kwargs)

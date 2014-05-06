@@ -56,6 +56,8 @@ class AbstractCrawler(metaclass=ABCMeta):
                 response = self._init_response(r)
                 response.parse(self.bearertoken.id)
 
+                self._hook_after_response_parsed(response)
+
                 # Pagination.
                 if is_first_loop:
                     updates_cursor = response.updates_cursor
@@ -63,7 +65,8 @@ class AbstractCrawler(metaclass=ABCMeta):
 
                 # Continue only in case the response `has_more` items to query.
                 if response.has_more:
-                    pagination_cursor = response.pagination_cursor
+                    if hasattr(response, 'pagination_cursor'):
+                        pagination_cursor = response.pagination_cursor
                     continue
                 break
 
@@ -73,6 +76,9 @@ class AbstractCrawler(metaclass=ABCMeta):
 
     @abstractmethod
     def _build_resource_url(self, pagination_cursor):
+        pass
+
+    def _hook_after_response_parsed(self, response):
         pass
 
     def _update_updates_cursor(self, new_updates_cursor):

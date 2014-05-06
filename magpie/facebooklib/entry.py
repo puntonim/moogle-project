@@ -1,6 +1,7 @@
 from abc import ABCMeta
 
 from redislist import AbstractRedisEntry
+from utils.exceptions import EntryNotToBeIndexed
 
 
 class BaseFacebookEntry(metaclass=ABCMeta):
@@ -35,6 +36,16 @@ class ApiFacebookEntry(BaseFacebookEntry):
         self.updated_time = post_dict['updated_time']
         # Message can be missing in facebook_dict (f.i. for a link or photo w/ no message).
         self.message = post_dict.get('message', '')
+
+        self._filter()
+
+    def _filter(self):
+        """
+        Filter based on a single simple rule:
+        a. If there is no message, than there is nothing to index.
+        """
+        if not self.message:
+            raise EntryNotToBeIndexed
 
 
 class RedisFacebookEntry(BaseFacebookEntry, AbstractRedisEntry):
