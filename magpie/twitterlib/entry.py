@@ -1,9 +1,14 @@
 import re
+from abc import ABCMeta
 
 from redislist import AbstractRedisEntry
 
 
-class ApiTwitterEntry:
+class BaseTwitterEntry(metaclass=ABCMeta):
+    __all__ = ['id', 'text', 'text_clean', 'lang', 'created_at', 'retweeted']
+
+
+class ApiTwitterEntry(BaseTwitterEntry):
     """
     A tweet got in a reply to a API query.
 
@@ -124,7 +129,7 @@ class ApiTwitterEntry:
             self._text_clean = re.sub(regex, '', self._text_clean.strip()).strip()
 
 
-class RedisTwitterEntry(AbstractRedisEntry):
+class RedisTwitterEntry(BaseTwitterEntry, AbstractRedisEntry):
     """
     A tweet stored in Redis.
 
@@ -141,4 +146,4 @@ class RedisTwitterEntry(AbstractRedisEntry):
              Android released  Download'
         }
     """
-    __all__ = ['id', 'text', 'text_clean', 'lang', 'created_at', 'retweeted']
+    pass

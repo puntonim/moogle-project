@@ -32,8 +32,8 @@ class ApiTwitterResponse(AbstractApiResponse):
         # TODO implement a check on rate limit error (max 180 GET requests per access_token
         # TODO every 15 min): https://dev.twitter.com/docs/rate-limiting/1.1/limits
 
-    def _init_redis_list(self, bearertoken_id):
-        return RedisTwitterList(bearertoken_id)
+    def _init_redis_list(self, *args, **kwargs):
+        return RedisTwitterList(*args, **kwargs)
 
     def _hook_parse_first_entry(self, entry):
         self._build_updates_cursor(entry)
@@ -54,5 +54,5 @@ class ApiTwitterResponse(AbstractApiResponse):
         # Pagination cursor: `id` - 1 of the oldest post in this page.
         self.pagination_cursor = str(int(entry.id) - 1)
 
-    def _init_api_provider_entry(self, entry):
-        return ApiTwitterEntry(entry)
+    def _init_api_provider_entry(self, *args, **kwargs):
+        return ApiTwitterEntry(*args, **kwargs)

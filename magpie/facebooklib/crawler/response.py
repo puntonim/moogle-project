@@ -33,8 +33,8 @@ class ApiFacebookResponse(AbstractApiResponse):
             raise FacebookResponseError(msg)
         # TODO implement a check on rate limit error
 
-    def _init_redis_list(self, bearertoken_id):
-        return RedisFacebookList(bearertoken_id)
+    def _init_redis_list(self, *args, **kwargs):
+        return RedisFacebookList(*args, **kwargs)
 
     def _hook_parse_entire_response(self):
         # Pagination cursor: the `next` key of this page.
@@ -57,8 +57,8 @@ class ApiFacebookResponse(AbstractApiResponse):
         datestamp = datetime.strptime(entry.updated_time, '%Y-%m-%dT%H:%M:%S+0000')
         self.updates_cursor = timegm(datestamp.utctimetuple())  # Conversion to unix time.
 
-    def _init_api_provider_entry(self, entry):
-        return ApiFacebookEntry(entry)
+    def _init_api_provider_entry(self, *args, **kwargs):
+        return ApiFacebookEntry(*args, **kwargs)
 
     @staticmethod
     def _extract_entries_list(data_dict):

@@ -51,7 +51,7 @@ class AbstractApiResponse(metaclass=ABCMeta):
         redis.flush_buffer()
 
     @abstractmethod
-    def _init_redis_list(self, bearertoken_id):
+    def _init_redis_list(self, *args, **kwargs):
         pass
 
     def _hook_parse_entire_response(self):
@@ -102,5 +102,5 @@ class AbstractApiResponse(metaclass=ABCMeta):
         return data_dict
 
     @abstractmethod
-    def _init_api_provider_entry(self, entry):
+    def _init_api_provider_entry(self, *args, **kwargs):
         pass

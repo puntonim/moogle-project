@@ -35,15 +35,34 @@ class AbstractRedisList(metaclass=ABCMeta):
         """
         self._pipeline_cache = value
 
-    @abstractmethod
     def buffer(self, entry):
         """
         Add a entry to this Redis list (through a pipeline, which is a buffer).
 
-        Parameter:
-        entry -- the entry to be added.
+        Parameters:
+        entry -- A `Api<Provider>Entry` instance to be added.
         """
-        pass
+        # TODO
+        print("Storing {} in Redis.".format(entry))
+
+        if not self._is_indexable(entry):
+            return
+
+        # Redis list to store all ids of entities
+        self._pipeline.rpush(
+            self._list_name,
+            '{}'.format(entry.id)
+        )
+
+        # Redis hash to store all attributes of entities
+        hash_name = '{}:{}'.format(self._list_name, entry.id)
+        hash_dict = {}
+        field_names = list(entry.__all__)
+        field_names.remove('id')
+        for field_name in field_names:
+            hash_dict[field_name] = getattr(entry, field_name)
+
+        self._pipeline.hmset(hash_name, hash_dict)
 
     @staticmethod
     def _is_indexable(entry):
@@ -59,11 +78,56 @@ class AbstractRedisList(metaclass=ABCMeta):
         if self._pipeline:
             self._pipeline.execute()
 
-    @abstractmethod
     def iterate(self):
         """
         Iterate over the Redis list.
+        Return an iterator object which iterates over `Redis<Provider>Entry` objects.
         """
+        r = open_redis_connection()
+        pipeline = r.pipeline()
+
+        def _lpop():
+            """
+            Pop from the head of the Facebook Redis list and get the hash entry.
+            Convert the pop and hash items to a `RedisFacebookEntry` instance.
+            """
+            post_id = r.lpop(self._list_name)
+            if not post_id:  # The list has been completely consumed.
+                return None
+
+            hash_name = '{}:{}'.format(self._list_name, post_id.decode(encoding='UTF-8'))
+            post_dict = r.hgetall(hash_name)
+            # Delete the hash through a pipeline. The use of a pipeline is to avoid a sort
+            # of bug. The bug was the following:
+            # entry = r.hgetall(hash_name)  -- READ
+            # r.delete(hash_name)           -- DELETE
+            # Sometimes the DELETE happens before the READ causing the read value to be None: this
+            # is very very weird, but it happened sometimes. Using a pipeline solve this.
+            pipeline.delete(hash_name)
+            return self._init_redis_provider_entry(post_id, post_dict)
+
+        def _lpop_mgr():
+            """
+            Wrap _lpop in a try-except block to make sure the pipeline is executed even in case
+            of exception.
+            """
+            try:
+                item = _lpop()
+                if not item:
+                    pipeline.execute()
+                return item
+            except:
+                pipeline.execute()
+                raise
+
+        # The first argument of iter must be a callable, that's why we created the _lpop()
+        # closure. This closure will be called for each iteration and the result is returned
+        # until the result is None.
+        return iter(_lpop_mgr, None)
+
+    @staticmethod
+    @abstractmethod
+    def _init_redis_provider_entry(*args, **kwargs):
         pass
 
 
@@ -91,7 +155,4 @@ class AbstractRedisEntry(metaclass=ABCMeta):
         field_names = list(self.__all__)
         field_names.remove('id')
         for field_name in field_names:
-            try:
-                self.__setattr__(field_name, entry_dict[field_name.encode()].decode('UTF-8'))
-            except Exception as e:
-                import bpdb; bpdb.set_trace()
+            setattr(self, field_name, entry_dict[field_name.encode()].decode('UTF-8'))
