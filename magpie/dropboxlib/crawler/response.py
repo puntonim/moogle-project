@@ -1,15 +1,20 @@
-from ..redis import RedisDropboxDownloadList
-from utils.exceptions import InconsistentItemError, EntryNotToBeIndexed
-from .responseentry import DropboxResponseEntry
+import logging
+
+from ..redislist import RedisDropboxDownloadList
+from ..entry import DropboxResponseEntry
+from response import AbstractApiResponse
 
 
-class DropboxResponse:
+log = logging.getLogger('dropbox')
+
+
+class ApiDropboxResponse(AbstractApiResponse):
     """
     A response got back from Dropbox after an update query.
-    It is build out of a the parameter `response_dict` which is a Python dictionary.
+    It is build out of a the parameter `response` which is a Python dictionary.
 
     Parameters:
-    `response_dict` -- a Python dictionary like the following example.
+    `response` -- a Python dictionary like the following example.
     The `entries` key contains a set of up to about 1k entries, where each entry is a file
     added or removed to Dropbox by its owner. Each of this entry will be mapped to a
     `DropboxResponseEntry`.
@@ -40,87 +45,42 @@ class DropboxResponse:
     }
     """
 
-    def __init__(self, response_dict):
-        self.response_dict = response_dict
+    def __init__(self, response):
+        super().__init__(response)
+        # `is_reset` shows that we need to delete all the entry we have stored for the
+        # current user.
+        self.is_reset = self.response.get('reset', False)
+        self.has_more = self.response.get('has_more', False)
+        # The cursor is the identifier used by Dropbox to keep track of the point in time of the
+        # last synchronization. Say we synchronized last time yesterday at 6pm and got a cursor.
+        # If we synchronize again today using the same cursor, we will get only the updates
+        # happened after yesterday 6pm.
+        self.updates_cursor = self.response.get('cursor', '')
 
-    @property
-    def updates_cursor(self):
-        """
-        The cursor is the identifier used by Dropbox to keep track of the point in time of the
-        last synchronization. Say we synchronized last time yesterday at 6pm and got a cursor.
-        If we synchronize again today using the same cursor, we will get only the updates happened
-        after yesterday 6pm.
-        """
-        return self.response_dict.get('cursor', '')
+    def _init_redis_list(self, *args, **kwargs):
+        return RedisDropboxDownloadList(*args, **kwargs)
 
-    @property
-    def is_reset(self):
-        """
-        Show that we need to delete all the entry we have stored for the current user.
-        """
-        return self.response_dict.get('reset', False)
-
-    @property
-    def has_more(self):
-        """
-        Show that there are more entries to be retrieved with a new update query.
-        """
-        return self.response_dict.get('has_more', False)
-
-    def parse(self, bearertoken_id):
-        """
-        Parse a response got back from Dropbox after an update query.
-        Create a `RedisStore` for the current `bearertoken_id` and add each entry of the
-        `response_dict['entries']` list to the download list of the `RedisStore`.
-
-        Parameters:
-        bearertoken_id -- the identifier to bind this response to a Dropbox user (using his
-        `BearerToken`.
-        """
-
-        redis = RedisDropboxDownloadList(bearertoken_id)
-
+    def _hook_parse_entire_response(self, redis):
         if self.is_reset:
             redis.buffer_add_reset()
 
-        entries = self.response_dict.get('entries', list())
-        for entry in self._entries_to_dropboxresponseentries(entries):
-            # `entry` is a `DropboxResponseEntry` instance.
-            redis.buffer(entry)
-        redis.flush_buffer()
+    def _extract_entries_list(self):
+        return self.response.get('entries', list())
 
-    @staticmethod
-    def _entries_to_dropboxresponseentries(entries):
+    def _init_api_provider_entry(self, *args, **kwargs):
+        return DropboxResponseEntry(*args, **kwargs)
+
+    def _sanity_check(self):
         """
-        Iter over all entries in the response.
-        `entries` is a list of items; each item is converted to a `DropboxResponseEntry` instance.
+        Override default `_sanity_check` from `AbstractApiResponse`. We don't need a sanity check
+        because we are using the specific `dropbox` library here and not the generic
+        `request_oauthlib`. This library raise an exception in case of error, so we don't need
+        to perform a sanity check ourself.
         """
+        pass
 
-        def _lpop():
-            """
-            Pop from the head of the list.
-            Convert the item to `DropboxResponseEntry`.
-            """
-            while True:
-                try:
-                    entry = entries.pop(0)
-                    entry = DropboxResponseEntry(entry)
-                    return entry
-                except IndexError:
-                    # `entry_list` is empty, return None to stop the iter
-                    return None
-                except EntryNotToBeIndexed:
-                    # The entry is probably a dir or not a textual file and we don't need to
-                    # index it
-                    continue
-                except InconsistentItemError as e:
-                    # The entry is not consistent, like some important metadata are missing,
-                    # we just skip it
-                    # TODO log it anyway
-                    continue
+    def _build_pagination_cursor(self):
+        pass
 
-        # The first argument of iter must be a callable, that's why we created the _lpop()
-        # closure. This closure will be called for each iteration and the result is returned
-        # until the result is None.
-        return iter(_lpop, None)
-
+    def _build_updates_cursor(self):
+        pass

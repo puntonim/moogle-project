@@ -1,13 +1,21 @@
 from abc import ABCMeta
 
-from utils.redis import AbstractRedisList, open_redis_connection
+from redislist import AbstractRedisList, open_redis_connection
 from utils.exceptions import RedisDropboxEntryInconsistentError
 
 
-class AbstractRedisDropboxList(AbstractRedisList, metaclass=ABCMeta):
+class AbstractRedisDropboxList(AbstractRedisList):
     """
     Abstract class to manage a single Dropbox list (queue) in Redis.
     """
+    @staticmethod
+    def _build_list_name(bearertoken_id):
+        pass
+
+    @staticmethod
+    def _init_redis_provider_entry(*args, **kwargs):
+        pass
+
     def buffer(self, entry):
         """
         Add a entry to this Redis list (through a pipeline, which is a buffer).

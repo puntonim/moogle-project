@@ -1,53 +1,42 @@
+import logging
 from dropbox.client import DropboxClient  # Dropobox official library
 
-from utils.db import session_autocommit
-from .response import DropboxResponse
+from .response import ApiDropboxResponse
+from crawler import AbstractCrawler
 
 
-class DropboxCrawler:
-    def __init__(self, bearertoken):
-        self.bearertoken = bearertoken
+log = logging.getLogger('dropbox')
 
-    @property
-    def _client(self):
-        """
-        A `dropbox.DropboxClient` for the current `bearertoken`.
-        It is a cached attribute so that it is a singleton.
-        """
-        try:
-            cl = self._client_cached
-        except AttributeError:
-            cl = self._client_cached = DropboxClient(self.bearertoken.access_token)
-        return cl
 
-    def run(self):
-        """
-        Crawl Dropbox for updates and write en entry for each item to Redis.
-        """
-        # When crawling Dropbox, the response contains max about 1000 items plus a has_more flag.
-        # We have to keep repeating the crawling until has_more is false.
-        # For each crawl we open a new session, such as, in case of failure of a single crawl, only
-        # that specific crawl is rolled back.
-        # Bare in mind that in the 99% of cases there is only 1 crawl because users usually
-        # don't update more than 1000 files in the time in between 2 syncs.
-        while True:
-            with session_autocommit() as sex:
-                # Add bearertoken to the current session.
-                self.bearertoken = sex.merge(self.bearertoken)
+class DropboxCrawler(AbstractCrawler):
+    """
+    Web crawler to query Dropbox and collect updated files for a `bearertoken`.
 
-                # TODO Catch the exception dropbox.rest.ErrorResponse: [401] "The given OAuth 2
-                # TODO access token doesn't exist or has expired."
-                r = self._client.delta(cursor=self.bearertoken.updates_cursor,
-                                       path_prefix='/temp/moogletest')  # TODO remove the prefix
+    Parameters:
+    bearertoken -- a `models.BearerToken`
+    """
+    def _init_client(self):
+        client = DropboxClient(self.bearertoken.access_token)
+        updates_cursor = self.bearertoken.updates_cursor
 
-                # Parse the response.
-                response = DropboxResponse(r)
-                response.parse(self.bearertoken.id)
+        # Monkey patching the `get` method of client.
+        # `AbstractCrawler` expects `client` to be a `request_oauthlib.OAuth1Session` or a
+        # `request_oauthlib.OAuth1Session` with a `get` method. Here `client` is a
+        # `dropbox.client`, so we monkey patch the `get` method and make it call `delta`.
+        def _delta(*args):
+            return client.delta(cursor=updates_cursor,
+                                path_prefix='/temp/moogletest'  # TODO remove the prefix
+            )
+        client.get = _delta
+        return client
 
-                # Update the cursor.
-                self.bearertoken.updates_cursor = response.updates_cursor
+    @staticmethod
+    def _init_response(*args, **kwargs):
+        return ApiDropboxResponse(*args, **kwargs)
 
-                # Continue only in case Dropbox `has_more` items to send.
-                if response.has_more:
-                    continue
-                break
+    def _hook_after_response_parsed(self, response):
+        # Update the cursor.
+        self.bearertoken.updates_cursor = response.updates_cursor
+
+    def _build_resource_url(self, pagination_cursor):
+        pass

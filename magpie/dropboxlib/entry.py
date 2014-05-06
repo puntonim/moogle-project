@@ -1,7 +1,12 @@
 from os.path import splitext, basename
+from abc import ABCMeta
 
 from utils.exceptions import InconsistentItemError, EntryNotToBeIndexed
 from magpie.settings import settings
+
+
+#class BaseDropboxEntry(metaclass=ABCMeta):
+#    __all__ = ['id', 'operation']
 
 
 class DropboxResponseEntry:

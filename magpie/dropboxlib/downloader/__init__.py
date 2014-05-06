@@ -1,6 +1,6 @@
 from dropbox.client import DropboxClient  # Dropobox official library
 
-from ..redis import RedisDropboxDownloadList, RedisDropboxIndexList
+from ..redislist import RedisDropboxDownloadList, RedisDropboxIndexList
 from .dropboxfile import DropboxFile
 
 

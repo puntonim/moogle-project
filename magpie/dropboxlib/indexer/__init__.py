@@ -1,4 +1,4 @@
-from ..redis import RedisDropboxIndexList
+from ..redislist import RedisDropboxIndexList
 
 
 class DropboxIndexer:
