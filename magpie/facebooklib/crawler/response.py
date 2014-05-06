@@ -5,7 +5,7 @@ import json
 
 from utils.exceptions import FacebookResponseError
 from ..entry import ApiFacebookEntry
-from ..redis import RedisFacebookList
+from ..redislist import RedisFacebookList
 from response import AbstractApiResponse
 
 
@@ -56,9 +56,6 @@ class ApiFacebookResponse(AbstractApiResponse):
         # We need to convert it to unix time tho.
         datestamp = datetime.strptime(entry.updated_time, '%Y-%m-%dT%H:%M:%S+0000')
         self.updates_cursor = timegm(datestamp.utctimetuple())  # Conversion to unix time.
-
-    def _hook_parse_last_entry(self):
-        pass
 
     def _init_api_provider_entry(self, entry):
         return ApiFacebookEntry(entry)

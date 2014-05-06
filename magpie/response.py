@@ -54,16 +54,13 @@ class AbstractApiResponse(metaclass=ABCMeta):
     def _init_redis_list(self, bearertoken_id):
         pass
 
-    @abstractmethod
     def _hook_parse_entire_response(self):
         pass
 
-    @abstractmethod
     def _hook_parse_first_entry(self, entry):
         pass
 
-    @abstractmethod
-    def _hook_parse_last_entry(self):
+    def _hook_parse_last_entry(self, entry):
         pass
 
     @abstractmethod

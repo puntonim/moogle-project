@@ -1,17 +1,7 @@
-from abc import ABCMeta
+from redislist import AbstractRedisEntry
 
 
-class AbstractFacebookEntry(metaclass=ABCMeta):
-    id = ''
-    from_name = ''
-    from_id = ''
-    type = ''
-    created_time = ''
-    updated_time = ''
-    message = ''
-
-
-class ApiFacebookEntry(AbstractFacebookEntry):
+class ApiFacebookEntry:
     """
     A post (status, link, photo or video) got in a reply to a API query.
 
@@ -41,7 +31,7 @@ class ApiFacebookEntry(AbstractFacebookEntry):
         self.message = post_dict.get('message', '')
 
 
-class RedisFacebookEntry(AbstractFacebookEntry):
+class RedisFacebookEntry(AbstractRedisEntry):
     """
     A post (status, link, photo or video) stored in Redis.
 
@@ -57,11 +47,4 @@ class RedisFacebookEntry(AbstractFacebookEntry):
             b'message': 'test message'
         }
     """
-    def __init__(self, post_id, post_dict):
-        self.id = post_id.decode(encoding='UTF-8')
-        self.from_name = post_dict[b'from_name'].decode(encoding='UTF-8')
-        self.from_id = post_dict[b'from_id'].decode(encoding='UTF-8')
-        self.type = post_dict[b'type'].decode(encoding='UTF-8')
-        self.created_time = post_dict[b'created_time'].decode(encoding='UTF-8')
-        self.updated_time = post_dict[b'updated_time'].decode(encoding='UTF-8')
-        self.message = post_dict[b'message'].decode(encoding='UTF-8')
+    __all__ = ['id', 'from_name', 'from_id', 'type', 'created_time', 'updated_time', 'message']

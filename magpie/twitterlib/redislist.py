@@ -1,16 +1,14 @@
-from abc import ABCMeta
-
 from .entry import RedisTwitterEntry
-from utils.redis import AbstractRedisList, open_redis_connection
+from redislist import AbstractRedisList, open_redis_connection
 
 
-class RedisTwitterList(AbstractRedisList, metaclass=ABCMeta):
+class RedisTwitterList(AbstractRedisList):
     """
     List (queue) of Twitter tweets in Redis.
     """
-
-    def __init__(self, bearertoken_id):
-        self._list_name = 'twitter:token:{}'.format(bearertoken_id)
+    @staticmethod
+    def _build_list_name(bearertoken_id):
+        return 'twitter:token:{}'.format(bearertoken_id)
 
     def buffer(self, entry):
         """
@@ -23,15 +21,16 @@ class RedisTwitterList(AbstractRedisList, metaclass=ABCMeta):
 
         self._pipeline.rpush(
             self._list_name,
-            '{}'.format(entry.id_str)
+            '{}'.format(entry.id)
         )
 
         self._pipeline.hmset(
-            '{}:{}'.format(self._list_name, entry.id_str),
+            '{}:{}'.format(self._list_name, entry.id),
             {
                 'text': entry.text,
                 'lang': entry.lang,
                 'created_at': entry.created_at,
+                'retweeted': entry.retweeted,
                 'text_clean': entry.text_clean,
             }
         )

@@ -1,17 +1,9 @@
 import re
-from abc import ABCMeta
+
+from redislist import AbstractRedisEntry
 
 
-class AbstractTwitterEntry(metaclass=ABCMeta):
-    id_str = ''
-    text = ''
-    lang = ''
-    created_at = ''
-    retweeted = ''
-    text_clean = ''
-
-
-class ApiTwitterEntry(AbstractTwitterEntry):
+class ApiTwitterEntry:
     """
     A tweet got in a reply to a API query.
 
@@ -59,7 +51,7 @@ class ApiTwitterEntry(AbstractTwitterEntry):
         }
     """
     def __init__(self, tweet_dict):
-        self.id_str = tweet_dict['id_str']
+        self.id = tweet_dict['id_str']
         self.text = tweet_dict['text']
         self.lang = tweet_dict['lang']
         self.created_at = tweet_dict['created_at']
@@ -132,7 +124,7 @@ class ApiTwitterEntry(AbstractTwitterEntry):
             self._text_clean = re.sub(regex, '', self._text_clean.strip()).strip()
 
 
-class RedisTwitterEntry(AbstractTwitterEntry):
+class RedisTwitterEntry(AbstractRedisEntry):
     """
     A tweet stored in Redis.
 
@@ -149,9 +141,4 @@ class RedisTwitterEntry(AbstractTwitterEntry):
              Android released  Download'
         }
     """
-    def __init__(self, tweet_id, tweet_dict):
-        self.id = tweet_id.decode(encoding='UTF-8')
-        self.lang = tweet_dict[b'lang'].decode(encoding='UTF-8')
-        self.created_at = tweet_dict[b'created_at'].decode(encoding='UTF-8')
-        self.text = tweet_dict[b'text'].decode(encoding='UTF-8')
-        self.text_clean = tweet_dict[b'text_clean'].decode(encoding='UTF-8')
+    __all__ = ['id', 'text', 'text_clean', 'lang', 'created_at', 'retweeted']

@@ -1,29 +1,20 @@
-from abc import ABCMeta
-
 from .entry import RedisFacebookEntry
-from utils.redis import AbstractRedisList, open_redis_connection
+from redislist import AbstractRedisList, open_redis_connection
 
 
-class RedisFacebookList(AbstractRedisList, metaclass=ABCMeta):
+class RedisFacebookList(AbstractRedisList):
     """
     List (queue) of Facebook statuses in Redis.
     """
-
-    def __init__(self, bearertoken_id):
-        self._list_name = 'facebook:token:{}'.format(bearertoken_id)
-
     @staticmethod
-    def _is_indexable(entry):
-        """
-        Decide whether an entry has to be indexed or not.
-        """
-        return entry.message
+    def _build_list_name(bearertoken_id):
+        return 'facebook:token:{}'.format(bearertoken_id)
 
     def buffer(self, entry):
         """
 
         Parameters:
-        entry -- A `ApiFacebookEntry` instance.
+        entry -- A `Api<Provider>Entry` instance.
         """
         # TODO
         print("Storing {} in Redis.".format(entry))
@@ -47,6 +38,13 @@ class RedisFacebookList(AbstractRedisList, metaclass=ABCMeta):
                 'message': entry.message,
             }
         )
+
+    @staticmethod
+    def _is_indexable(entry):
+        """
+        Decide whether an entry has to be indexed or not.
+        """
+        return entry.message
 
     def iterate(self):
         """

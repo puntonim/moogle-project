@@ -1,6 +1,6 @@
 import logging
 
-from ..redis import RedisFacebookList
+from ..redislist import RedisFacebookList
 
 
 log = logging.getLogger('facebook')

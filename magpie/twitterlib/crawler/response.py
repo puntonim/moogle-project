@@ -3,7 +3,7 @@ import json
 
 from utils.exceptions import TwitterResponseError
 from ..entry import ApiTwitterEntry
-from ..redis import RedisTwitterList
+from ..redislist import RedisTwitterList
 from response import AbstractApiResponse
 
 
@@ -35,9 +35,6 @@ class ApiTwitterResponse(AbstractApiResponse):
     def _init_redis_list(self, bearertoken_id):
         return RedisTwitterList(bearertoken_id)
 
-    def _hook_parse_entire_response(self):
-        pass
-
     def _hook_parse_first_entry(self, entry):
         self._build_updates_cursor(entry)
         # Has more: we suppose that if there is at least an entry in this response,
@@ -46,16 +43,16 @@ class ApiTwitterResponse(AbstractApiResponse):
         self.has_more = True
 
     def _build_updates_cursor(self, entry):
-        # Updates cursor: the `id_str` of the most recent post.
-        self.updates_cursor = entry.id_str
+        # Updates cursor: the `id` of the most recent post.
+        self.updates_cursor = entry.id
 
     def _hook_parse_last_entry(self, entry):
         #if self.has_more:
         self._build_pagination_cursor(entry)
 
     def _build_pagination_cursor(self, entry):
-        # Pagination cursor: `id_str` - 1 of the oldest post in this page.
-        self.pagination_cursor = str(int(entry.id_str) - 1)
+        # Pagination cursor: `id` - 1 of the oldest post in this page.
+        self.pagination_cursor = str(int(entry.id) - 1)
 
     def _init_api_provider_entry(self, entry):
         return ApiTwitterEntry(entry)

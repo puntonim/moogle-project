@@ -1,6 +1,6 @@
 import logging
 
-from ..redis import RedisTwitterList
+from ..redislist import RedisTwitterList
 
 
 log = logging.getLogger('twitter')
@@ -26,6 +26,7 @@ class TwitterIndexer:
             log.debug('id={}\n'.format(redis_entry.id) +
                       'lang={}\n'.format(redis_entry.lang) +
                       'created_at={}\n'.format(redis_entry.created_at) +
+                      'retweeted={}\n'.format(redis_entry.retweeted) +
                       'text={}\n'.format(redis_entry.text) +
                       'text_clean={}\n'.format(redis_entry.text_clean)
             )
