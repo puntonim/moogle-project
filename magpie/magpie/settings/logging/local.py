@@ -1,5 +1,5 @@
 from os.path import join, normpath
-from .base import BASE_DIR
+from ..base import BASE_DIR
 
 
 # Set the log folder: a folder named 'log' in the root folder of the project
@@ -29,6 +29,15 @@ LOGGING_DICT = {
             'backupCount': 0,  # max 1 file
             'formatter': 'advanced',
         },
+        'dropbox_hl': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': normpath(join(LOG_FOLDER, 'dropbox.log')),
+            'mode': 'a',
+            'maxBytes': 1048576*5,  # max 5 Mbyte
+            'backupCount': 0,  # max 1 file
+            'formatter': 'advanced',
+        },
         'facebook_hl': {
             'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
@@ -53,6 +62,11 @@ LOGGING_DICT = {
         '': {
             'handlers': ['magpie_hl'],
             'level': 'DEBUG',
+        },
+        'dropbox': {
+            'handlers': ['dropbox_hl'],
+            'level': 'DEBUG',
+            'propagate': False,
         },
         'facebook': {
             'handlers': ['facebook_hl'],

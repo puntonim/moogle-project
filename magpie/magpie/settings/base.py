@@ -17,11 +17,6 @@ DATABASE = {
     'NAME': normpath(join(BASE_DIR, 'magpie.db')),
 }
 
-# Logging
-from .logging import LOGGING_DICT
-from logging.config import dictConfig
-dictConfig(LOGGING_DICT)
-
 # Dropbox
 DROPBOX_MAX_FILE_SIZE = 10*1024*1024  # 10 MB in bytes
 DROPBOX_TEMP_REPO_PATH = normpath(join(BASE_DIR, '_tmp', 'dropbox'))

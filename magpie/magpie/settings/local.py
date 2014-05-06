@@ -11,3 +11,8 @@ REDIS = {
         'DB': 0,
     }
 }
+
+# Logging
+from logging.config import dictConfig
+from .logging.local import LOGGING_DICT
+dictConfig(LOGGING_DICT)
