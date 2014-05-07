@@ -4,11 +4,11 @@ from redislist import AbstractRedisEntry
 from utils.exceptions import EntryNotToBeIndexed
 
 
-class BaseFacebookEntry(metaclass=ABCMeta):
+class AbstractFacebookEntry(metaclass=ABCMeta):
     __all__ = ['id', 'from_name', 'from_id', 'type', 'created_time', 'updated_time', 'message']
 
 
-class ApiFacebookEntry(BaseFacebookEntry):
+class ApiFacebookEntry(AbstractFacebookEntry):
     """
     A post (status, link, photo or video) got in a reply to a API query.
 
@@ -48,7 +48,7 @@ class ApiFacebookEntry(BaseFacebookEntry):
             raise EntryNotToBeIndexed
 
 
-class RedisFacebookEntry(BaseFacebookEntry, AbstractRedisEntry):
+class RedisFacebookEntry(AbstractFacebookEntry, AbstractRedisEntry):
     """
     A post (status, link, photo or video) stored in Redis.
 

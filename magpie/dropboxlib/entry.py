@@ -7,11 +7,11 @@ from magpie.settings import settings
 from redislist import AbstractRedisEntry
 
 
-class BaseDropboxEntry(metaclass=ABCMeta):
+class AbstractDropboxEntry(metaclass=ABCMeta):
     __all__ = ['id', 'path', 'operation']
 
 
-class ApiDropboxEntry(BaseDropboxEntry):
+class ApiDropboxEntry(AbstractDropboxEntry):
     """
     A response got back from Dropbox is a Python dictionary (which is mapped to a
     `DropboxResponse`). This dictionary contains a `entries` key, which is a Python list of up to
@@ -152,7 +152,7 @@ class ApiDropboxEntry(BaseDropboxEntry):
         )
 
 
-class RedisDropboxEntry(BaseDropboxEntry, AbstractRedisEntry):
+class RedisDropboxEntry(AbstractDropboxEntry, AbstractRedisEntry):
     """
     A Dropbox entry of a Redis list.
 
