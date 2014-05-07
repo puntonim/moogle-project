@@ -78,15 +78,15 @@ class AbstractRedisList(metaclass=ABCMeta):
 
         def _lpop():
             """
-            Pop from the head of the Facebook Redis list and get the hash entry.
-            Convert the pop and hash items to a `RedisFacebookEntry` instance.
+            Pop from the head of the Redis list and get the hash entry.
+            Convert the pop and hash items to a `Redis<Provider>Entry` instance.
             """
-            post_id = r.lpop(self._list_name)
-            if not post_id:  # The list has been completely consumed.
+            entry_id = r.lpop(self._list_name)
+            if not entry_id:  # The list has been completely consumed.
                 return None
 
-            hash_name = '{}:{}'.format(self._list_name, post_id.decode(encoding='UTF-8'))
-            post_dict = r.hgetall(hash_name)
+            hash_name = '{}:{}'.format(self._list_name, entry_id.decode(encoding='UTF-8'))
+            entry_dict = r.hgetall(hash_name)
             # Delete the hash through a pipeline. The use of a pipeline is to avoid a sort
             # of bug. The bug was the following:
             # entry = r.hgetall(hash_name)  -- READ
@@ -94,7 +94,7 @@ class AbstractRedisList(metaclass=ABCMeta):
             # Sometimes the DELETE happens before the READ causing the read value to be None: this
             # is very very weird, but it happened sometimes. Using a pipeline solve this.
             pipeline.delete(hash_name)
-            return self._init_redis_provider_entry(post_id, post_dict)
+            return self._init_redis_provider_entry(entry_id, entry_dict)
 
         def _lpop_mgr():
             """
@@ -146,3 +146,8 @@ class AbstractRedisEntry(metaclass=ABCMeta):
         field_names.remove('id')
         for field_name in field_names:
             setattr(self, field_name, entry_dict[field_name.encode()].decode('UTF-8'))
+
+        self._sanity_check()
+
+    def _sanity_check(self):
+        pass

@@ -1,7 +1,8 @@
 import logging
+import json
 
 from ..redislist import RedisDropboxDownloadList
-from ..entry import DropboxResponseEntry
+from ..entry import ApiDropboxEntry
 from response import AbstractApiResponse
 
 
@@ -11,13 +12,13 @@ log = logging.getLogger('dropbox')
 class ApiDropboxResponse(AbstractApiResponse):
     """
     A response got back from Dropbox after an update query.
-    It is build out of a the parameter `response` which is a Python dictionary.
+    It is build from the parameter `response` which is a Python dictionary.
 
     Parameters:
     `response` -- a Python dictionary like the following example.
     The `entries` key contains a set of up to about 1k entries, where each entry is a file
     added or removed to Dropbox by its owner. Each of this entry will be mapped to a
-    `DropboxResponseEntry`.
+    `ApiDropboxEntry`.
     The `has_more` key shows whether the response is not complete, by meaning that more items
     will be included in the response to the next update query.
     {
@@ -44,7 +45,6 @@ class ApiDropboxResponse(AbstractApiResponse):
         ]
     }
     """
-
     def __init__(self, response):
         super().__init__(response)
         # `is_reset` shows that we need to delete all the entry we have stored for the
@@ -57,6 +57,8 @@ class ApiDropboxResponse(AbstractApiResponse):
         # happened after yesterday 6pm.
         self.updates_cursor = self.response.get('cursor', '')
 
+        log.debug('Response got: \n{}'.format(json.dumps(response, indent=4)))
+
     def _init_redis_list(self, *args, **kwargs):
         return RedisDropboxDownloadList(*args, **kwargs)
 
@@ -68,7 +70,7 @@ class ApiDropboxResponse(AbstractApiResponse):
         return self.response.get('entries', list())
 
     def _init_api_provider_entry(self, *args, **kwargs):
-        return DropboxResponseEntry(*args, **kwargs)
+        return ApiDropboxEntry(*args, **kwargs)
 
     def _sanity_check(self):
         """

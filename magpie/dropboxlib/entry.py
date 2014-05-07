@@ -1,20 +1,22 @@
 from os.path import splitext, basename
 from abc import ABCMeta
+import hashlib
 
 from utils.exceptions import InconsistentItemError, EntryNotToBeIndexed
 from magpie.settings import settings
+from redislist import AbstractRedisEntry
 
 
-#class BaseDropboxEntry(metaclass=ABCMeta):
-#    __all__ = ['id', 'operation']
+class BaseDropboxEntry(metaclass=ABCMeta):
+    __all__ = ['id', 'path', 'operation']
 
 
-class DropboxResponseEntry:
+class ApiDropboxEntry(BaseDropboxEntry):
     """
     A response got back from Dropbox is a Python dictionary (which is mapped to a
     `DropboxResponse`). This dictionary contains a `entries` key, which is a Python list of up to
     about 1k entries where each entry is a file added or removed to Dropbox by its owner.
-    Each of this entry is mapped to a `DropboxResponseEntry`.
+    Each of this entry is mapped to a `ApiDropboxEntry`.
 
     Parameters:
     entry_list -- a file added or removed to Dropbox by its owner. It is a Python list made of 2
@@ -64,9 +66,10 @@ class DropboxResponseEntry:
     """
 
     def __init__(self, entry_list):
-        self.remote_path, self.metadata = self._sanity_check(entry_list)
+        self.path, self.metadata = self._sanity_check(entry_list)
         self._filter()
-        self.operation_type = self._find_operation_type()
+        self.id = self._build_id(self.path)
+        self.operation = self._find_operation()
 
 
     @staticmethod
@@ -75,10 +78,10 @@ class DropboxResponseEntry:
         Sanity check to make sure this `entry_list` is a valid entry.
         """
         if not len(entry_list) == 2:
-            raise InconsistentItemError("This entry is not a tuple with 2 elements.")
+            raise InconsistentItemError("This entry is not a list with 2 elements.")
 
         remote_path = entry_list[0]
-        metadata = entry_list[1]
+        metadata = entry_list[1]  # None if the operation is delete.
 
         if not remote_path:
             raise InconsistentItemError("This entry has no remote path.")
@@ -109,27 +112,32 @@ class DropboxResponseEntry:
         #   and it is not a dir (so it's a file),
         #   and its size is allowed,
         # then it is a file to add.
-        try:
-            is_dir = self.metadata['is_dir']
-            size = self.metadata['bytes']
-            path = self.metadata['path']
-        except KeyError as e:  # Case d.
-            raise InconsistentItemError('Some metadata are missing.') from e
+        if self.metadata:
+            try:
+                is_dir = self.metadata['is_dir']
+                size = self.metadata['bytes']
+                path = self.metadata['path']
+            except KeyError as e:  # Case d.
+                raise InconsistentItemError('Some metadata are missing.') from e
 
-        try:
-            ext = splitext(basename(path))[1][1:].lower()
-        except Exception as e:  # Case d.
-            raise InconsistentItemError('The file extension is not consistent.') from e
+            try:
+                ext = splitext(basename(path))[1][1:].lower()
+            except Exception as e:  # Case d.
+                raise InconsistentItemError('The file extension is not consistent.') from e
 
-        # Cases b., c., e.
-        if is_dir or \
-           size > settings.DROPBOX_MAX_FILE_SIZE or \
-           ext not in settings.DROPBOX_FILE_EXT_FILTER:
-            raise EntryNotToBeIndexed
+            # Cases b., c., e.
+            if is_dir or \
+               size > settings.DROPBOX_MAX_FILE_SIZE or \
+               ext not in settings.DROPBOX_FILE_EXT_FILTER:
+                raise EntryNotToBeIndexed
 
-        # Case a., f.: nothing to do
+            # Case a., f.: nothing to do
 
-    def _find_operation_type(self):
+    @staticmethod
+    def _build_id(text):
+        return hashlib.md5(text.encode()).hexdigest()
+
+    def _find_operation(self):
         """
         Find out if this `entry_list` is a file added ('+') or deleted ('-').
         """
@@ -139,6 +147,45 @@ class DropboxResponseEntry:
         return '+'
 
     def __str__(self):
-        return '<{}(remote_path={}, operation_type={})>'.format(
-            self.__class__.__name__, self.remote_path, self.operation_type
+        return '<{}(remote_path={}, operation={})>'.format(
+            self.__class__.__name__, self.path, self.operation
+        )
+
+
+class RedisDropboxEntry(BaseDropboxEntry, AbstractRedisEntry):
+    """
+    A Dropbox entry of a Redis list.
+
+    Parameters:
+    entry -- a original entry of a Redis list, like: b"+/dir1/file2.txt". It is a bytes string
+    in Python.
+    """
+    def _sanity_check(self):
+        """
+        A `RedisDropboxEntry` instance is consistent if:
+            - `operation` is: '+' or '-' or 'X'.
+            - `remote_path` is 'RESET' if `operation` is 'X'.
+        """
+        if not self.operation in ['+', '-', 'X']:
+            raise InconsistentItemError("The operation must be '+', '-' or 'X'.")
+
+        if self.operation == 'X' and not self.path == 'RESET':
+            raise InconsistentItemError("If the operation is 'X' the remote_path"
+                                        "must be 'REST'.")
+
+    def is_add(self):
+        """True if the `operation` is '+'."""
+        return self.operation == '+'
+
+    def is_del(self):
+        """True if the `operation` is '-'."""
+        return self.operation == '-'
+
+    def is_reset(self):
+        """True if the `operation` is 'X' and remote_path is 'RESET'."""
+        return self.path == 'RESET'
+
+    def __str__(self):
+        return '<{}(operation={}, remote_path={})>'.format(
+            self.__class__.__name__, self.operation, self.path
         )

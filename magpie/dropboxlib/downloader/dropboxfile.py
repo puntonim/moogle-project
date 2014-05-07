@@ -1,8 +1,12 @@
 import json
 from os.path import normpath, join, exists, split, basename
 from os import mkdir
+import logging
 
 from magpie.settings import settings
+
+
+log = logging.getLogger('dropbox')
 
 
 class DropboxFile:
@@ -36,6 +40,7 @@ class DropboxFile:
     def store_to_disk(self, bearertoken_id):
         content_file_path, metadata_file_path = self._find_valid_local_name(bearertoken_id)
         self.local_name = basename(content_file_path)
+        log.debug('Storing to disk: {}'.format(self.local_name))
 
         with self.content,\
              open(content_file_path, 'wb') as fout,\
@@ -47,7 +52,8 @@ class DropboxFile:
 
     def _find_valid_local_name(self, bearertoken_id):
         """
-        ??????
+        Find a valid local name for the current file. In case a file with the same name already
+        exists, then a number is added to the file name in order to make it unique.
         """
         # Create user folder inside DROPBOX_TEMP_REPO_PATH, named after the bearertoken_id.
         local_folder = normpath(join(settings.DROPBOX_TEMP_REPO_PATH, str(bearertoken_id)))

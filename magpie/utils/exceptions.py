@@ -13,11 +13,6 @@ class EntryNotToBeIndexed(Exception):
     pass
 
 
-class RedisDropboxEntryInconsistentError(Exception):
-    """An inconsistent `RedisDropboxEntry`."""
-    pass
-
-
 class ResponseError(Exception):
     """An error response was received from a HTTP request."""
     pass

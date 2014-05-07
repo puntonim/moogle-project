@@ -1,4 +1,9 @@
+import logging
+
 from ..redislist import RedisDropboxIndexList
+
+
+log = logging.getLogger('dropbox')
 
 
 class DropboxIndexer:
@@ -32,10 +37,10 @@ class DropboxIndexer:
             # And a sanity check is run when creating a `RedisDropboxEntry` instance.
 
             if redis_entry.is_del():
-                print('DEL:', redis_entry.remote_path)
+                log.debug('DEL: {}'.format(redis_entry.path))
 
             if redis_entry.is_reset():
-                print('RESET')
+                log.debug('RESET')
 
             if redis_entry.is_add():
-                print('ADD:', redis_entry.remote_path)
+                log.debug('ADD: {}'.format(redis_entry.path))
