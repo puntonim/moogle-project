@@ -27,6 +27,9 @@ Quando aggiungo Facebook, dopo la redirect mi lascia un bruttissimo #_=_ nell'ur
 * LINGUE
 Faccio tutto in lingua inglese? Uso il riconoscimento linguistico in Solr?
 
+* When a user wants to disconnect a provider (so delete a bearer token) then we should warn him
+that also the index will be deleted
+
 
 -- LOW PRIORITY -----------------------------------------------------------------------------------
 

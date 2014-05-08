@@ -39,6 +39,14 @@ name -- for links, photo
 caption -- for links, photo
 description -- for links
 
+* Twitter
+We index the text_clean, which is the text with URLs removed
+URLs are in a list in Python code, but they are not passed to redis and solr
+We can add them so users can explicitly search a link or a link from a specific domain
+
+* When a BearerToken is removed (via Moogle) then the index in Solr must be deleted
+
+
 -- LOW PRIORITY -----------------------------------------------------------------------------------
 
 * TWITTER

@@ -26,3 +26,8 @@ class TwitterResponseError(ResponseError):
 class FacebookResponseError(ResponseError):
     """An error response was received from Twitter."""
     pass
+
+
+class SolrResponseError(ResponseError):
+    """An error response was received from Solr."""
+    pass

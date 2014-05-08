@@ -1,0 +1,32 @@
+Thursday 2014.05.08 18:18:05
+
+TEMPORARY INFO ABOUT INFRA IN MY OFFICE
+
+Important: a new deployment strategy based on Ansible, Vagrant, Docker must be setup.
+
+
+REDIS
+=====
+Start `sloth` and you are done.
+
+Use redis-cli:
+    $ ssh sloth
+    $ redis-cli -h 192.168.1.77
+
+You can install redis-cli in your mac by compiling it: http://jasdeep.ca/2012/05/installing-redis-on-mac-os-x/
+
+
+SOLR
+====
+Start `wendy` and:
+    (wendy)$ ssh wendy
+    $ cd solr-4.6.1/moogle/
+    $ java -jar start.jar
+
+If you want to mount Solr's folder locally on your laptop:
+    (laptop)$ mkdir /tmp/solr
+    $ sshfs wendy:/home/nimiq/solr-4.6.1/moogle /tmp/solr
+
+Test doc:
+    (wendy)$ cd ~/solr-4.6.1/moogle/exampledocs
+    $ ./post.sh samples.json

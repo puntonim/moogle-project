@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<schema name="twitter" version="1.5">
+    <fields>
+        <field name="_version_" type="long" indexed="true" stored="true"/>
+        <field name="_root_" type="string" indexed="true" stored="false"/>
+
+        <field name="id" type="string" indexed="true" stored="true" required="true" multiValued="false"/>
+        <field name="bearertoken_id" type="string" indexed="true" stored="false"/>
+        <field name="lang" type="string" indexed="true" stored="true"/>
+        <field name="created_at" type="tdate" indexed="true" stored="true"/>
+        <field name="retweeted" type="boolean" indexed="false" stored="true"/>
+        <field name="text_original" type="string" indexed="false" stored="true"/>
+        <field name="text_clean" type="tweet" indexed="true" stored="false"/>
+        <!-- <field name="urls" type="string" indexed="true" stored="false" multiValued="true"/> -->
+        <!-- Catch all field -->
+        <field name="text" type="tweet" indexed="true" stored="false" multiValued="true"/>
+    </fields>
+
+    <uniqueKey>id</uniqueKey>
+
+    <copyField source="text_clean" dest="text"/>
+    <!-- <copyField source="urls" dest="text"/> NO!!! We don't want text analysis on urls -->
+
+    <types>
+        <fieldType name="string" class="solr.StrField" sortMissingLast="true"/>
+        <fieldType name="boolean" class="solr.BoolField" sortMissingLast="true"/>
+        <fieldType name="int" class="solr.TrieIntField" precisionStep="0" positionIncrementGap="0"/>
+        <fieldType name="float" class="solr.TrieFloatField" precisionStep="0" positionIncrementGap="0"/>
+        <fieldType name="long" class="solr.TrieLongField" precisionStep="0" positionIncrementGap="0"/>
+        <fieldType name="double" class="solr.TrieDoubleField" precisionStep="0" positionIncrementGap="0"/>
+        <fieldType name="tint" class="solr.TrieIntField" precisionStep="8" positionIncrementGap="0"/>
+        <fieldType name="tfloat" class="solr.TrieFloatField" precisionStep="8" positionIncrementGap="0"/>
+        <fieldType name="tlong" class="solr.TrieLongField" precisionStep="8" positionIncrementGap="0"/>
+        <fieldType name="tdouble" class="solr.TrieDoubleField" precisionStep="8" positionIncrementGap="0"/>
+        <fieldType name="date" class="solr.TrieDateField" precisionStep="0" positionIncrementGap="0"/>
+        <fieldType name="tdate" class="solr.TrieDateField" precisionStep="6" positionIncrementGap="0"/>
+        <fieldtype name="binary" class="solr.BinaryField"/>
+        <fieldType name="random" class="solr.RandomSortField" indexed="true"/>
+
+        <fieldType name="text_ws" class="solr.TextField" positionIncrementGap="100">
+            <analyzer>
+                <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+            </analyzer>
+        </fieldType>
+
+        <fieldType name="text_general" class="solr.TextField" positionIncrementGap="100">
+            <analyzer type="index">
+                <tokenizer class="solr.StandardTokenizerFactory"/>
+                <filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords.txt"/>
+                <!-- in this example, we will only use synonyms at query time
+                <filter class="solr.SynonymFilterFactory" synonyms="index_synonyms.txt" ignoreCase="true" expand="false"/>
+                -->
+                <filter class="solr.LowerCaseFilterFactory"/>
+            </analyzer>
+            <analyzer type="query">
+                <tokenizer class="solr.StandardTokenizerFactory"/>
+                <filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords.txt"/>
+                <filter class="solr.SynonymFilterFactory" synonyms="synonyms.txt" ignoreCase="true" expand="true"/>
+                <filter class="solr.LowerCaseFilterFactory"/>
+            </analyzer>
+        </fieldType>
+
+        <fieldType name="text_en" class="solr.TextField" positionIncrementGap="100">
+            <analyzer type="index">
+                <tokenizer class="solr.StandardTokenizerFactory"/>
+                <!-- in this example, we will only use synonyms at query time
+                <filter class="solr.SynonymFilterFactory" synonyms="index_synonyms.txt" ignoreCase="true" expand="false"/>
+                -->
+                <!-- Case insensitive stop word removal.
+                -->
+                <filter class="solr.StopFilterFactory"
+                        ignoreCase="true"
+                        words="lang/stopwords_en.txt"
+                        />
+                <filter class="solr.LowerCaseFilterFactory"/>
+                <filter class="solr.EnglishPossessiveFilterFactory"/>
+                <filter class="solr.KeywordMarkerFilterFactory" protected="protwords.txt"/>
+                <!-- Optionally you may want to use this less aggressive stemmer instead of PorterStemFilterFactory:
+                <filter class="solr.EnglishMinimalStemFilterFactory"/>
+                -->
+                <filter class="solr.PorterStemFilterFactory"/>
+            </analyzer>
+            <analyzer type="query">
+                <tokenizer class="solr.StandardTokenizerFactory"/>
+                <filter class="solr.SynonymFilterFactory" synonyms="synonyms.txt" ignoreCase="true" expand="true"/>
+                <filter class="solr.StopFilterFactory"
+                        ignoreCase="true"
+                        words="lang/stopwords_en.txt"
+                        />
+                <filter class="solr.LowerCaseFilterFactory"/>
+                <filter class="solr.EnglishPossessiveFilterFactory"/>
+                <filter class="solr.KeywordMarkerFilterFactory" protected="protwords.txt"/>
+                <!-- Optionally you may want to use this less aggressive stemmer instead of PorterStemFilterFactory:
+                <filter class="solr.EnglishMinimalStemFilterFactory"/>
+                -->
+                <filter class="solr.PorterStemFilterFactory"/>
+            </analyzer>
+        </fieldType>
+
+        <fieldType name="text_en_splitting" class="solr.TextField" positionIncrementGap="100"
+                   autoGeneratePhraseQueries="true">
+            <analyzer type="index">
+                <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+                <!-- in this example, we will only use synonyms at query time
+                <filter class="solr.SynonymFilterFactory" synonyms="index_synonyms.txt" ignoreCase="true" expand="false"/>
+                -->
+                <!-- Case insensitive stop word removal.
+                -->
+                <filter class="solr.StopFilterFactory"
+                        ignoreCase="true"
+                        words="lang/stopwords_en.txt"
+                        />
+                <filter class="solr.WordDelimiterFilterFactory" generateWordParts="1" generateNumberParts="1"
+                        catenateWords="1" catenateNumbers="1" catenateAll="0" splitOnCaseChange="1"/>
+                <filter class="solr.LowerCaseFilterFactory"/>
+                <filter class="solr.KeywordMarkerFilterFactory" protected="protwords.txt"/>
+                <filter class="solr.PorterStemFilterFactory"/>
+            </analyzer>
+            <analyzer type="query">
+                <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+                <filter class="solr.SynonymFilterFactory" synonyms="synonyms.txt" ignoreCase="true" expand="true"/>
+                <filter class="solr.StopFilterFactory"
+                        ignoreCase="true"
+                        words="lang/stopwords_en.txt"
+                        />
+                <filter class="solr.WordDelimiterFilterFactory" generateWordParts="1" generateNumberParts="1"
+                        catenateWords="0" catenateNumbers="0" catenateAll="0" splitOnCaseChange="1"/>
+                <filter class="solr.LowerCaseFilterFactory"/>
+                <filter class="solr.KeywordMarkerFilterFactory" protected="protwords.txt"/>
+                <filter class="solr.PorterStemFilterFactory"/>
+            </analyzer>
+        </fieldType>
+
+        <fieldType name="text_en_splitting_tight" class="solr.TextField" positionIncrementGap="100"
+                   autoGeneratePhraseQueries="true">
+            <analyzer>
+                <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+                <filter class="solr.SynonymFilterFactory" synonyms="synonyms.txt" ignoreCase="true" expand="false"/>
+                <filter class="solr.StopFilterFactory" ignoreCase="true" words="lang/stopwords_en.txt"/>
+                <filter class="solr.WordDelimiterFilterFactory" generateWordParts="0" generateNumberParts="0"
+                        catenateWords="1" catenateNumbers="1" catenateAll="0"/>
+                <filter class="solr.LowerCaseFilterFactory"/>
+                <filter class="solr.KeywordMarkerFilterFactory" protected="protwords.txt"/>
+                <filter class="solr.EnglishMinimalStemFilterFactory"/>
+                <!-- this filter can remove any duplicate tokens that appear at the same position - sometimes
+                     possible with WordDelimiterFilter in conjuncton with stemming. -->
+                <filter class="solr.RemoveDuplicatesTokenFilterFactory"/>
+            </analyzer>
+        </fieldType>
+
+        <fieldtype name="ignored" stored="false" indexed="false" multiValued="true" class="solr.StrField"/>
+
+        <fieldType name="currency" class="solr.CurrencyField" precisionStep="8" defaultCurrency="USD"
+                   currencyConfig="currency.xml"/>
+
+        <!-- positionIncrementGap: prevent phrase queries from matching the end of one value and the beginning
+             of the next value in multivalued fields -->
+        <fieldType name="tweet" class="solr.TextField" positionIncrementGap="100">
+            <analyzer type="index">
+                <!-- Collapse repeated letters to a max of 2, e.g. "yummmm" to "yumm" -->
+                <charFilter class="solr.PatternReplaceCharFilterFactory"
+                            pattern="([a-zA-Z])\1+"
+                            replacement="$1$1"/>
+                <!-- Split only on whitespaces, so it preserves hashtags, mentions, hypheneted terms -->
+                <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+                <!-- Split tokens into subwords based on parsing rules:
+                      (1 means enabled, 0 means disabled)
+                      * generateWordParts (1): "i-pad" to "i pad"
+                      * splitOnCaseChange (0): "SolrInAction" to "Solr In Action"
+                      * splitOnNumerics (0): "r2d2" to "r 2 d 2"
+                      * stemEnglishPossessive (1): "SF's" to "SF" TODO: is it ok w/ multilungual?
+                      * preserveOriginal (0): include the original token
+                      * catenateWords (1): "i-pad" to "ipad"
+                      * generateNumberParts (1): "02-820" to "02 820"
+                      * catenateNumbers (0): "02-820" to "02820"
+                      * catenateAll (0): concatenate all number and word parts
+                      * types: a file where we list some symbols (like #, @, $) which must not be considered as word delimiters.
+                -->
+                <filter class="solr.WordDelimiterFilterFactory"
+                        generateWordParts="1"
+                        splitOnCaseChange="0"
+                        splitOnNumerics="0"
+                        stemEnglishPossessive="1"
+                        preserveOriginal="0"
+                        catenateWords="1"
+                        generateNumberParts="1"
+                        catenateNumbers="0"
+                        catenateAll="0"
+                        types="wdfftypes.txt"/>
+                <!-- Removing English stopword
+                     TODO: this should be multilingual -->
+                <filter class="solr.StopFilterFactory"
+                        ignoreCase="true"
+                        words="lang/stopwords_en.txt"/>
+                <!-- Change case to lower case -->
+                <filter class="solr.LowerCaseFilterFactory"/>
+                <!-- Change diacritical marks to ASCII equivalent, e.g. "caffè" to "caffe"
+                     TODO: this works for latin-based character, what for other languages? -->
+                <filter class="solr.ASCIIFoldingFilterFactory"/>
+                <!-- Stemming for English
+                     TODO: this should be multilingual -->
+                <filter class="solr.KStemFilterFactory"/>
+            </analyzer>
+            <analyzer type="query">
+                <!-- Collapse repeated letters to a max of 2, e.g. "yummmm" to "yumm" -->
+                <charFilter class="solr.PatternReplaceCharFilterFactory"
+                            pattern="([a-zA-Z])\1+"
+                            replacement="$1$1"/>
+                <!-- Split only on whitespaces, so it preserves hashtags, mentions, hypheneted terms -->
+                <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+                <!-- See cooment on index analyzer -->
+                <filter class="solr.WordDelimiterFilterFactory"
+                        generateWordParts="1"
+                        splitOnCaseChange="0"
+                        splitOnNumerics="0"
+                        stemEnglishPossessive="1"
+                        preserveOriginal="0"
+                        catenateWords="1"
+                        generateNumberParts="1"
+                        catenateNumbers="0"
+                        catenateAll="0"
+                        types="wdfftypes.txt"/>
+                <!-- Change case to lower case -->
+                <filter class="solr.LowerCaseFilterFactory"/>
+                <!-- Change diacritical marks to ASCII equivalent, e.g. "caffè" to "caffe"
+                     TODO: this works for latin-based character, what for other languages? -->
+                <filter class="solr.ASCIIFoldingFilterFactory"/>
+                <!-- Removing English stopword
+                     TODO: this should be multilingual -->
+                <filter class="solr.StopFilterFactory"
+                        ignoreCase="true"
+                        words="lang/stopwords_en.txt"/>
+                <!-- Inject synonyms -->
+                <filter class="solr.SynonymFilterFactory"
+                        synonyms="synonyms.txt"
+                        ignoreCase="true"
+                        expand="true"/>
+                <!-- Stemming for English
+                     TODO: this should be multilingual -->
+                <filter class="solr.KStemFilterFactory"/>
+            </analyzer>
+        </fieldType>
+
+    </types>
+
+</schema>
