@@ -2,6 +2,7 @@ import re
 from abc import ABCMeta
 
 from redislist import AbstractRedisEntry
+from utils.urls import remove_urls
 
 
 class AbstractTwitterEntry(metaclass=ABCMeta):
@@ -113,12 +114,8 @@ class ApiTwitterEntry(AbstractTwitterEntry):
         # been truncated, then the `indices` contains only the info to cut out the ellipsis
         # character, like (139, 140), and not the url. So we need to process also this case.
         if not indices or self.text[-1:] == u'\u2026' or self.text[-3:] == '...':
-            # Regex to identify URLs
-            regex = ('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|'
-                     '(?:%[0-9a-fA-F][0-9a-fA-F]))+')
-            urls = re.findall(regex, self._text_clean)
-            for u in urls:
-                self._text_clean = self._text_clean.replace(u, '')
+            # Remove all URLs from `_text_clean`
+            self._text_clean, urls = remove_urls(self._text_clean)
             # Add the URLs found to `self.urls`
             #self.urls.extend(urls)
 

@@ -29,5 +29,6 @@ class FacebookIndexer:
                       'type={}\n'.format(redis_entry.type) +
                       'created_time={}\n'.format(redis_entry.created_time) +
                       'updated_time={}\n'.format(redis_entry.updated_time) +
-                      'message={}\n'.format(redis_entry.message)
+                      'message={}\n'.format(redis_entry.message) +
+                      'message_clean={}\n'.format(redis_entry.message_clean)
             )

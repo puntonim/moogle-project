@@ -14,7 +14,7 @@ class AbstractSolrUpdater(metaclass=ABCMeta):
     """
     def __init__(self, bearertoken_id):
         self.bearertoken_id = bearertoken_id
-        self.solr = open_solr_connection()
+        self.solr = open_solr_connection(self.CORE_NAME)
 
     def add(self, redis_entry, commit=False):
         doc = self._convert_redis_entry_to_solr_entry(redis_entry)

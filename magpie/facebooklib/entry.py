@@ -2,10 +2,12 @@ from abc import ABCMeta
 
 from redislist import AbstractRedisEntry
 from utils.exceptions import EntryNotToBeIndexed
+from utils.urls import remove_urls
 
 
 class AbstractFacebookEntry(metaclass=ABCMeta):
-    __all__ = ['id', 'from_name', 'from_id', 'type', 'created_time', 'updated_time', 'message']
+    __all__ = ['id', 'from_name', 'from_id', 'type', 'created_time', 'updated_time', 'message',
+               'message_clean']
 
 
 class ApiFacebookEntry(AbstractFacebookEntry):
@@ -44,8 +46,18 @@ class ApiFacebookEntry(AbstractFacebookEntry):
         Filter based on a single simple rule:
         a. If there is no message, than there is nothing to index.
         """
-        if not self.message:
+        if not self.message_clean:
             raise EntryNotToBeIndexed
+
+    @property
+    def message_clean(self):
+        try:
+            return self._message_clean
+        except AttributeError:
+            self._message_clean, urls = remove_urls(self.message)
+            # Add the URLs found to `self.urls`
+            #self.urls = urls
+            return self._message_clean
 
 
 class RedisFacebookEntry(AbstractFacebookEntry, AbstractRedisEntry):
@@ -61,7 +73,8 @@ class RedisFacebookEntry(AbstractFacebookEntry, AbstractRedisEntry):
             b'type': 'status',
             b'created_time': '2014-05-01T16:59:41+0000',
             b'updated_time': '2014-05-01T16:59:41+0000',
-            b'message': 'test message'
+            b'message': 'test message http://www.test.com',
+            b'message_clean': 'test message'
         }
     """
     pass
