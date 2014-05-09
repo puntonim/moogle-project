@@ -1,0 +1,13 @@
+[
+    {
+        "id": "93878937897", 
+        "bearertoken_id": "135348442",
+        "from_id": "456567657",
+        "from_name": "John Doe",
+        "type": "status",
+        "created_time": "2014-02-23T22:37:57Z",
+        "updated_time": "2014-02-23T22:37:57Z",
+        "message_original": "I love snowboarding and skis http://www.winter.com",
+        "message_clean": "I love snowboarding and skis"
+    }
+]

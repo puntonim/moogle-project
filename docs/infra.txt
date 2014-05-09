@@ -28,5 +28,5 @@ If you want to mount Solr's folder locally on your laptop:
     $ sshfs wendy:/home/nimiq/solr-4.6.1 /tmp/solr
 
 Test doc:
-    (wendy)$ cd ~/solr-4.6.1/moogle/exampledocs
-    $ ./post.sh samples.json
+    (wendy)$ cd ~/solr-4.6.1/moogle/solr/twitter/examples
+    $ ./post.sh tweet.json

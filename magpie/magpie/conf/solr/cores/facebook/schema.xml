@@ -6,19 +6,21 @@
 
         <field name="id" type="string" indexed="true" stored="true" required="true" multiValued="false"/>
         <field name="bearertoken_id" type="string" indexed="true" stored="false"/>
-        <field name="lang" type="string" indexed="true" stored="true"/>
-        <field name="created_at" type="tdate" indexed="true" stored="true"/>
-        <field name="retweeted" type="boolean" indexed="false" stored="true"/>
-        <field name="text_original" type="string" indexed="false" stored="true"/>
-        <field name="text_clean" type="tweet" indexed="true" stored="false"/>
+        <field name="from_id" type="string" indexed="true" stored="true"/>
+        <field name="from_name" type="string" indexed="true" stored="true"/>
+        <field name="type" type="string" indexed="true" stored="true"/>
+        <field name="created_time" type="tdate" indexed="true" stored="true"/>
+        <field name="updated_time" type="tdate" indexed="true" stored="true"/>
+        <field name="message_original" type="string" indexed="false" stored="true"/>
+        <field name="message_clean" type="post" indexed="true" stored="false"/>
         <!-- <field name="urls" type="string" indexed="true" stored="false" multiValued="true"/> -->
         <!-- Catch all field -->
-        <field name="text" type="tweet" indexed="true" stored="false" multiValued="true"/>
+        <field name="text" type="post" indexed="true" stored="false" multiValued="true"/>
     </fields>
 
     <uniqueKey>id</uniqueKey>
 
-    <copyField source="text_clean" dest="text"/>
+    <copyField source="message_clean" dest="text"/>
     <!-- <copyField source="urls" dest="text"/> NO!!! We don't want text analysis on urls -->
 
     <types>
@@ -155,13 +157,13 @@
 
         <!-- positionIncrementGap: prevent phrase queries from matching the end of one value and the beginning
              of the next value in multivalued fields -->
-        <fieldType name="tweet" class="solr.TextField" positionIncrementGap="100">
+        <fieldType name="post" class="solr.TextField" positionIncrementGap="100">
             <analyzer type="index">
                 <!-- Collapse repeated letters to a max of 2, e.g. "yummmm" to "yumm" -->
                 <charFilter class="solr.PatternReplaceCharFilterFactory"
                             pattern="([a-zA-Z])\1+"
                             replacement="$1$1"/>
-                <!-- Split only on whitespaces, so it preserves hashtags, mentions, hypheneted terms -->
+                <!-- Split only on whitespaces, so it preserves hashtags -->
                 <tokenizer class="solr.WhitespaceTokenizerFactory"/>
                 <!-- Split tokens into subwords based on parsing rules:
                       (1 means enabled, 0 means disabled)
@@ -206,9 +208,9 @@
                 <charFilter class="solr.PatternReplaceCharFilterFactory"
                             pattern="([a-zA-Z])\1+"
                             replacement="$1$1"/>
-                <!-- Split only on whitespaces, so it preserves hashtags, mentions, hypheneted terms -->
+                <!-- Split only on whitespaces, so it preserves hashtags -->
                 <tokenizer class="solr.WhitespaceTokenizerFactory"/>
-                <!-- See cooment on index analyzer -->
+                <!-- See comment on index analyzer -->
                 <filter class="solr.WordDelimiterFilterFactory"
                         generateWordParts="1"
                         splitOnCaseChange="0"
