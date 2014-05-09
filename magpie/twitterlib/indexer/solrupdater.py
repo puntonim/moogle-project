@@ -4,6 +4,8 @@ from time import strptime, mktime
 from datetime import datetime
 
 from solrupdater import AbstractSolrUpdater
+from models import Provider
+from magpie.settings import settings
 
 
 log = logging.getLogger('twitter')
@@ -16,6 +18,8 @@ class TwitterSolrUpdater(AbstractSolrUpdater):
     Parameters:
     bearertoken_id -- a `models.BearerToken.id`.
     """
+    CORE_NAME = settings.CORE_NAMES[Provider.NAME_TWITTER]
+
     def _convert_redis_entry_to_solr_entry(self, redis_entry):
         tweet = dict()
         tweet['bearertoken_id'] = self.bearertoken_id

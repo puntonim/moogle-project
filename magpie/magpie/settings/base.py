@@ -8,6 +8,7 @@ Then you can import settings in any module, like:
 """
 
 from os.path import join, normpath, dirname
+from models import Provider
 
 
 BASE_DIR = normpath(dirname(dirname(dirname(__file__))))
@@ -30,4 +31,8 @@ REDIS = {
 }
 
 # Solr connection.
-SOLR_URL = 'http://127.0.0.1:8983/solr/'
+SOLR_URL = 'http://127.0.0.1:8983/solr'
+CORE_NAMES = {
+    Provider.NAME_TWITTER: 'twitter',
+    Provider.NAME_FACEBOOK: 'facebook'
+}

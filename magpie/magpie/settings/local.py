@@ -13,7 +13,7 @@ REDIS = {
 }
 
 # Solr connection.
-SOLR_URL = 'http://192.168.1.76:8983/solr/'
+SOLR_URL = 'http://192.168.1.76:8983/solr'
 
 # Logging
 from logging.config import dictConfig
