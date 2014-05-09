@@ -15,7 +15,6 @@ class TwitterIndexer:
     bearertoken_id -- a `models.BearerToken.id`.
     access_token -- a `models.BearerToken.access_token`.
     """
-
     def __init__(self, bearertoken_id, access_token):
         self.bearertoken_id = bearertoken_id
         self.access_token = access_token

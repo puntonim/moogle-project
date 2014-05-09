@@ -1,11 +1,10 @@
 import logging
 import json
-from time import strptime, mktime
-from datetime import datetime
 
 from solrupdater import AbstractSolrUpdater
 from models import Provider
 from magpie.settings import settings
+from utils.dates import twitter_date_to_solr_date
 
 
 log = logging.getLogger('twitter')
@@ -28,13 +27,7 @@ class TwitterSolrUpdater(AbstractSolrUpdater):
         tweet['retweeted'] = redis_entry.retweeted
         tweet['text_original'] = redis_entry.text
         tweet['text_clean'] = redis_entry.text_clean
-
-        # Convert created_at (Twitter format: Sun Feb 23 10:49:52 +0000 2014) to a datetime
-        dt = redis_entry.created_at
-        dt = strptime(dt, '%a %b %d %H:%M:%S +0000 %Y')
-        dt = datetime.fromtimestamp(mktime(dt))
-        # Convert datetime to Solr format: 2014-02-23T10:49:52Z
-        tweet['created_at'] = '{}Z'.format(dt.isoformat())
+        tweet['created_at'] = twitter_date_to_solr_date(redis_entry.created_at)
 
         # Remove entries whose value is None
         tweet = {key: value for (key, value) in tweet.items() if value is not None}

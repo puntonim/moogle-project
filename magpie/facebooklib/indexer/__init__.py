@@ -1,6 +1,7 @@
 import logging
 
 from ..redislist import RedisFacebookList
+from .solrupdater import FacebookSolrUpdater
 
 
 log = logging.getLogger('facebook')
@@ -8,18 +9,20 @@ log = logging.getLogger('facebook')
 
 class FacebookIndexer:
     """
-    ...
-    """
+    Indexer to read all Facebook posts stored in Redis for a `bearertoken_id` and send them
+    to Solr.
 
+    Parameters:
+    bearertoken_id -- a `models.BearerToken.id`.
+    access_token -- a `models.BearerToken.access_token`.
+    """
     def __init__(self, bearertoken_id, access_token):
         self.bearertoken_id = bearertoken_id
         self.access_token = access_token
 
     def run(self):
-        """
-        ....
-        """
         redis = RedisFacebookList(self.bearertoken_id)
+        solr = FacebookSolrUpdater(self.bearertoken_id)
         for redis_entry in redis.iterate():
             # `redis_entry` is a `RedisFacebookEntry` instance.
 
@@ -32,3 +35,5 @@ class FacebookIndexer:
                       'message={}\n'.format(redis_entry.message) +
                       'message_clean={}\n'.format(redis_entry.message_clean)
             )
+            solr.add(redis_entry)
+        solr.commit()
