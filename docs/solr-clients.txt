@@ -1,0 +1,33 @@
+MYSOLR
+http://mysolr.readthedocs.org/en/latest/
+Actively developed
+Besto choice
+Python 3
+
+TXSOLR
+https://launchpad.net/txsolr
+Old and not maintained anymore
+
+PYSOLR, Python Solr
+https://bitbucket.org/cogtree/python-solr/overview/
+Python Solr is the new version of PySolr
+Old and not maintained anymore
+
+SOLRPY
+https://pypi.python.org/pypi/solrpy/
+It's ok but slower than mysolr
+Maybe no Python 3
+
+INSOL
+https://github.com/mdomans/insol
+Not mature nor actively developed
+No Python 3
+
+SUNBURNT
+http://github.com/tow/sunburnt
+Nothing special
+No Python 3
+
+HAYSTACK
+http://haystacksearch.org/
+When you want to integrate your Django models with Solr
