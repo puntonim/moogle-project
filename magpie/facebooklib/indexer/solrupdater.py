@@ -19,7 +19,7 @@ class FacebookSolrUpdater(AbstractSolrUpdater):
     """
     CORE_NAME = settings.CORE_NAMES[Provider.NAME_FACEBOOK]
 
-    def _convert_redis_entry_to_solr_entry(self, redis_entry):
+    def _convert_redis_entry_to_solr_doc(self, redis_entry):
         tweet = dict()
         tweet['bearertoken_id'] = self.bearertoken_id
         tweet['id'] = redis_entry.id
