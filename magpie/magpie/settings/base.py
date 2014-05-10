@@ -20,7 +20,7 @@ DATABASE = {
 
 # Dropbox settings.
 DROPBOX_MAX_FILE_SIZE = 10*1024*1024  # 10 MB in bytes
-DROPBOX_TEMP_REPO_PATH = normpath(join(BASE_DIR, '_tmp', 'dropbox'))
+DROPBOX_TEMP_STORAGE_PATH = normpath(join(BASE_DIR, '_tmp', 'dropbox'))
 DROPBOX_FILE_EXT_FILTER = ['txt', 'doc', 'docx', 'pdf']  # lowercase!
 
 # Redis connection.
@@ -34,5 +34,6 @@ REDIS = {
 SOLR_URL = 'http://127.0.0.1:8983/solr'
 CORE_NAMES = {
     Provider.NAME_TWITTER: 'twitter',
-    Provider.NAME_FACEBOOK: 'facebook'
+    Provider.NAME_FACEBOOK: 'facebook',
+    Provider.NAME_DROPBOX: 'dropbox'
 }

@@ -17,25 +17,31 @@ class AbstractSolrUpdater(metaclass=ABCMeta):
         self.solr = open_solr_connection(self.CORE_NAME)
 
     def add(self, redis_entry, commit=False):
-        doc = self._convert_redis_entry_to_solr_entry(redis_entry)
+        doc = self._convert_redis_entry_to_solr_doc(redis_entry)
 
         r = self.solr.update([doc], 'json', commit)
-        self._sanity_check(r)
-        if r.status != 200 or r.solr_status != 0:
-            raise Exception
+        self._sanity_check(r, True)
 
         if commit:
-            self.solr.commit()
+            self.commit()
 
     @abstractmethod
-    def _convert_redis_entry_to_solr_entry(self, redis_entry):
+    def _convert_redis_entry_to_solr_doc(self, redis_entry):
         pass
 
     @staticmethod
-    def _sanity_check(r):
-        if r.status != 200 or r.solr_status != 0:
-            raise SolrResponseError('HTTP Status: {}\nSolr Status: {}'.format(r.status,
-                                                                              r.solr_status))
+    def _sanity_check(r, is_check_solr_response=False):
+        if r.status != 200:
+            raise SolrResponseError('HTTP Status: {}\n{}'.format(
+                r.status, r.raw_content)
+            )
+
+        if is_check_solr_response:
+            if r.solr_status != 0:
+                raise SolrResponseError('Solr Status: {}\n{}'.format(
+                    r.solr_status, r.raw_content)
+                )
 
     def commit(self):
-        self.solr.commit()
+        r = self.solr.commit()
+        self._sanity_check(r)
