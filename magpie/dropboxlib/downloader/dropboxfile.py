@@ -55,8 +55,8 @@ class DropboxFile:
         Find a valid local name for the current file. In case a file with the same name already
         exists, then a number is added to the file name in order to make it unique.
         """
-        # Create user folder inside DROPBOX_TEMP_REPO_PATH, named after the bearertoken_id.
-        local_folder = normpath(join(settings.DROPBOX_TEMP_REPO_PATH, str(bearertoken_id)))
+        # Create user folder inside DROPBOX_TEMP_STORAGE_PATH, named after the bearertoken_id.
+        local_folder = normpath(join(settings.DROPBOX_TEMP_STORAGE_PATH, str(bearertoken_id)))
         if not exists(local_folder):
             mkdir(local_folder)
 

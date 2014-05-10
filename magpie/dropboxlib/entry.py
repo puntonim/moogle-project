@@ -8,7 +8,7 @@ from redislist import AbstractRedisEntry
 
 
 class AbstractDropboxEntry(metaclass=ABCMeta):
-    __all__ = ['id', 'path', 'operation']
+    __all__ = ['id', 'remote_path', 'local_name', 'operation']
 
 
 class ApiDropboxEntry(AbstractDropboxEntry):
@@ -66,10 +66,11 @@ class ApiDropboxEntry(AbstractDropboxEntry):
     """
 
     def __init__(self, entry_list):
-        self.path, self.metadata = self._sanity_check(entry_list)
+        self.remote_path, self.metadata = self._sanity_check(entry_list)
         self._filter()
-        self.id = self._build_id(self.path)
+        self.id = self._build_id(self.remote_path)
         self.operation = self._find_operation()
+        self.local_name = ''
 
 
     @staticmethod
@@ -116,12 +117,12 @@ class ApiDropboxEntry(AbstractDropboxEntry):
             try:
                 is_dir = self.metadata['is_dir']
                 size = self.metadata['bytes']
-                path = self.metadata['path']
+                remote_path = self.metadata['path']
             except KeyError as e:  # Case d.
                 raise InconsistentItemError('Some metadata are missing.') from e
 
             try:
-                ext = splitext(basename(path))[1][1:].lower()
+                ext = splitext(basename(remote_path))[1][1:].lower()
             except Exception as e:  # Case d.
                 raise InconsistentItemError('The file extension is not consistent.') from e
 
@@ -148,7 +149,7 @@ class ApiDropboxEntry(AbstractDropboxEntry):
 
     def __str__(self):
         return '<{}(remote_path={}, operation={})>'.format(
-            self.__class__.__name__, self.path, self.operation
+            self.__class__.__name__, self.remote_path, self.operation
         )
 
 
@@ -169,7 +170,7 @@ class RedisDropboxEntry(AbstractDropboxEntry, AbstractRedisEntry):
         if not self.operation in ['+', '-', 'X']:
             raise InconsistentItemError("The operation must be '+', '-' or 'X'.")
 
-        if self.operation == 'X' and not self.path == 'RESET':
+        if self.operation == 'X' and not self.remote_path == 'RESET':
             raise InconsistentItemError("If the operation is 'X' the remote_path"
                                         "must be 'REST'.")
 
@@ -183,9 +184,9 @@ class RedisDropboxEntry(AbstractDropboxEntry, AbstractRedisEntry):
 
     def is_reset(self):
         """True if the `operation` is 'X' and remote_path is 'RESET'."""
-        return self.path == 'RESET'
+        return self.remote_path == 'RESET'
 
     def __str__(self):
         return '<{}(operation={}, remote_path={})>'.format(
-            self.__class__.__name__, self.operation, self.path
+            self.__class__.__name__, self.operation, self.remote_path
         )

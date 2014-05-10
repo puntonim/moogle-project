@@ -35,9 +35,6 @@ class DropboxDownloader:
         return cl
 
     def run(self):
-        """
-
-        """
         print("Downloading for bearerid: ", self.bearertoken_id)
 
         redis_dw = RedisDropboxDownloadList(self.bearertoken_id)
@@ -60,18 +57,18 @@ class DropboxDownloader:
             # And a sanity check is run when creating a `RedisDropboxEntry` instance.
 
             # TODO
-            print(redis_entry.operation, redis_entry.path)
+            print(redis_entry.operation, redis_entry.remote_path)
 
             if redis_entry.is_add():
                 # Download the file. We could use client.get_file or client.get_file_and_metadata,
                 # but under the hood the actual call to the API is the same, cause that basic API
                 # call returns the file plus its metadata.
-                log.debug('Downloading: {}'.format(redis_entry.path))
-                content, metadata = self._client.get_file_and_metadata(redis_entry.path)
+                log.debug('Downloading: {}'.format(redis_entry.remote_path))
+                content, metadata = self._client.get_file_and_metadata(redis_entry.remote_path)
                 file = DropboxFile(content, metadata)
                 file.store_to_disk(self.bearertoken_id)
                 # Update `remote_path` attribute with the local name
-                redis_entry.path = file.local_name
+                redis_entry.local_name = file.local_name
 
             redis_ix.buffer(redis_entry)
         redis_ix.flush_buffer()

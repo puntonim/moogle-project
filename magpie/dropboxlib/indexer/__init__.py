@@ -1,6 +1,7 @@
 import logging
 
 from ..redislist import RedisDropboxIndexList
+from .solrupdater import DropboxSolrUpdater
 
 
 log = logging.getLogger('dropbox')
@@ -16,10 +17,8 @@ class DropboxIndexer:
         self.access_token = access_token
 
     def run(self):
-        """
-        ....
-        """
         redis = RedisDropboxIndexList(self.bearertoken_id)
+        solr = DropboxSolrUpdater(self.bearertoken_id)
         for redis_entry in redis.iterate():
             # `redis_entry` is a `RedisDropboxEntry` instance.
 
@@ -37,10 +36,11 @@ class DropboxIndexer:
             # And a sanity check is run when creating a `RedisDropboxEntry` instance.
 
             if redis_entry.is_del():
-                log.debug('DEL: {}'.format(redis_entry.path))
+                log.debug('DEL: {}'.format(redis_entry.remote_path))
 
             if redis_entry.is_reset():
                 log.debug('RESET')
 
             if redis_entry.is_add():
-                log.debug('ADD: {}'.format(redis_entry.path))
+                log.debug('ADD: {}'.format(redis_entry.remote_path))
+                solr.add(redis_entry)

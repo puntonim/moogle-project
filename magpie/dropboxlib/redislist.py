@@ -2,7 +2,7 @@ import datetime
 from unittest.mock import Mock
 
 from redislist import AbstractRedisList
-from .entry import RedisDropboxEntry
+from .entry import RedisDropboxEntry, AbstractDropboxEntry
 
 
 class RedisDropboxDownloadList(AbstractRedisList):
@@ -27,11 +27,12 @@ class RedisDropboxDownloadList(AbstractRedisList):
         Add a reset instruction to Redis' download list (through a pipeline which is a buffer).
         """
         entry = Mock()
-        entry.__all__ = ['id', 'path', 'operation']
+        entry.__all__ = AbstractDropboxEntry.__all__
         epoch = datetime.datetime.utcfromtimestamp(0)
         now = datetime.datetime.now()
         entry.id = '{}'.format((now - epoch).total_seconds())  # Seconds.milliseconds from epoch.
-        entry.path = 'RESET'
+        entry.remote_path = 'RESET'
+        entry.local_name = 'RESET'
         entry.operation = 'X'
         self.buffer(entry)
 
