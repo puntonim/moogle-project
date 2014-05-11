@@ -17,7 +17,7 @@ class DropboxSolrUpdater:
 
     def __init__(self, bearertoken_id):
         self.bearertoken_id = bearertoken_id
-        self.url = '{}/{}/update/extract'.format(settings.SOLR_URL, self.CORE_NAME)
+        self.url = '{}/{}/update'.format(settings.SOLR_URL, self.CORE_NAME)
 
     def add(self, redis_entry, commit=False):
         local_file_path = normpath(join(settings.DROPBOX_TEMP_STORAGE_PATH,
@@ -26,14 +26,8 @@ class DropboxSolrUpdater:
 
         # Build Solr doc.
         doc = self._convert_redis_entry_to_solr_doc(redis_entry, local_file_path)
-        # Build url params.
-        params = doc
-        params['wt'] = 'json'
-        files = {'file': open(local_file_path, 'rb')}
-        # Send request.
-        r = requests.post(self.url, params=params, files=files)
+        r = self._post_file(doc, local_file_path)
         self._sanity_check(r, True)
-        log.debug('Request to Solr: {}\nParams: {}'.format(self.url, params))
 
         if commit:
             self.commit()
@@ -63,20 +57,23 @@ class DropboxSolrUpdater:
         """
         pass
 
-    def reset(self):
+    def reset(self, commit=False):
         """
         Delete all docs for `bearertoken_id`.
         """
-        pass
+        q = 'bearertoken_id:{}'.format(self.bearertoken_id)
+        xml_data = '<delete><query>{}</query></delete>'.format(q)
+        r = self._post_xml(xml_data)
+        self._sanity_check(r)
+
+        if commit:
+            self.commit()
+
+        return r
 
     def commit(self):
-        url = 'http://192.168.1.76:8983/solr/dropbox/update'
-        xml_data = '<commit waitSearcher="true" expungeDeletes="false"/>'.encode('utf-8')
-        headers = {
-            'Content-type': 'text/xml; charset=utf-8',
-            'Content-Length': "%s" % len(xml_data)
-        }
-        r = requests.post(url, data=xml_data, headers=headers)
+        xml_data = '<commit waitSearcher="true" expungeDeletes="false"/>'
+        r = self._post_xml(xml_data)
         self._sanity_check(r)
         return r
 
@@ -96,3 +93,34 @@ class DropboxSolrUpdater:
                 solr_status, json.dumps(json.loads(r.text), indent=4))
             )
 
+    def _post_file(self, doc, local_file_path):
+        """
+        Post a file to add to Solr server.
+
+        Parameters:
+        doc -- doc to be added.
+        local_file_path -- local path of the file to add.
+        """
+        # Build url params.
+        params = doc
+        params['wt'] = 'json'
+        files = {'file': open(local_file_path, 'rb')}
+        log.debug('Posting file to Solr: {}\nParams: {}'.format(self.url, params))
+        # Send request.
+        r = requests.post('{}/extract'.format(self.url), params=params, files=files)
+        return r
+
+    def _post_xml(self, xml):
+        """
+        Send the xml to Solr server.
+
+        Parameters:
+        xml -- XML document to be posted.
+        """
+        xml_data = xml.encode('utf-8')
+        headers = {
+            'Content-type': 'text/xml; charset=utf-8',
+            'Content-Length': "%s" % len(xml_data)
+        }
+        r = requests.post(self.url, data=xml_data, headers=headers)
+        return r

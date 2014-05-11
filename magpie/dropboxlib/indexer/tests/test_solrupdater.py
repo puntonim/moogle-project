@@ -1,5 +1,7 @@
 from unittest import TestCase
 
+from utils.solr import open_solr_connection
+
 
 class DropboxSolrUpdaterTest(TestCase):
 
@@ -28,8 +30,16 @@ class DropboxSolrUpdaterTest(TestCase):
     def tearDown(self):
         pass
 
-    def test_file_saved(self):
+    def test_reset(self):
         """
         A file written with the right content and metadata.
         """
+        #self.solr.delete_by_query('bearertoken_id:13')
+        #self.solr.commit()
+        #solr = open_solr_connection('dropbox')
+        #response = solr.search(q='*:*')
+        from ..solrupdater import DropboxSolrUpdater
+        solr = DropboxSolrUpdater('4')
+        solr.reset()
+        solr.commit()
         self.assertTrue(True)

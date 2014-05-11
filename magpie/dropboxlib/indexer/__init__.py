@@ -37,9 +37,11 @@ class DropboxIndexer:
 
             if redis_entry.is_del():
                 log.debug('DEL: {}'.format(redis_entry.remote_path))
+                solr.delete(redis_entry)
 
             if redis_entry.is_reset():
                 log.debug('RESET')
+                solr.reset()
 
             if redis_entry.is_add():
                 log.debug('ADD: {}'.format(redis_entry.remote_path))
