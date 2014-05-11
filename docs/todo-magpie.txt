@@ -46,15 +46,38 @@ We can add them so users can explicitly search a link or a link from a specific 
 
 * When a BearerToken is removed (via Moogle) then the index in Solr must be deleted
 
+* DESIGN
+Can I do something to model in a connected (maybe hierarchical) structure these models:
+ - the main entity (a FB post, a tweet, o dropbox file) as given in a API response
+ - its redis entry
+ - its solr entry
+I've already done something for API entry and Redis entry: I think I can extend it to Solr
+
+* DESIGN
+Move Solr code to a new sub-project because it would be deployed in the machine where Sorl is.
+
 
 -- LOW PRIORITY -----------------------------------------------------------------------------------
 
 * TWITTER
-Aggiungere: favorited, favorite_count, retweet_count (v. doc)
+Add "dynamic" fields like: favorited, favorite_count, retweet_count
+
+* FACEBOOK
+Add "dynamic" field like: comments, likes
 
 * GOOGLE +
-Da aggiungere
+Add it
 
-* Replace settings.DROPBOX_FILE_EXT_FILTER w/ a setting coming from Moogle
+* Replace settings.DROPBOX_FILE_EXT_FILTER w/ a setting coming from Moogle Settings page
+
+* DROPBOX: the content of files is stored in Solr. This could take a lot of disk space even tho
+we only index files < 10 MB.
+Storing is the only way to use the "hit highlighting" feature.
+If we ever experience problems in disk space, we could change pur strategy and keep indexing
+files < 10 MB, but storing only files < 500 KB.
+We could do that by checking the file size in Python and then follow the ideas sketched here:
+http://wiki.apache.org/solr/ExtractingRequestHandler
+Paragraph: "You may notice that although you can search on any of the text in the sample document, you
+ may not be able to see that text when the document is retrieved..."
 
 ---------------------------------------------------------------------------------------------------
