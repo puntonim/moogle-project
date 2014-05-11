@@ -29,15 +29,14 @@ class DropboxSolrUpdater:
         # Build url params.
         params = doc
         params['wt'] = 'json'
-        ####files = {'file': open(local_file_path, 'rb')}
+        files = {'file': open(local_file_path, 'rb')}
         # Send request.
-        ####r = requests.post(self.url, params=params, files=files)
-        ####self._sanity_check(r, True)
+        r = requests.post(self.url, params=params, files=files)
+        self._sanity_check(r, True)
         log.debug('Request to Solr: {}\nParams: {}'.format(self.url, params))
 
         if commit:
-            ####self.commit()
-            pass
+            self.commit()
 
     def _convert_redis_entry_to_solr_doc(self, redis_entry, local_file_path):
         # Build the metadata-file path.
@@ -49,9 +48,12 @@ class DropboxSolrUpdater:
         metadata = json.loads(data)
 
         doc = dict()
+        doc['literal.bearertoken_id'] = self.bearertoken_id
         doc['literal.id'] = redis_entry.id
         doc['literal.remote_path'] = metadata['path']
         doc['literal.modified_at'] = dropbox_date_to_solr_date(metadata['modified'])
+        doc['literal.mime_type'] = metadata['mime_type']
+        doc['literal.bytes'] = metadata['bytes']
 
         return doc
 
@@ -74,7 +76,7 @@ class DropboxSolrUpdater:
             'Content-type': 'text/xml; charset=utf-8',
             'Content-Length': "%s" % len(xml_data)
         }
-        r = requests.post(url, data=xml_data, headers=headers, auth=self.auth)
+        r = requests.post(url, data=xml_data, headers=headers)
         self._sanity_check(r)
         return r
 

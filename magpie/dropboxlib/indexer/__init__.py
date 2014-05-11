@@ -44,3 +44,4 @@ class DropboxIndexer:
             if redis_entry.is_add():
                 log.debug('ADD: {}'.format(redis_entry.remote_path))
                 solr.add(redis_entry)
+        solr.commit()
