@@ -1,0 +1,13 @@
+A Solr doc for Dropbox is made of:
+ - a file, from which Tika extracts some metadata
+ - a set of metadata, like:
+    [
+        {
+            "id": "93878937897",
+            "bearertoken_id": "135348442",
+            "remote_path": "/myfolder/Myfile.txt",
+            "modified_at": "2014-02-23T22:37:57Z",
+            "mime_type": "text/plain; charset=ISO-8859-1",
+            "bytes": 562
+        }
+    ]

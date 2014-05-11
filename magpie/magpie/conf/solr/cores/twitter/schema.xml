@@ -187,7 +187,7 @@
                         catenateNumbers="0"
                         catenateAll="0"
                         types="wdfftypes.txt"/>
-                <!-- Removing English stopword
+                <!-- Remove English stopwords
                      TODO: this should be multilingual -->
                 <filter class="solr.StopFilterFactory"
                         ignoreCase="true"
@@ -225,7 +225,7 @@
                 <!-- Change diacritical marks to ASCII equivalent, e.g. "caffè" to "caffe"
                      TODO: this works for latin-based character, what for other languages? -->
                 <filter class="solr.ASCIIFoldingFilterFactory"/>
-                <!-- Removing English stopword
+                <!-- Remove English stopwords
                      TODO: this should be multilingual -->
                 <filter class="solr.StopFilterFactory"
                         ignoreCase="true"
