@@ -4,7 +4,7 @@
         <field name="_version_" type="long" indexed="true" stored="true"/>
         <field name="_root_" type="string" indexed="true" stored="false"/>
 
-        <!-- Dropbox specific fields -->
+        <!-- Dropbox specific fields. -->
         <field name="id" type="string" indexed="true" stored="true" required="true"
                multiValued="false"/>
         <field name="bearertoken_id" type="string" indexed="true" stored="false"/>
@@ -12,6 +12,14 @@
         <field name="modified_at" type="tdate" indexed="true" stored="true"/>
         <field name="mime_type" type="string" indexed="true" stored="true"/>
         <field name="bytes" type="long" indexed="true" stored="true"/>
+        <!-- Case insensitive version of remote_path and mime_type.
+             Keep in mind that "Dropbox treats file names in a case-insensitive but
+             case-preserving way. To facilitate this, the path strings above are lower-cased
+             versions of the actual path. The metadata dicts have the original, case-preserved
+             path."
+             https://www.dropbox.com/developers/core/docs/python#DropboxClient (see delta() method)
+        -->
+        <field name="remote_path_ci" type="string_case_insensitive" indexed="true" stored="false"/>
 
         <!-- Common metadata fields, named specifically to match up with
           SolrCell metadata when parsing rich documents such as Word, PDF.
@@ -106,8 +114,9 @@
 
     <uniqueKey>id</uniqueKey>
 
-    <!-- Dropbox specific fields -->
+    <!-- Dropbox specific fields. -->
     <copyField source="remote_path" dest="text"/>
+    <copyField source="remote_path" dest="remote_path_ci"/>
 
     <!-- Text fields from SolrCell to search by default in our catch-all field -->
     <copyField source="title" dest="text"/>
@@ -970,6 +979,26 @@
                 <filter class="solr.KStemFilterFactory"/>
             </analyzer>
         </fieldType>
+
+        <!-- Dropbox specific type. -->
+        <!-- String filed case insensitive.
+             Keep in mind that "Dropbox treats file names in a case-insensitive but
+             case-preserving way. To facilitate this, the path strings above are lower-cased
+             versions of the actual path. The metadata dicts have the original, case-preserved
+             path."
+             https://www.dropbox.com/developers/core/docs/python#DropboxClient (see delta() method)
+        -->
+        <fieldType name="string_case_insensitive" class="solr.TextField" positionIncrementGap="100">
+            <analyzer type="index">
+                <tokenizer class="solr.KeywordTokenizerFactory"/>
+                <filter class="solr.LowerCaseFilterFactory"/>
+            </analyzer>
+            <analyzer type="query">
+                <tokenizer class="solr.KeywordTokenizerFactory"/>
+                <filter class="solr.LowerCaseFilterFactory"/>
+            </analyzer>
+        </fieldType>
+
     </types>
 
 
