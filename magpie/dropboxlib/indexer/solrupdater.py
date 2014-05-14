@@ -1,6 +1,7 @@
 import requests
 import json
 from os.path import join, normpath, splitext, basename
+from os import remove
 import logging
 
 from utils.exceptions import SolrResponseError
@@ -34,6 +35,7 @@ class DropboxSolrUpdater:
         # Build Solr doc.
         doc = self._convert_redis_entry_to_solr_doc(redis_entry, local_file_path)
         self._post_file(doc, local_file_path)
+        self.delete_file(local_file_path)  # Delete the downloaded file.
 
         if commit:
             self.commit()
@@ -165,3 +167,8 @@ class DropboxSolrUpdater:
             raise SolrResponseError('Solr Status: {}\n{}'.format(
                 solr_status, json.dumps(json.loads(r.text), indent=4))
             )
+
+    @staticmethod
+    def delete_file(local_file_path):
+        remove(local_file_path)  # Delete the downloaded file.
+        remove(local_file_path + '.metadata')  # Delete the metadata file.
