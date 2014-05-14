@@ -117,4 +117,14 @@ if __name__ == '__main__':
 
         FacebookSynchronizer(bearertoken=bearertoken).run()
 
+    elif sys.argv[1] == 'resetindex':
+        from magpie.settings import settings
+        from utils.solr import open_solr_connection
 
+        CORE_NAME = settings.CORE_NAMES[sys.argv[2]]
+        solr = open_solr_connection(CORE_NAME)
+
+        query = 'bearertoken_id:{}'.format(sys.argv[3])
+        if sys.argv[3] == 'all':
+            query = '*:*'
+        r = solr.delete_by_query(query, True)
