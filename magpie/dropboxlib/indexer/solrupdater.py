@@ -1,6 +1,6 @@
 import requests
 import json
-from os.path import join, normpath
+from os.path import join, normpath, splitext, basename
 import logging
 
 from utils.exceptions import SolrResponseError
@@ -103,7 +103,6 @@ class DropboxSolrUpdater:
 
     def _delete_by_query(self, query):
         xml_data = '<delete><query>{}</query></delete>'.format(query)
-        print(xml_data)
         r = self._post_xml(xml_data)
         self._sanity_check(r)
 
@@ -118,8 +117,18 @@ class DropboxSolrUpdater:
         # Build url params.
         params = doc
         params['wt'] = 'json'
-        files = {'file': open(local_file_path, 'rb')}
-        log.debug('Posting file to Solr: {}\nParams: {}'.format(self.url, params))
+        # Normally we would use the following dictionary to attach a file to a `requests.post`:
+        #files = {'file': open(local_file_path, 'rb')}
+        # But this would fail silently when the file name contains special chars (like
+        # Chinese chars). The failure is subtle because the `requests.post` does not raise
+        # any exception, it just posts no file at all.
+        # To solve this we need to assign a fake name to the file.
+        ext = splitext(basename(local_file_path))[1]  # Get the extension of the original file.
+        # This way the posted file will be named: doc`.ext`.
+        files = {'doc': ('doc' + ext, open(local_file_path, 'rb'))}
+        log.debug('Posting file to Solr: {}'.format(self.url) +
+                  '\nParams: {}'.format(params) +
+                  '\nFile: {}'.format(local_file_path))
         # Send request.
         r = requests.post('{}/extract'.format(self.url), params=params, files=files)
         self._sanity_check(r)

@@ -36,14 +36,14 @@ class DropboxIndexer:
             # And a sanity check is run when creating a `RedisDropboxEntry` instance.
 
             if redis_entry.is_del():
-                log.debug('DEL: {}'.format(redis_entry.remote_path))
+                log.debug('Solr DEL: {}'.format(redis_entry.remote_path))
                 solr.delete(redis_entry)
 
             if redis_entry.is_reset():
-                log.debug('RESET')
+                log.debug('Solr RESET')
                 solr.reset()
 
             if redis_entry.is_add():
-                log.debug('ADD: {}'.format(redis_entry.remote_path))
+                log.debug('Solr ADD: {}'.format(redis_entry.remote_path))
                 solr.add(redis_entry)
         solr.commit()
