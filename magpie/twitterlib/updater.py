@@ -1,11 +1,11 @@
 from .crawler import TwitterCrawler
 from .indexer import TwitterIndexer
-from synchronizer import AbstractSynchronizer
+from updater import AbstractUpdater
 
 
-class TwitterSynchronizer(AbstractSynchronizer):
+class TwitterUpdater(AbstractUpdater):
     """
-    Manage the synchronization with Twitter.
+    Fetch updates from Twitter for a `bearertoken`.
     """
     def run(self):
         print(">>>>>> START CRAWLING")

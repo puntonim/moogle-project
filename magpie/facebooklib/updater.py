@@ -1,11 +1,11 @@
 from .crawler import FacebookCrawler
 from .indexer import FacebookIndexer
-from synchronizer import AbstractSynchronizer
+from updater import AbstractUpdater
 
 
-class FacebookSynchronizer(AbstractSynchronizer):
+class FacebookUpdater(AbstractUpdater):
     """
-    Manage the synchronization with Facebook.
+    Fetch updates from Facebook for a `bearertoken`.
     """
     def run(self):
         print(">>>>>> START CRAWLING")

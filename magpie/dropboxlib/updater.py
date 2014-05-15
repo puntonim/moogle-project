@@ -1,12 +1,12 @@
 from .crawler import DropboxCrawler
 from .downloader import DropboxDownloader
 from .indexer import DropboxIndexer
-from synchronizer import AbstractSynchronizer
+from updater import AbstractUpdater
 
 
-class DropboxSynchronizer(AbstractSynchronizer):
+class DropboxUpdater(AbstractUpdater):
     """
-    Manage the synchronization with Dropbox.
+    Fetch updates from Dropbox for a `bearertoken`.
     """
     def run(self):
         print(">>>>>> START CRAWLING")
