@@ -42,10 +42,12 @@ class UpdateManager:
         Provider.NAME_DROPBOX: DropboxUpdater,
     }
 
-    def __init__(self, bearertoken_id):
+    def __init__(self, bearertoken_id, reset_cursor=False):
         with session_autocommit() as sex:
             self.bearertoken = sex.query(BearerToken).filter_by(id=bearertoken_id).one()
             self.provider_name = self.bearertoken.provider.name
+            if reset_cursor:
+                self.bearertoken.updates_cursor = None
 
     @abstractmethod
     def run(self):

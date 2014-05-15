@@ -1,85 +1,7 @@
-#import sys
-#from os import environ
-#from os.path import join, normpath
-
-from models import Provider
-
-
-if __name__ == '__main__111':
-    # TODO use argparse
-    # See https://github.com/united-academics/uarepocamp/blob/master/campaign/scripts/send_bulk_email2.py
-
-    # TODO delete me
-    def _reset_cursor(bearertoken):
-        print("Resetting the cursor...")
-        bearertoken.updates_cursor = None
-
-    if True:
-        pass
-
-
-
-    elif sys.argv[1] == 'dropbox':
-        from dropboxlib.updater import DropboxUpdater
-        from utils.db import session_autocommit
-        from models import Provider
-
-        print("START DROPBOX")
-
-        with session_autocommit() as sex:
-            provider = sex.query(Provider).filter_by(name=Provider.NAME_DROPBOX).one()
-            bearertoken = provider.bearertokens[0]
-            try:
-                if sys.argv[2] == 'resetcursor':
-                    _reset_cursor(bearertoken)
-            except IndexError:
-                pass
-
-        DropboxUpdater(bearertoken=bearertoken).run()
-
-    elif sys.argv[1] == 'twitter':
-        from twitterlib.updater import TwitterUpdater
-        from utils.db import session_autocommit
-        from models import Provider
-
-        print("START TWITTER")
-
-        with session_autocommit() as sex:
-            provider = sex.query(Provider).filter_by(name=Provider.NAME_TWITTER).one()
-            bearertoken = provider.bearertokens[0]
-            try:
-                if sys.argv[2] == 'resetcursor':
-                    _reset_cursor(bearertoken)
-            except IndexError:
-                pass
-
-        TwitterUpdater(bearertoken=bearertoken).run()
-
-    elif sys.argv[1] == 'facebook':
-        from facebooklib.updater import FacebookUpdater
-        from utils.db import session_autocommit
-        from models import Provider
-
-        print("START FACEBOOK")
-
-        with session_autocommit() as sex:
-            provider = sex.query(Provider).filter_by(name=Provider.NAME_FACEBOOK).one()
-            bearertoken = provider.bearertokens[0]
-            try:
-                if sys.argv[2] == 'resetcursor':
-                    _reset_cursor(bearertoken)
-            except IndexError:
-                pass
-
-        FacebookUpdater(bearertoken=bearertoken).run()
-
-
-
-
-
-
-
 import argparse
+
+from magpie.settings import settings
+from models import Provider
 
 
 def syncdb(args):
@@ -134,24 +56,26 @@ def shell(args):
 
 
 def resetindex(args):
-    print("Resetting the Solr index for bearertoken_id: {}".format(args.bearertoken_id))
     from magpie.settings import settings
     from utils.solr import open_solr_connection
+    from utils.db import session_autocommit
+    from models import BearerToken
 
-    core_names = list()
-    if args.provider == 'all':
-        core_names = settings.CORE_NAMES.values()
-    else:
-        core_names.append(settings.CORE_NAMES[args.provider])
+    if args.bearertoken_id:
+        print("Resetting the Solr index for bearertoken_id: {}".format(args.bearertoken_id))
 
-    for core_name in core_names:
-        solr = open_solr_connection(core_name)
-
+        with session_autocommit() as sex:
+            bearertoken = sex.query(BearerToken).filter_by(id=args.bearertoken_id).one()
+            provider_name = bearertoken.provider.name
         query = 'bearertoken_id:{}'.format(args.bearertoken_id)
-        if args.all:
-            query = '*:*'
-        r = solr.delete_by_query(query, True)
-        print(r.raw_content)
+
+    if args.provider:
+        print("Resetting the Solr index for provider: {}".format(args.provider))
+        provider_name = args.provider
+        query = '*:*'
+
+    solr = open_solr_connection(settings.CORE_NAMES[provider_name])
+    r = solr.delete_by_query(query, True)
 
     print("Done.")
 
@@ -168,9 +92,7 @@ def update(args):
     print("Fetching updates for bearertoken_id: {}".format(args.bearertoken_id))
     from updater import UpdateManager
 
-    # TODO resetcursor
-
-    updater = UpdateManager(args.bearertoken_id)
+    updater = UpdateManager(args.bearertoken_id, args.reset_cursor)
     updater.run()
 
     print("Done.")
@@ -205,17 +127,19 @@ if __name__ == '__main__':
     subcmd = subparsers.add_parser('update', help='Fetch updates for a bearertoken_id.')
     subcmd.add_argument('bearertoken_id', type=int,
                         help='The bearertoken_id to fetch updates for.')
+    subcmd.add_argument('--reset-cursor', action='store_true',
+                        help='Reset the cursor before updating.')
     subcmd.set_defaults(func=update)
 
     # `resetindex` subcommand.
     subcmd = subparsers.add_parser('resetindex', help='Reset Solr index for a bearertoken_id.')
-    subcmd.add_argument('provider', choices=provider_names,
-                        help='Name of service provider.')
+    #subcmd.add_argument('bearertoken_id', type=int,
+    #                    help='The bearertoken_id to reset the Solr index.')
     group = subcmd.add_mutually_exclusive_group(required=True)
     group.add_argument('--bearertoken_id', type=int,
-                        help='The bearertoken_id to reset the index updates for.')
-    group.add_argument('--all', action='store_true',
-                       help='The bearertoken_ids')
+                        help='The bearertoken_id to reset the Solr index for.')
+    group.add_argument('--provider', choices=settings.CORE_NAMES.values(),
+                       help='The provider to reset the Solr index for.')
     subcmd.set_defaults(func=resetindex)
 
     args = parser.parse_args()
