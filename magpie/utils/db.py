@@ -82,7 +82,7 @@ def get_all_models_classes():
     return [x[1] for x in classes]
 
 
-def loaddata(path):
+def loaddata(content):
     """
     Read a json file containing objects which map to the models defined in `crawler.models`.
     Add those objects to the database.
@@ -96,10 +96,6 @@ def loaddata(path):
         for Cls in get_all_models_classes():
             if tablename == Cls.__tablename__:
                 return Cls
-
-    # Read the entire file and load it as json
-    with open(path, 'r', encoding='utf-8') as fin:
-        content = json.loads(fin.read())
 
     with session_autocommit() as sex:
         i = 0
