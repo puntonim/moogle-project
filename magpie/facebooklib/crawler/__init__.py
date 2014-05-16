@@ -34,16 +34,18 @@ class FacebookCrawler(AbstractCrawler):
         pagination_cursor -- the `next` parameter got from Facebook when the response
         has more pages.
         """
-        # Fields filter
+        # Fields filter.
         # TODO I might want to add more fields like comments or likes, but bare in mind that
         # TODO when doing so, you want to use: .limit(x)
         # TODO https://developers.facebook.com/docs/graph-api/using-graph-api/
         fields = 'fields=id,from,type,created_time,updated_time,message'
 
-        # The cursor
+        # The cursor.
         since = self._build_since_parameter()
+        # Numer of posts for each page.
+        limit = 'limit=100'
 
-        url = 'https://graph.facebook.com/v2.0/me/feed?{}&{}'.format(fields, since)
+        url = 'https://graph.facebook.com/v2.0/me/feed?{}&{}&{}'.format(fields, since, limit)
         if pagination_cursor:
             url = '{}&{}'.format(pagination_cursor, since)
 
@@ -55,7 +57,7 @@ class FacebookCrawler(AbstractCrawler):
         Build the since parameter used for pagination as explained here:
         https://developers.facebook.com/docs/graph-api/using-graph-api/#paging
         """
-        try:  # check whether _updates_cursor has already been initialized
+        try:  # Check whether _updates_cursor has already been initialized.
             cur = self._updates_cursor
         except AttributeError:
             cur = self._updates_cursor = self.bearertoken.updates_cursor
