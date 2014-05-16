@@ -21,7 +21,10 @@ class AbstractSolrUpdater(metaclass=ABCMeta):
         self.solr.update([doc], 'json', commit)
 
         if commit:
-            self.solr.commit()
+            self.commit()
+
+    def commit(self):
+        self.solr.commit()
 
     @abstractmethod
     def _convert_redis_entry_to_solr_doc(self, redis_entry):

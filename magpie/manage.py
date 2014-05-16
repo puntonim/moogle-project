@@ -57,8 +57,8 @@ def shell(args):
 
 def resetindex(args):
     from magpie.settings import settings
-    from utils.solr import open_solr_connection
     from utils.db import session_autocommit
+    from utils.solr import Solr
     from models import BearerToken
 
     if args.bearertoken_id:
@@ -74,9 +74,9 @@ def resetindex(args):
         provider_name = args.provider
         query = '*:*'
 
-    solr = open_solr_connection(settings.CORE_NAMES[provider_name])
-    r = solr.delete_by_query(query, True)
-
+    solr = Solr(settings.CORE_NAMES[provider_name])
+    solr.delete_by_query(query)
+    solr.commit()
     print("Done.")
 
 
@@ -143,4 +143,7 @@ if __name__ == '__main__':
     subcmd.set_defaults(func=resetindex)
 
     args = parser.parse_args()
-    args.func(args)
+    if hasattr(args, 'func'):
+        args.func(args)
+    else:
+        parser.print_help()

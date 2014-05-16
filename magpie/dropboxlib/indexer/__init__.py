@@ -9,16 +9,19 @@ log = logging.getLogger('dropbox')
 
 class DropboxIndexer:
     """
-    ...
-    """
+    Read all Dropbox entries stored in Redis for a `bearertoken_id` and send them to Solr.
 
+    Parameters:
+    bearertoken_id -- a `models.BearerToken.id`.
+    access_token -- a `models.BearerToken.access_token`.
+    """
     def __init__(self, bearertoken_id, access_token):
         self.bearertoken_id = bearertoken_id
         self.access_token = access_token
 
     def run(self):
         redis = RedisDropboxIndexList(self.bearertoken_id)
-        solr = DropboxSolrUpdater(self.bearertoken_id)
+        solr_updater = DropboxSolrUpdater(self.bearertoken_id)
         for redis_entry in redis.iterate():
             # `redis_entry` is a `RedisDropboxEntry` instance.
 
@@ -37,13 +40,13 @@ class DropboxIndexer:
 
             if redis_entry.is_del():
                 log.debug('Solr DEL: {}'.format(redis_entry.remote_path))
-                solr.delete(redis_entry)
+                solr_updater.delete(redis_entry)
 
             if redis_entry.is_reset():
                 log.debug('Solr RESET')
-                solr.reset()
+                solr_updater.reset()
 
             if redis_entry.is_add():
                 log.debug('Solr ADD: {}'.format(redis_entry.remote_path))
-                solr.add(redis_entry)
-        solr.commit()
+                solr_updater.add(redis_entry)
+        solr_updater.commit()

@@ -1,13 +1,12 @@
 import json
 from os.path import join, normpath
+import os
 import logging
 
 from utils.dates import dropbox_date_to_solr_date
 from magpie.settings import settings
 from models import Provider
-import utils.solr
-import utils.filesystem
-
+from utils.solr import Solr, escape_solr_query
 
 log = logging.getLogger('dropbox')
 
@@ -17,7 +16,7 @@ class DropboxSolrUpdater:
 
     def __init__(self, bearertoken_id):
         self.bearertoken_id = bearertoken_id
-        self.url = '{}/{}/update'.format(settings.SOLR_URL, self.CORE_NAME)
+        self.solr = Solr(self.CORE_NAME)
 
     def add(self, redis_entry, commit=False):
         """
@@ -32,15 +31,15 @@ class DropboxSolrUpdater:
 
         # Build Solr doc.
         doc = self._convert_redis_entry_to_solr_doc(redis_entry, local_file_path)
-        log.debug('Posting file to Solr: {}'.format(self.url) +
+        log.debug('Posting file to Solr: {}'.format(self.solr.url) +
                   '\nDoc: {}'.format(doc) +
                   '\nFile: {}'.format(local_file_path))
-        utils.solr.add_file(self.url, doc, local_file_path)
-        utils.filesystem.remove(local_file_path)  # Delete the downloaded file.
-        utils.filesystem.remove(local_file_path + '.metadata')  # Delete the metadata file.
+        self.solr.add_file(doc, local_file_path)
+        os.remove(local_file_path)  # Delete the downloaded file.
+        os.remove(local_file_path + '.metadata')  # Delete the metadata file.
 
         if commit:
-            utils.solr.commit(self.url)
+            self.commit()
 
     def _convert_redis_entry_to_solr_doc(self, redis_entry, local_file_path):
         # Build the metadata-file path.
@@ -81,21 +80,25 @@ class DropboxSolrUpdater:
         #   remote_path:(\/folder1\/folder2\/folder\ 3 OR \/folder1\/folder2\/folder\ 3\/*)
         #
         # Note: this is smart because we don't delete: /folder1/folder2/folder 30
-        root = utils.solr.escape_solr_query(redis_entry.remote_path)
+
+        root = escape_solr_query(redis_entry.remote_path)
         children = '{}\/*'.format(root)
         q = 'remote_path_ci:({} OR {}) '.format(root.lower(), children.lower()) + \
             'AND bearertoken_id:{}'.format(self.bearertoken_id)
-        utils.solr.delete_by_query(self.url, q)
+        self.solr.delete_by_query(q)
 
         if commit:
-            utils.solr.commit(self.url)
+            self.commit()
 
     def reset(self, commit=False):
         """
         Delete all files from the Solr index for the current `bearertoken_id`.
         """
         q = 'bearertoken_id:{}'.format(self.bearertoken_id)
-        utils.solr.delete_by_query(q)
+        self.solr.delete_by_query(q)
 
         if commit:
-            utils.solr.commit(self.url)
+            self.commit()
+
+    def commit(self):
+        self.solr.commit()

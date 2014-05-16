@@ -9,7 +9,7 @@ log = logging.getLogger('twitter')
 
 class TwitterIndexer:
     """
-    Indexer to read all tweets stored in Redis for a `bearertoken_id` and send them to Solr.
+    Read all tweets stored in Redis for a `bearertoken_id` and send them to Solr.
 
     Parameters:
     bearertoken_id -- a `models.BearerToken.id`.
@@ -21,7 +21,7 @@ class TwitterIndexer:
 
     def run(self):
         redis = RedisTwitterList(self.bearertoken_id)
-        solr = TwitterSolrUpdater(self.bearertoken_id)
+        solr_updater = TwitterSolrUpdater(self.bearertoken_id)
         for redis_entry in redis.iterate():
             # `redis_entry` is a `RedisTwitterEntry` instance.
             log.debug('Read a tweet from Redis:\n' +
@@ -32,5 +32,5 @@ class TwitterIndexer:
                       'text={}\n'.format(redis_entry.text) +
                       'text_clean={}\n'.format(redis_entry.text_clean)
             )
-            solr.add(redis_entry)
-        solr.commit()
+            solr_updater.add(redis_entry)
+        solr_updater.commit()
