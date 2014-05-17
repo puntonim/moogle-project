@@ -43,6 +43,15 @@ class Solr:
         r = self._mysolr.update(*args, **kwargs)
         self._sanity_check(r, True)
 
+    def search(self, *args, **kwargs):
+        """
+        Search in Solr.
+        It uses mysolr library.
+        """
+        r = self._mysolr.search(*args, **kwargs)
+        self._sanity_check(r, True)
+        return r
+
     def add_file(self, doc, local_file_path):
         """
         Post a file to add to Solr server.
