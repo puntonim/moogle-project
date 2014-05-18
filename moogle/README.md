@@ -16,7 +16,7 @@ Follow the steps in order to create a *local development* copy.
 We will refer to this folder as *repository root*.
 
 
-2. Clone the reposiotry
+2. Clone the repository
 -----------------------
     $ git clone https://github.com/nimiq/moogle-project.git .
 

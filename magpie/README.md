@@ -4,7 +4,7 @@ MAGPIE
 Magpie is the backend core engine which powers the Moogle Project.
 It crawls and index private data from service providers.
 It is powered by Python.
-
+store_tru
 Follow the steps in order to create a *local development* copy.
 
 **NOTE** The project is still in its early stages.
@@ -17,7 +17,7 @@ Follow the steps in order to create a *local development* copy.
 We will refer to this folder as *repository root*.
 
 
-2. Clone the reposiotry
+2. Clone the repository
 -----------------------
     $ git clone https://github.com/nimiq/moogle-project.git .
 
