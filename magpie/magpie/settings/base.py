@@ -18,6 +18,9 @@ DATABASE = {
     'NAME': normpath(join(BASE_DIR, 'magpie.db')),
 }
 
+# Test bearertoken_ids
+TEST_BEARERTOKEN_IDS = []
+
 # Dropbox settings.
 DROPBOX_MAX_FILE_SIZE = 10*1024*1024  # 10 MB in bytes
 DROPBOX_TEMP_STORAGE_PATH = normpath(join(BASE_DIR, '_tmp', 'dropbox'))

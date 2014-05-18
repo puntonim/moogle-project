@@ -25,9 +25,8 @@ class DropboxCrawler(AbstractCrawler):
         # `dropbox.client`, so we monkey patch the `get` method and make it call `delta`.
         def _delta(*args):
             log.debug("Querying DELTA")
-            return client.delta(cursor=updates_cursor,
-                                path_prefix='/temp/moogletest'  # TODO remove the prefix
-            )
+            return client.delta(cursor=updates_cursor,)
+                                #path_prefix='/temp/moogletest')  # TODO remove the prefix
         client.get = _delta
         return client
 

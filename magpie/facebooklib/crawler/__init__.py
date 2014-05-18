@@ -3,6 +3,7 @@ from requests_oauthlib import OAuth2Session
 
 from .response import ApiFacebookResponse
 from crawler import AbstractCrawler
+from magpie.settings import settings
 
 
 log = logging.getLogger('facebook')
@@ -42,10 +43,17 @@ class FacebookCrawler(AbstractCrawler):
 
         # The cursor.
         since = self._build_since_parameter()
-        # Numer of posts for each page.
+        # Number of posts for each page.
         limit = 'limit=100'
 
         url = 'https://graph.facebook.com/v2.0/me/feed?{}&{}&{}'.format(fields, since, limit)
+        # Test BearerToken: it uses my credentials but crawls mashable account.
+        if self.bearertoken.id in settings.TEST_BEARERTOKEN_IDS:
+            url = url.replace('/me/', '/mashable/')  # More than 62k entries as May 2014 (almost
+                                                     # 1h03m crawling and 13m indexing.
+            #url = url.replace('/me/', '/nytimes/')
+            #url = url.replace('/me/', '/IFeakingLoveScience/')
+
         if pagination_cursor:
             url = '{}&{}'.format(pagination_cursor, since)
 

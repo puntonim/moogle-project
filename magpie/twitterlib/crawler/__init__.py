@@ -3,6 +3,7 @@ from requests_oauthlib import OAuth1Session
 
 from .response import ApiTwitterResponse
 from crawler import AbstractCrawler
+from magpie.settings import settings
 
 
 log = logging.getLogger('twitter')
@@ -36,17 +37,20 @@ class TwitterCrawler(AbstractCrawler):
         max_id -- the `max_id` parameter got from Twitter and used for pagination as explained
         here: https://dev.twitter.com/docs/working-with-timelines
         """
+        user_id = self.bearertoken.user_id
+        # Test BearerToken: it uses my credentials but crawls lifehacker account.
+        if self.bearertoken.id in settings.TEST_BEARERTOKEN_IDS:
+            user_id = '7144422'  # @lifehacker  # 3241 tweets as of May 2014. It takes a minute
+                                                # or so to crawl and index.
+            #user_id = '6253282'  # @twitterapi
+            #user_id = '14885549'  # @ForbesTech
+            #user_id = '20536157'  # @google
         return ('https://api.twitter.com/1.1/statuses/user_timeline.json?' +
                 'trim_user=true&' +
                 'count=100&' +  # Number of tweets returned in each page.
-                'user_id={}&'.format(self.bearertoken.user_id) +
-                #'user_id=6253282&' +  # TODO DEBUG @twitterapi
-                #'user_id=14885549&' +  # TODO DEBUG @ForbesTech
-                #'user_id=7144422&' +  # TODO DEBUG @lifehacker
-                #'user_id=20536157&' +  # TODO DEBUG @google
+                'user_id={}&'.format(user_id) +
                 '{}&'.format(self._build_since_id_parameter()) +
-                '{}'.format(self._build_max_id_parameter(pagination_cursor))
-        )
+                '{}'.format(self._build_max_id_parameter(pagination_cursor)))
 
     def _build_since_id_parameter(self):
         """

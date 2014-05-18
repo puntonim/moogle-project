@@ -174,10 +174,18 @@ def redis_print(args):
 
 
 def update(args):
-    print("Fetching updates for bearertoken_id: {}".format(args.bearertoken_id))
     from updater import UpdateManager
 
-    updater = UpdateManager(args.bearertoken_id, args.reset_cursor)
+    bearertoken_id = args.bearertoken_id
+    if args.test_bearertoken_id:
+        if args.test_bearertoken_id == 'facebook':
+            bearertoken_id = '1000000'
+        elif args.test_bearertoken_id == 'twitter':
+            bearertoken_id = '1000001'
+        elif args.test_bearertoken_id == 'dropbox':
+            bearertoken_id = '1000002'
+    print("Fetching updates for bearertoken_id: {}".format(bearertoken_id))
+    updater = UpdateManager(bearertoken_id, args.reset_cursor)
     updater.run()
 
     print("Done.")
@@ -221,8 +229,11 @@ if __name__ == '__main__':
 
     # `update` subcommand.
     subcmd = subparsers.add_parser('update', help='Fetch updates for a bearertoken_id.')
-    subcmd.add_argument('bearertoken_id', type=int,
+    group = subcmd.add_mutually_exclusive_group(required=True)
+    group.add_argument('--bearertoken-id', type=int,
                         help='The bearertoken_id to fetch updates for.')
+    group.add_argument('--test-bearertoken-id', choices=Provider.NAME_CHOICES,
+                        help='Use the test bearertoken_id for the given provider.')
     subcmd.add_argument('--reset-cursor', action='store_true',
                         help='Reset the cursor before updating.')
     subcmd.set_defaults(func=update)
