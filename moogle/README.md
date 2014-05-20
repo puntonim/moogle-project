@@ -134,6 +134,9 @@ Check the settings file: `moogle/settings/local.py`
     $ python manage.py loaddata fixtures/users.json
     $ python manage.py loaddata fixtures/bearertokens.json
 
+Now you can login with username `admin` and password `admin`.
+It's **important** to change this password.
+
 
 9. Run the server
 -----------------
