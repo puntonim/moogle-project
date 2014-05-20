@@ -1,0 +1,65 @@
+[
+    {
+        "pk": 2,
+        "fields": {
+            "user_permissions": [],
+            "last_login": "2014-05-20T20:39:55.126Z",
+            "last_name": "",
+            "username": "lev",
+            "email": "",
+            "is_staff": true,
+            "first_name": "",
+            "date_joined": "2014-05-18T22:22:30Z",
+            "is_active": true,
+            "is_superuser": true,
+            "password": "your_password",
+            "groups": []
+        },
+        "model": "auth.user"
+    },
+    {
+        "model": "tokens.bearertoken",
+        "fields": {
+            "provider": 4,
+            "_access_token": "your_dropbox_access_token",
+            "user": 2
+        },
+        "pk": 46
+    },
+    {
+        "model": "tokens.bearertoken",
+        "fields": {
+            "provider": 2,
+            "_access_token": "your_gmail_access_token",
+            "user": 2
+        },
+        "pk": 47
+    },
+    {
+        "model": "tokens.bearertoken",
+        "fields": {
+            "provider": 5,
+            "_access_token": "your_twitter_access_token",
+            "user": 2
+        },
+        "pk": 48
+    },
+    {
+        "model": "tokens.bearertoken",
+        "fields": {
+            "provider": 3,
+            "_access_token": "your_facebook_access_token",
+            "user": 2
+        },
+        "pk": 49
+    },
+    {
+        "model": "tokens.bearertoken",
+        "fields": {
+            "provider": 1,
+            "_access_token": "your_drive_access_token",
+            "user": 2
+        },
+        "pk": 50
+    }
+]
