@@ -1,0 +1,67 @@
+[
+{
+    "model": "tokens.provider", 
+    "fields": {
+        "oauth_version": "2", 
+        "redirect_url": "/tokens/add/drive/callback", 
+        "_scope": "[\r\n    \"https://www.googleapis.com/auth/userinfo.email\",\r\n    \"https://www.googleapis.com/auth/userinfo.profile\",\r\n    \"https://www.googleapis.com/auth/drive.readonly\"\r\n]", 
+        "name": "drive", 
+        "request_token_url": "", 
+        "token_url": "https://accounts.google.com/o/oauth2/token", 
+        "authorization_base_url": "https://accounts.google.com/o/oauth2/auth"
+    }, 
+    "pk": 1
+},
+{
+    "model": "tokens.provider", 
+    "fields": {
+        "oauth_version": "2", 
+        "redirect_url": "/tokens/add/gmail/callback", 
+        "_scope": "[\r\n    \"https://www.googleapis.com/auth/userinfo.email\",\r\n    \"https://www.googleapis.com/auth/userinfo.profile\",\r\n    \"https://mail.google.com\"\r\n]", 
+        "name": "gmail", 
+        "request_token_url": "", 
+        "token_url": "https://accounts.google.com/o/oauth2/token", 
+        "authorization_base_url": "https://accounts.google.com/o/oauth2/auth"
+    }, 
+    "pk": 2
+},
+{
+    "model": "tokens.provider", 
+    "fields": {
+        "oauth_version": "2", 
+        "redirect_url": "/tokens/add/facebook/callback", 
+        "_scope": "[\r\n    \"read_stream\",\r\n    \"email\"\r\n]", 
+        "name": "facebook", 
+        "request_token_url": "", 
+        "token_url": "https://graph.facebook.com/oauth/access_token", 
+        "authorization_base_url": "https://www.facebook.com/dialog/oauth"
+    }, 
+    "pk": 3
+},
+{
+    "model": "tokens.provider", 
+    "fields": {
+        "oauth_version": "2", 
+        "redirect_url": "/tokens/add/dropbox/callback", 
+        "_scope": "", 
+        "name": "dropbox", 
+        "request_token_url": "", 
+        "token_url": "https://api.dropbox.com/1/oauth2/token", 
+        "authorization_base_url": "https://www.dropbox.com/1/oauth2/authorize"
+    }, 
+    "pk": 4
+},
+{
+    "model": "tokens.provider", 
+    "fields": {
+        "oauth_version": "1.0a", 
+        "redirect_url": "/tokens/add/twitter/callback", 
+        "_scope": "", 
+        "name": "twitter", 
+        "request_token_url": "https://api.twitter.com/oauth/request_token", 
+        "token_url": "https://api.twitter.com/oauth/access_token", 
+        "authorization_base_url": "https://api.twitter.com/oauth/authorize"
+    }, 
+    "pk": 5
+}
+]

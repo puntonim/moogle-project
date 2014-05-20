@@ -28,5 +28,5 @@ vars.environment
 # Any temp folder
 _tmp
 
-# Local files
-sample_bearertoken.json
+# Test fixtures
+test_user_*_bearertokens.json

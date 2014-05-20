@@ -1,0 +1,11 @@
+[
+    {
+        "model": "tokens.bearertoken",
+        "fields": {
+            "provider": 1,
+            "_access_token": "",
+            "user": 2
+        },
+        "pk": 50
+    }
+]
