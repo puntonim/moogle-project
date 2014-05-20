@@ -131,6 +131,8 @@ Check the settings file: `moogle/settings/local.py`
 8. Import the fixtures
 ----------------------
     $ python manage.py loaddata tokens/fixtures/providers.json
+    $ python manage.py loaddata tokens/fixtures/users.json
+    $ python manage.py loaddata tokens/fixtures/bearertokens.json
 
 
 9. Run the server
