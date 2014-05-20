@@ -1,0 +1,29 @@
+[
+    {
+        "tablename": "crawlers.bearertoken",
+        "id": 49,
+        "fields": {
+            "_token_set": "{...}",
+            "provider_id": 3,
+            "updates_cursor": ""
+        }
+    },
+    {
+        "tablename": "crawlers.bearertoken",
+        "id": 48,
+        "fields": {
+            "_token_set": "{...}",
+            "provider_id": 5,
+            "updates_cursor": ""
+        }
+    },
+    {
+        "tablename": "crawlers.bearertoken",
+        "id": 46,
+        "fields": {
+            "_token_set": "{...}",
+            "provider_id": 4,
+            "updates_cursor": ""
+        }
+    }
+]

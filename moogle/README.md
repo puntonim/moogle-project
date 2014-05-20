@@ -137,6 +137,8 @@ Check the settings file: `moogle/settings/local.py`
 Now you can login with username `admin` and password `admin`.
 It's **important** to change this password.
 
+See `fixture/README.md` to know how to create test `BearerToken`s.
+
 
 9. Run the server
 -----------------

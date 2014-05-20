@@ -140,7 +140,4 @@ Check the settings file: `magpie/settings/local.py`
 ----------------------
     $ python manage.py loaddata fixtures/providers.json
 
-Copy `fixtures/sample_bearertoken.json.template` to `fixtures/sample_bearertoken.json`.
-Add some user's bearer tokens, then import the fixture:
-
-    $ python manage.py loaddata fixtures/sample_bearertoken.json
+See `fixture/README.md` to know how to create test `BearerToken`s.
