@@ -52,6 +52,17 @@ class Solr:
         self._sanity_check(r, True)
         return r
 
+    def search_cursor(self, *args, **kwargs):
+        """
+        Search in Solr using a cursor to navigate next results.
+        It uses mysolr library.
+        """
+        # TODO: change this such as there is an automatic sanity_check
+        # TODO: then update also change_bearertoken_by_query() in solr_extra.py
+        cur = self._mysolr.search_cursor(*args, **kwargs)
+        ####self._sanity_check(r, True)
+        return cur
+
     def add_file(self, doc, local_file_path):
         """
         Post a file to add to Solr server.

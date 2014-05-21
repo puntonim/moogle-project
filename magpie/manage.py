@@ -191,6 +191,11 @@ def update(args):
     print("Done.")
 
 
+def ping(args):
+    print('Ping... pong')
+    print("Done.")
+
+
 if __name__ == '__main__':
     provider_names = list(Provider.NAME_CHOICES)
     provider_names.append('all')
@@ -257,6 +262,10 @@ if __name__ == '__main__':
     group.add_argument('--provider', choices=settings.CORE_NAMES.values(),
                        help='The provider (Solr core) to reset.')
     sub_subcmd.set_defaults(func=solr_print)
+
+    # `ping` subcommand -- just a mock.
+    subcmd = subparsers.add_parser('ping', help='Prints pong.')
+    subcmd.set_defaults(func=ping)
 
     args = parser.parse_args()
     if hasattr(args, 'func'):
