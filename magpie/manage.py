@@ -179,11 +179,11 @@ def update(args):
     bearertoken_id = args.bearertoken_id
     if args.test_bearertoken_id:
         if args.test_bearertoken_id == 'facebook':
-            bearertoken_id = '1000000'
+            bearertoken_id = '49'
         elif args.test_bearertoken_id == 'twitter':
-            bearertoken_id = '1000001'
+            bearertoken_id = '48'
         elif args.test_bearertoken_id == 'dropbox':
-            bearertoken_id = '1000002'
+            bearertoken_id = '46'
     print("Fetching updates for bearertoken_id: {}".format(bearertoken_id))
     updater = UpdateManager(bearertoken_id, args.reset_cursor)
     updater.run()
