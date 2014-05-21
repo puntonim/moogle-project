@@ -12,9 +12,6 @@ REDIS = {
     }
 }
 
-# Test bearertoken_ids
-TEST_BEARERTOKEN_IDS = [1000000, 1000001, 1000002]
-
 # Solr connection.
 SOLR_URL = 'http://192.168.1.76:8983/solr'
 
