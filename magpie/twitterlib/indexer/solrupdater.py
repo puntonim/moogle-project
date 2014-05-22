@@ -3,8 +3,8 @@ import json
 
 from solrupdater import AbstractSolrUpdater
 from models import Provider
-from magpie.settings import settings
 from utils.dates import twitter_date_to_solr_date
+from utils.solr import CORE_NAMES
 
 
 log = logging.getLogger('twitter')
@@ -17,7 +17,7 @@ class TwitterSolrUpdater(AbstractSolrUpdater):
     Parameters:
     bearertoken_id -- a `models.BearerToken.id`.
     """
-    CORE_NAME = settings.CORE_NAMES[Provider.NAME_TWITTER]
+    CORE_NAME = CORE_NAMES[Provider.NAME_TWITTER]
 
     def _convert_redis_entry_to_solr_doc(self, redis_entry):
         tweet = dict()

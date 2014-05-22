@@ -1,7 +1,7 @@
 import argparse
 
-from magpie.settings import settings
 from models import Provider
+from utils.solr import Solr, CORE_NAMES
 
 
 def syncdb(args):
@@ -56,9 +56,7 @@ def shell(args):
 
 
 def solr_reset(args):
-    from magpie.settings import settings
     from utils.db import session_autocommit
-    from utils.solr import Solr
     from models import BearerToken
     from sqlalchemy.orm.exc import NoResultFound
 
@@ -79,16 +77,14 @@ def solr_reset(args):
         provider_name = args.provider
         query = '*:*'
 
-    solr = Solr(settings.CORE_NAMES[provider_name])
+    solr = Solr(CORE_NAMES[provider_name])
     solr.delete_by_query(query)
     solr.commit()
     print("Done.")
 
 
 def solr_print(args):
-    from magpie.settings import settings
     from utils.db import session_autocommit
-    from utils.solr import Solr
     from models import BearerToken
     from sqlalchemy.orm.exc import NoResultFound
 
@@ -110,7 +106,7 @@ def solr_print(args):
         provider_name = args.provider
         query = '*:*'
 
-    solr = Solr(settings.CORE_NAMES[provider_name])
+    solr = Solr(CORE_NAMES[provider_name])
     r = solr.search(q=query)
     for doc in r.documents:
         del doc['content']
@@ -251,7 +247,7 @@ if __name__ == '__main__':
     group = sub_subcmd.add_mutually_exclusive_group(required=True)
     group.add_argument('--bearertoken_id', type=int,
                         help='The bearertoken_id to reset the Solr index for.')
-    group.add_argument('--provider', choices=settings.CORE_NAMES.values(),
+    group.add_argument('--provider', choices=CORE_NAMES.values(),
                        help='The provider (Solr core) to reset.')
     sub_subcmd.set_defaults(func=solr_reset)
     # `solr print` sub-subcommand.
@@ -259,7 +255,7 @@ if __name__ == '__main__':
     group = sub_subcmd.add_mutually_exclusive_group(required=True)
     group.add_argument('--bearertoken_id', type=int,
                         help='The bearertoken_id to reset the Solr index for.')
-    group.add_argument('--provider', choices=settings.CORE_NAMES.values(),
+    group.add_argument('--provider', choices=CORE_NAMES.values(),
                        help='The provider (Solr core) to reset.')
     sub_subcmd.set_defaults(func=solr_print)
 

@@ -4,7 +4,15 @@ from mysolr.response import SolrResponse
 import requests
 
 from magpie.settings import settings
-from utils.exceptions import SolrResponseError
+from .exceptions import SolrResponseError
+from models import Provider
+
+
+CORE_NAMES = {
+    Provider.NAME_TWITTER: 'twitter',
+    Provider.NAME_FACEBOOK: 'facebook',
+    Provider.NAME_DROPBOX: 'dropbox'
+}
 
 
 def escape_solr_query(query):
@@ -22,7 +30,7 @@ def escape_solr_query(query):
 class Solr:
     """
     A wrapper around `mysolr` library.
-    It adds
+    It adds features missing in `mysolr`, like delete by query or add file.
     """
     def __init__(self, core_name):
         self.url = '{}/{}'.format(settings.SOLR_URL, core_name)
@@ -51,17 +59,6 @@ class Solr:
         r = self._mysolr.search(*args, **kwargs)
         self._sanity_check(r, True)
         return r
-
-    def search_cursor(self, *args, **kwargs):
-        """
-        Search in Solr using a cursor to navigate next results.
-        It uses mysolr library.
-        """
-        # TODO: change this such as there is an automatic sanity_check
-        # TODO: then update also change_bearertoken_by_query() in solr_extra.py
-        cur = self._mysolr.search_cursor(*args, **kwargs)
-        ####self._sanity_check(r, True)
-        return cur
 
     def add_file(self, doc, local_file_path):
         """

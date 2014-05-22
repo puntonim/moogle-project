@@ -6,13 +6,14 @@ import logging
 from utils.dates import dropbox_date_to_solr_date
 from magpie.settings import settings
 from models import Provider
-from utils.solr import Solr, escape_solr_query
+from utils.solr import Solr, escape_solr_query, CORE_NAMES
+
 
 log = logging.getLogger('dropbox')
 
 
 class DropboxSolrUpdater:
-    CORE_NAME = settings.CORE_NAMES[Provider.NAME_DROPBOX]
+    CORE_NAME = CORE_NAMES[Provider.NAME_DROPBOX]
 
     def __init__(self, bearertoken_id):
         self.bearertoken_id = bearertoken_id
