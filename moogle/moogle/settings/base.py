@@ -104,3 +104,6 @@ from django.contrib.messages import constants as messages
 MESSAGE_TAGS = {
     messages.ERROR: 'danger',
 }
+
+# Solr connection.
+SOLR_URL = 'http://192.168.1.76:8983/solr'

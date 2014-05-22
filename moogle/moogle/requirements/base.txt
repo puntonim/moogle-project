@@ -5,3 +5,10 @@ requests-oauthlib==0.4.0
 # which requires:
 # requests
 # oauthlib
+mysolr==0.8.2
+# which requires:
+# anyjson
+# coveralls
+# PyYAML
+# docopt
+# coverage
