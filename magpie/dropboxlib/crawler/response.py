@@ -51,12 +51,6 @@ class ApiDropboxResponse(AbstractApiResponse):
         # current user.
         self.is_reset = self.response.get('reset', False)
         self.has_more = self.response.get('has_more', False)
-        # The cursor is the identifier used by Dropbox to keep track of the point in time of the
-        # last synchronization. Say we synchronized last time yesterday at 6pm and got a cursor.
-        # If we synchronize again today using the same cursor, we will get only the updates
-        # happened after yesterday 6pm.
-        self.updates_cursor = self.response.get('cursor', '')
-
         log.debug('Response got: \n{}'.format(json.dumps(response, indent=4)))
 
     def _init_redis_list(self, *args, **kwargs):
@@ -65,6 +59,8 @@ class ApiDropboxResponse(AbstractApiResponse):
     def _hook_parse_entire_response(self, redis):
         if self.is_reset:
             redis.buffer_add_reset()
+        self._build_updates_cursor()
+        self._build_pagination_cursor()
 
     def _extract_entries_list(self):
         return self.response.get('entries', list())
@@ -82,7 +78,12 @@ class ApiDropboxResponse(AbstractApiResponse):
         pass
 
     def _build_pagination_cursor(self):
-        pass
+        # The pagination cursor in this case is the updates_cursor.
+        self.pagination_cursor = self.updates_cursor
 
     def _build_updates_cursor(self):
-        pass
+        # The cursor is the identifier used by Dropbox to keep track of the point in time of the
+        # last synchronization. Say we synchronized last time yesterday at 6pm and got a cursor.
+        # If we synchronize again today using the same cursor, we will get only the updates
+        # happened after yesterday 6pm.
+        self.updates_cursor = self.response.get('cursor', '')
