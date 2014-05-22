@@ -2,7 +2,7 @@ MOOGLE PROJECT
 ==============
 
 Imagine you want to search for that sushi restaurant someone recommended you last month: you type
-"sushi restaurant" in your smart phone and you get a tweet from a friend talking about
+"sushi restaurant" in your smart phone and you get a tweet from a friend about
 Tokyo Sushi. You also get a comment you wrote on Facebook, an SMS message you sent your girlfriend
 and a bookmark in your browser, all about the same restaurant. And imagine that you can do this
 with your smart phone, your laptop, tablet or smart TV. Something so basic yet so far from
@@ -17,7 +17,7 @@ The project has 2 main components:
 Follow the steps written in the README.md files in `magpie` and `moogle` folder in order to
 create a *local development* copy.
 
-**NOTE** The project is still in its early stages.
+**NOTE**: The project is still in its early stages.
 
 
 Foreword
