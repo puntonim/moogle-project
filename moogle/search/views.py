@@ -31,15 +31,16 @@ def search(request, template='search.html'):
 
     args = {
         'gets': request.GET,
+        'twitter_results': twitter_results,
     }
     return render(request, template, args)
 
 
 def search_twitter(user, q):
-    bearertoken = BearerToken.objects.get(user=user, provider__name=Provider.NAME_TWITTER)\
-        .only('id')
+    bearertoken = BearerToken.objects.only(
+        'id').get(user=user, provider__name=Provider.NAME_TWITTER)
     fq = 'bearertoken_id:{}'.format(bearertoken.id)
 
     solr = Solr(CORE_NAMES[Provider.NAME_TWITTER])
     r = solr.search(q=q, fq=fq)
-    print(r.total_results)
+    return r.documents

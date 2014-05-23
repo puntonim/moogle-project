@@ -34,6 +34,11 @@ class Solr:
 
     @property
     def _mysolr(self):
+        # TODO: This thing of caching mysolr will be useless with mysolr 0.9, because it has the
+        # TODO: ability to resuse the same requests.session, like:
+        # TODO: session = requests.Session()
+        # TODO: solr = Solr('http://localhost:8983/solr/collection1', make_request=session)
+        # TODO: see http://mysolr.redtuna.org/en/latest/user/userguide.html
         try:
             return self._mysolr_cache
         except AttributeError:

@@ -11,5 +11,18 @@
 {% endblock title %}
 
 {% block content %}
+    <p>
     This is your search: {{ gets }}
+    </p>
+
+    <h1>Twitter</h1>
+    <p>
+        <ul>
+            {% for tweet in twitter_results %}
+                <li>
+                    {{ tweet.text_original }}
+                </li>
+            {% endfor %}
+        </ul>
+    </p>
 {% endblock content %}
