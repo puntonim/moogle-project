@@ -19,38 +19,39 @@
 
         <div class="col-md-10 provider-icons-container">
 
-            <form action="{% url 'search_search' %}" method="GET" class="search-form" role="search">
+            <form action="{% url 'search_search' %}" method="GET" class="search-form"
+                  role="search">
                 {% comment %}
                     We could make a loop here and print all the provider icon automatically, but
                     'explicit is better than implicit' in particular in templates where designers
                     have to work too.
                 {% endcomment %}
                 {% if gmail %}
-                    <div name="gmail"
+                    <div name="{{ name_gmail }}"
                          class="gmail-provider-icon provider-icon-hover provider-icon icon">
                     </div>
                 {% endif %}
 
                 {% if drive %}
-                    <div name="drive"
+                    <div name="{{ name_drive }}"
                          class="drive-provider-icon provider-icon-hover provider-icon icon">
                     </div>
                 {% endif %}
 
                 {% if facebook %}
-                    <div name="facebook"
+                    <div name="{{ name_facebook }}"
                          class="facebook-provider-icon provider-icon-hover provider-icon icon">
                     </div>
                 {% endif %}
 
                 {% if twitter %}
-                    <div name="twitter"
+                    <div name="{{ name_twitter }}"
                          class="twitter-provider-icon provider-icon-hover provider-icon icon">
                     </div>
                 {% endif %}
 
                 {% if dropbox %}
-                    <div name="dropbox"
+                    <div name="{{ name_dropbox }}"
                          class="dropbox-provider-icon provider-icon-hover provider-icon icon">
                     </div>
                 {% endif %}
@@ -69,11 +70,14 @@
                 </div>
 
                 {# Hidden input to mark which provider is selected #}
-                {% if gmail %}<input type="hidden" name="gmail" value="true">{% endif %}
-                {% if drive %}<input type="hidden" name="drive" value="true">{% endif %}
-                {% if facebook %}<input type="hidden" name="facebook" value="true">{% endif %}
-                {% if twitter %}<input type="hidden" name="twitter" value="true">{% endif %}
-                {% if dropbox %}<input type="hidden" name="dropbox" value="true">{% endif %}
+                {% if gmail %}<input type="hidden" name="{{ name_gmail }}" value="true">{% endif %}
+                {% if drive %}<input type="hidden" name="{{ name_drive }}" value="true">{% endif %}
+                {% if facebook %}<input type="hidden" name="{{ name_facebook }}"
+                                        value="true">{% endif %}
+                {% if twitter %}<input type="hidden" name="{{ name_twitter }}"
+                                       value="true">{% endif %}
+                {% if dropbox %}<input type="hidden" name="{{ name_dropbox }}"
+                                       value="true">{% endif %}
             </form>
 
         </div>

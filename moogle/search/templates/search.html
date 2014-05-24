@@ -11,18 +11,60 @@
 {% endblock title %}
 
 {% block content %}
-    <p>
-    This is your search: {{ gets }}
-    </p>
 
-    <h1>Twitter</h1>
-    <p>
+    {% if gmail_is_selected %}
+        <h1>Gmail</h1>
         <ul>
-            {% for tweet in twitter_results %}
+            {% for email in gmail_results %}
                 <li>
-                    {{ tweet.text_original }}
+                    ID: {{ email.id }}
                 </li>
             {% endfor %}
         </ul>
-    </p>
+    {% endif %}
+
+    {% if drive_is_selected %}
+        <h1>Drive</h1>
+        <ul>
+            {% for document in drive_results %}
+                <li>
+                    ID: {{ document.id }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    {% if facebook_is_selected %}
+        <h1>Facebook</h1>
+        <ul>
+            {% for post in facebook_results %}
+                <li>
+                    ID: {{ post.id }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    {% if dropbox_is_selected %}
+        <h1>Dropbox</h1>
+        <ul>
+            {% for document in dropbox_results %}
+                <li>
+                    ID: {{ document.id }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    {% if twitter_is_selected %}
+        <h1>Twitter</h1>
+        <ul>
+            {% for tweet in twitter_results %}
+                <li>
+                    ID: {{ tweet.id }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
 {% endblock content %}
