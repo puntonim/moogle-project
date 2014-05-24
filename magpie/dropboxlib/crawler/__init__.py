@@ -18,14 +18,14 @@ class DropboxCrawler(AbstractCrawler):
     def _init_client(self):
         client = DropboxClient(self.bearertoken.access_token)
         updates_cursor = self.bearertoken.updates_cursor
+        log.debug('Just read updates_cursor: {}'.format(updates_cursor))
 
         # Monkey patching the `get` method of client.
         # `AbstractCrawler` expects `client` to be a `request_oauthlib.OAuth1Session` or a
         # `request_oauthlib.OAuth1Session` with a `get` method. Here `client` is a
         # `dropbox.client`, so we monkey patch the `get` method and make it call `delta`.
-        def _delta(resource_url=updates_cursor, *args, **kwargs):
-            log.debug("Querying DELTA")
-            cursor = resource_url
+        def _delta(self, cursor=updates_cursor, *args, **kwargs):
+            log.debug("Querying DELTA w/ cursor: {}".format(cursor))
             return client.delta(cursor=cursor, *args, **kwargs)
                                 #path_prefix='/temp/moogletest')  # TODO remove the prefix
         client.get = _delta
