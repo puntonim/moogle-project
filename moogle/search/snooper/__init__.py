@@ -12,8 +12,8 @@ class Snooper:
         from .drive import DriveSnooper
 
         providers_snoopers_cls = {
-            #Provider.NAME_GMAIL: GmailSnooper,
-            #Provider.NAME_DRIVE: DriveSnooper,
+            Provider.NAME_GMAIL: GmailSnooper,
+            Provider.NAME_DRIVE: DriveSnooper,
             Provider.NAME_FACEBOOK: FacebookSnooper,
             Provider.NAME_DROPBOX: DropboxSnooper,
             Provider.NAME_TWITTER: TwitterSnooper,
