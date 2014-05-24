@@ -4,6 +4,13 @@ from utils.solr import Solr, CORE_NAMES
 
 class Snooper:
     def __new__(cls, provider_name, user, *args, **kwargs):
+        # Imports from here to avoid circular import problems w/ those modules.
+        from .facebook import FacebookSnooper
+        from .dropbox import DropboxSnooper
+        from .twitter import TwitterSnooper
+        from .gmail import GmailSnooper
+        from .drive import DriveSnooper
+
         providers_snoopers_cls = {
             #Provider.NAME_GMAIL: GmailSnooper,
             #Provider.NAME_DRIVE: DriveSnooper,
@@ -18,47 +25,20 @@ class Snooper:
 
     @staticmethod
     def search(*args, **kwargs):
+        """
+        Default search which returns no results.
+        """
         return []
 
 
 class BaseSolrSnooper:
+    extra_query_args = dict()
+
     def search(self, q):
         bearertoken = BearerToken.objects.only(
             'id').get(user=self.user, provider__name=self.provider_name)
         fq = 'bearertoken_id:{}'.format(bearertoken.id)
 
         solr = Solr(CORE_NAMES[self.provider_name])
-        r = solr.search(q=q, fq=fq, fl='id')
+        r = solr.search(q=q, fq=fq, **self.extra_query_args)
         return r.documents  # A list of dicts.
-
-
-class GmailSnooper(BaseSolrSnooper):
-    def __init__(self, user):
-        self.user = user
-        self.provider_name = Provider.NAME_GMAIL
-
-
-class DriveSnooper(BaseSolrSnooper):
-    def __init__(self, user):
-        self.user = user
-        self.provider_name = Provider.NAME_DRIVE
-
-
-class FacebookSnooper(BaseSolrSnooper):
-    def __init__(self, user):
-        self.user = user
-        self.provider_name = Provider.NAME_FACEBOOK
-
-
-class DropboxSnooper(BaseSolrSnooper):
-    def __init__(self, user):
-        self.user = user
-        self.provider_name = Provider.NAME_DROPBOX
-
-
-class TwitterSnooper(BaseSolrSnooper):
-    def __init__(self, user):
-        self.user = user
-        self.provider_name = Provider.NAME_TWITTER
-
-
