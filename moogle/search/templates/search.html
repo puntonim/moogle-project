@@ -13,58 +13,23 @@
 {% block content %}
 
     {% if gmail_is_selected %}
-        <h1>Gmail</h1>
-        <ul>
-            {% for email in gmail_results %}
-                <li>
-                    ID: {{ email.id }}
-                </li>
-            {% endfor %}
-        </ul>
+        {%  include 'results/gmail_results.html' %}
     {% endif %}
 
     {% if drive_is_selected %}
-        <h1>Drive</h1>
-        <ul>
-            {% for document in drive_results %}
-                <li>
-                    ID: {{ document.id }}
-                </li>
-            {% endfor %}
-        </ul>
+        {%  include 'results/drive_results.html' %}
     {% endif %}
 
     {% if facebook_is_selected %}
-        <h1>Facebook</h1>
-        <ul>
-            {% for post in facebook_results %}
-                <li>
-                    ID: {{ post.id }}
-                </li>
-            {% endfor %}
-        </ul>
+        {%  include 'results/facebook_results.html' %}
     {% endif %}
 
     {% if dropbox_is_selected %}
-        <h1>Dropbox</h1>
-        <ul>
-            {% for document in dropbox_results %}
-                <li>
-                    ID: {{ document.id }}
-                </li>
-            {% endfor %}
-        </ul>
+        {%  include 'results/dropbox_results.html' %}
     {% endif %}
 
     {% if twitter_is_selected %}
-        <h1>Twitter</h1>
-        <ul>
-            {% for tweet in twitter_results %}
-                <li>
-                    ID: {{ tweet.id }}
-                </li>
-            {% endfor %}
-        </ul>
+        {%  include 'results/twitter_results.html' %}
     {% endif %}
 
 {% endblock content %}

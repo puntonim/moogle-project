@@ -1,0 +1,14 @@
+<h1>Dropbox</h1>
+<ul>
+    {% for document in dropbox_results %}
+        <li>
+            Title: {{ document.title }}<br />
+            Path: {{ document.remote_path }}<br />
+            Id: {{ document.id }}<br />
+            Bytes: {{ document.bytes }}<br />
+            Mime_type: {{ document.mime_type }}<br />
+            Content_type: {{ document.content_type }}<br />
+            Modified: {{ document.modified_at }}
+        </li>
+    {% endfor %}
+</ul>

@@ -1,0 +1,12 @@
+<h1>Twitter</h1>
+<ul>
+    {% for tweet in twitter_results %}
+        <li>
+            Text: <b>{{ tweet.text_original }}</b><br />
+            Id: {{ tweet.id }}<br />
+            Lang: {{ tweet.lang }}<br />
+            Retweet: {{ tweet.retweeted }}<br />
+            Created: {{ tweet.created_at }}
+        </li>
+    {% endfor %}
+</ul>

@@ -1,0 +1,14 @@
+<h1>Facebook</h1>
+<ul>
+    {% for post in facebook_results %}
+        <li>
+            Message: <b>{{ post.message_original }}</b><br />
+            Id: {{ post.id }}<br />
+            Type: {{ post.type }}<br />
+            From: {{ post.from_name }}<br />
+            From_id: {{ post.from_id }}<br />
+            Created: {{ post.created_time }}<br />
+            Updated: {{ post.updated_time }}
+        </li>
+    {% endfor %}
+</ul>
