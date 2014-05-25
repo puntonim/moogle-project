@@ -12,7 +12,6 @@ class Provider(models.Model):
     It provides OAuth 2.0 protected resources.
     Any bearer (like Moogle) can access its protected resources using bearer tokens.
     """
-
     # `name` is a choice field because we only allow a pre-defined set of providers to be added.
     # Ideally each provider should have been a model, like FacebookProvider, TwitterProvider, ...
     # but they are all alike, no difference at all, so we decided to use only a model.
@@ -102,51 +101,57 @@ class Provider(models.Model):
 
 class BearerToken(models.Model):
     """
-    Token that a bearer (Moogle) can use to get access to OAuth 2.0 protected resources.
-    A protected resource belongs to a resource owner (user): it can be a Facebook profile, Google
-    Drive documents, tweets on Twitter, ...
+    Token that a bearer like Moogle and Magpie can use to get access to OAuth 2.0 protected
+    resources. A protected resource belongs to a resource owner (user): it can be a Facebook
+    profile, Google Drive documents, tweets on Twitter, ...
     """
-
     # `user` is the resource owner
     user = models.ForeignKey(User)
     provider = models.ForeignKey(Provider)
-    _access_token = models.TextField()
+    _token_set = models.TextField()
 
     objects = BearerTokenManager()
 
-    # `_access_token` is json text containing a serialized dictionary like:
+    # `_token_set` is json text containing a serialized dictionary like:
     #{
-    #    "refresh_token": "1/RPFj6FA6UahmuPUj3NqDEhdvfYNnXHCSIvhm1d2Yoj0",
+    #    "refresh_token": "1/UTY6FA......XHCSIvhm1dghJHHG678",
     #    "expires_in": 3600,
     #    "token_type": "Bearer",
     #    "access_token": "ya29.1.AADtN_VwezbeOQGkJE4_3ZDNZimrRf86Dn...pL8YB1rpVRhav0-mIiHEmV8",
     #    "id_token": "eyJhbGciOiJSUzI1NiIsI...U3MWJlNZoempIreV572mbxH7Rm90eNQwfShPQnI49u8bZgc"
     #}
-    # This example is a OAuth2 token (from Google) but it can be also OAuth1 token (like Twitter)
+    # This example is a OAuth2 token (from Google) but it can be also OAuth1 token (like Twitter).
     # A getter and a setter property are defined on this field to automatize the conversion
     # from json text to python  objects.
     #
-    # Getter and setter properties for _access_token to automatize the conversion from json text
+    # Getter and setter properties for _token_set to automatize the conversion from json text
     # to python objects.
     # The getter reads a json string from the db and returns a python dictionary.
     @property
-    def access_token(self):
+    def token_set(self):
         """
-        Getter property for `_access_token` to automatize the conversion from json text to python
+        Getter property for `_token_set` to automatize the conversion from json text to python
         objects. Read a json string from the db and return a python dictionary.
         """
         try:
-            return json.loads(self._access_token)
+            return json.loads(self._token_set)
         except ValueError:
             return None
 
-    @access_token.setter
-    def access_token(self, value):
+    @token_set.setter
+    def token_set(self, value):
         """
-        Setter property for `_access_token` to automatize the conversion from json text to python
+        Setter property for `_token_set` to automatize the conversion from json text to python
         objects. Receive a python dictionary and store a json string to the db.
         """
-        self._access_token = json.dumps(value, indent=4)
+        self._token_set = json.dumps(value, indent=4)
+
+    @property
+    def access_token(self):
+        """
+        Getter property for the access_token stored in `token_set` dictionary.
+        """
+        return self.token_set.get('access_token', '')
 
     class Meta:
         unique_together = ("user", "provider")

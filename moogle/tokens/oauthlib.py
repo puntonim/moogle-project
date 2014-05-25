@@ -37,10 +37,10 @@ class AbstractOauthFlowManager(metaclass=ABCMeta):
 
         auth_code = request.GET.get('code', None)
         sex = self._create_oauth_sex()
-        access_token = self._fetch_token(sex, auth_code, request)
+        token_set = self._fetch_token(sex, auth_code, request)
 
         # Save the new token
-        self._save_token(access_token, request.user)
+        self._save_token(token_set, request.user)
 
         # Save profile info
         # TODO launch a message via Celery asking to fetch profile info
@@ -64,9 +64,9 @@ class AbstractOauthFlowManager(metaclass=ABCMeta):
         """
         return oauth_sex
 
-    def _save_token(self, token, user):
+    def _save_token(self, token_set, user):
         tk, _ = BearerToken.objects.get_or_create(user=user, provider=self.provider)
-        tk.access_token = token
+        tk.token_set = token_set
         tk.save()
         return tk
 

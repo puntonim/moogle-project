@@ -3,7 +3,7 @@
         "model": "tokens.bearertoken",
         "fields": {
             "provider": 1,
-            "_access_token": "",
+            "_token_set": "",
             "user": 2
         },
         "pk": 50
