@@ -2,7 +2,15 @@
 <ul>
     {% for email in gmail_results %}
         <li>
-            {{ email }}
+            From: {{ email.from }}<br />
+            To: {{ email.to }}<br />
+            Date: {{ email.date }}<br />
+            Subject: {{ email.subject }}<br />
+            Text: <b>{{ email.text }}</b><br />
+            Thread_link: {{ email.thread_link }}<br />
+            Message_link: {{ email.message_link }}<br />
+            Content_transfer_encoding: {{ email.content_transfer_encoding }}<br />
+            Content_type: {{ email.content_type }}
         </li>
     {% endfor %}
 </ul>

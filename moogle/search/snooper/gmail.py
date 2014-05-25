@@ -1,6 +1,7 @@
 import imaplib
 import re
 import base64
+import quopri
 
 from tokens.models import Provider, BearerToken
 
@@ -76,8 +77,7 @@ class GmailSnooper:
         Build the auth string required for Gmail IMAP.
         """
         bearertoken = BearerToken.objects.get(user=self.user, provider__name=self.provider_name)
-        # TODO: it shouldn't be `bearertoken.access_token['access_token']`, but `bearertoken.access_token`
-        return 'user={}\1auth=Bearer {}\1\1'.format(self.email_address, bearertoken.access_token['access_token'])
+        return 'user={}\1auth=Bearer {}\1\1'.format(self.email_address, bearertoken.access_token)
 
     def _connect(self):
         """
@@ -126,8 +126,8 @@ class FetchedEmailParser:
                        '144d7b6c4392be36&view=conv&extsrc=atom',
         'message_link': 'http://mail.google.com/mail?account_id=johndoe@gmail.com&message_id='
                         '144d7b6c4392be36&view=conv&extsrc=atom',
-        'content-transfer-encoding': 'quoted-printable',
-        'content-type': 'text/plain; charset="utf-8"; format="fixed"',
+        'content_transfer_encoding': 'quoted-printable',
+        'content_type': 'text/plain; charset="utf-8"; format="fixed"',
     }
     """
     def __init__(self, response, email_address):
@@ -179,7 +179,10 @@ class FetchedEmailParser:
             if not isinstance(el, tuple):
                 continue  # We found the element: b')' (which is a byte).
             key = el[0].decode("utf-8")
-            value = el[1].decode("utf-8")
+            try:
+                value = el[1].decode("utf-8")
+            except UnicodeDecodeError:
+                value = el[1].decode("latin-1", errors='ignore')
 
             if 'HEADER' in key.upper():
                 self._parse_part1(key, value)
@@ -191,7 +194,7 @@ class FetchedEmailParser:
                 self._parse_part2(key, value)
 
         # Fix text, like decoding base64-encoded text.
-        self._fix_text_()
+        self._fix_texts_()
 
         return self.email
 
@@ -277,26 +280,76 @@ class FetchedEmailParser:
         """
         for line in value.splitlines():
             if 'content-type: ' in line.lower():
-                self.email['content-type'] = line[14:]
+                self.email['content_type'] = line[14:]
             elif 'content-transfer-encoding: ' in line.lower():
-                self.email['content-transfer-encoding'] = line[27:]
+                self.email['content_transfer_encoding'] = line[27:]
 
-    def _fix_text_(self):
+    def _fix_texts_(self):
         # When the text is encoded with base64.
-        if 'base64' in self.email.get('content-transfer-encoding', '').lower():
+        if 'base64' in self.email.get('content_transfer_encoding', '').lower():
             # Decode the first 98 chars w/ base 64.
             # Why 98? Cause the length must be a multiple of something... 100 doesn't always work.
             self.email['text'] = base64.b64decode(self.email['text'][:98]).decode("utf-8")
 
         # When the text is in plain-text.
-        if 'plain' in self.email.get('content-type', '').lower():
+        if 'plain' in self.email.get('content_type', '').lower():
             self.email['text'] = self.email['text'].replace('\r\n', ' ').strip()
             self.email['text'] = self.email['text'].replace('\n', ' ').strip()
             self.email['text'] = self.email['text'].replace('\r', ' ').strip()
 
-        # When the text is in HTML.
-        #if 'html' in email['content-type'].lower():
-        #    self.email['text'] = TODO try to decode the html
+        # When the text is in encoded in `quoted-printable`.
+        if 'quoted-printable' in self.email.get('content_transfer_encoding', '').lower():
+            self.email['text'] = quopri.decodestring(self.email['text']).decode()
+
+        # If self.email['text'] is a byte string we have to encode it using the right `charset`.
+        if isinstance(self.email['text'], bytes):
+            regex = r'.*charset=(\S+)'
+            match = re.search(regex, self.email['text'], re.I)
+            if match:
+                charset = match.group(1)
+                self.email['text'] = self.email['text'].decode(charset)
+
+        # Remove '=' (this is too aggressive, but many '=' are left).
+        self.email['text'] = self.email['text'].replace('=', '').strip()
+
+        # Remove '--' (this is too aggressive, but many '--' are left).
+        self.email['text'] = self.email['text'].replace('--', '').strip()
+
+        # Parse HTML text.
+        #if 'html' in self.email.get('content_type', '').lower():
+        #    self.email['text'] = ...
+
+        # Auto decode field.
+        self.email['subject'] = self._auto_decode_field(self.email['subject'])
+        self.email['from'] = self._auto_decode_field(self.email['from'])
+        self.email['to'] = self._auto_decode_field(self.email['to'])
+
+    @staticmethod
+    def _auto_decode_field(field):
+        """
+        Some fields are encoded together w/ the info necessary to decode them.
+        E.g.: '=?UTF-8?Q?Comunicazione=20di=20Servizio=20Telecom=20Italia!?='
+        """
+        regex = r'(.*)=\?(.*)\?([BQ])\?(.*)\?=(.*)'
+        match = re.search(regex, field, re.I)
+        if match:
+            prefix = match.group(1)  # Whatever comes before the regex.
+            charset = match.group(2)  # E.g.: 'UTF-8', 'ISO-8859-15'.
+            encoding = match.group(3)  # E.g.: 'Q' for quoted-printable, 'B' for base64.
+            content = match.group(4)  # The actual content.
+            suffix = match.group(5)  # Whatever comes after the regex.
+
+            if encoding.upper() == 'Q':
+                # Decode `content` using quoted-printable.
+                content = quopri.decodestring(content)
+            elif encoding.upper() == 'B':
+                # Decode `content` using base64.
+                content = base64.b64decode(content)
+
+            # Finally decode using `charset`.
+            field = '{}{}{}'.format(prefix, content.decode(charset), suffix)
+        return field
+
 
     @staticmethod
     def find_all_mail_folder(response):
