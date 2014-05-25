@@ -108,13 +108,13 @@ class BearerToken(Base):
 
     # `_token_set` is json text containing a serialized dictionary like:
     #{
-    #    "refresh_token": "1/RPFj6FA6UahmuPUj3NqDEhdvfYNnXHCSIvhm1d2Yoj0",
+    #    "refresh_token": "1/UTY6FA......XHCSIvhm1dghJHHG678",
     #    "expires_in": 3600,
     #    "token_type": "Bearer",
     #    "access_token": "ya29.1.AADtN_VwezbeOQGkJE4_3ZDNZimrRf86Dn...pL8YB1rpVRhav0-mIiHEmV8",
     #    "id_token": "eyJhbGciOiJSUzI1NiIsI...U3MWJlNZoempIreV572mbxH7Rm90eNQwfShPQnI49u8bZgc"
     #}
-    # This example is a OAuth2 token (from Google) but it can be also OAuth1 token (like Twitter)
+    # This example is a OAuth2 token (from Google) but it can be also OAuth1 token (like Twitter).
     # A getter and a setter property are defined on this field to automatize the conversion
     # from json text to python  objects.
     #
