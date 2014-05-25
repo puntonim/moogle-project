@@ -33,7 +33,7 @@ def search(request, template='search.html'):
     q = request.GET.get('q', '')
     args = dict()
     for provider_name, __ in Provider.NAME_CHOICES:
-        is_selected = True if request.GET.get(provider_name).lower() == 'true' else False
+        is_selected = True if request.GET.get(provider_name, '').lower() == 'true' else False
         args['{}_is_selected'.format(provider_name)] = is_selected
 
         results = Snooper(provider_name, request.user).search(q) if is_selected else []
