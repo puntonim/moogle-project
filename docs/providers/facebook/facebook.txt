@@ -115,18 +115,18 @@ Query through regular REST calls (through requests-oauthlib):
 -------------
 In JSON:
 {
-  "id": "1522956429",
-  "name": "Paulo Van Der Kofje",
-  "first_name": "Paulo",
-  "last_name": "Van Der Kofje",
-  "link": "https://www.facebook.com/puntonim",
+  "id": "3453454345",
+  "name": "John Doe",
+  "first_name": "John",
+  "last_name": "Doe",
+  "link": "https://www.facebook.com/johndoe",
   "gender": "male",
-  "email": "puntonim@gmail.com",
+  "email": "johndoe@gmail.com",
   "timezone": 1,
   "locale": "en_GB",
   "verified": true,
   "updated_time": "2014-01-24T18:08:10+0000",
-  "username": "puntonim",
+  "username": "johndoe",
 }
 
 

@@ -14,7 +14,7 @@ APPENDIX A. POST URL
 
 1. INTRO
 ========
-The set of items I can see in my wall at https://www.facebook.com/puntonim
+The set of items I can see in my wall at https://www.facebook.com/johndoe
 They can be my statuses or messages that a friend posted on my wall, or photos/videos I posted or linked or links in
 general that I posted.
 A feed query:
@@ -93,4 +93,4 @@ What if my server is not online? What if my server is too slow?
 APPENDIX A. POST URL
 ====================
 Build it using the id:
-https://www.facebook.com/puntonim/posts/10204097240900953
+https://www.facebook.com/johndoe/posts/10204456456900953
