@@ -153,6 +153,13 @@ class BearerToken(models.Model):
         """
         return self.token_set.get('access_token', '')
 
+    @property
+    def refresh_token(self):
+        """
+        Getter property for the refresh_token stored in `token_set` dictionary.
+        """
+        return self.token_set.get('refresh_token', '')
+
     class Meta:
         unique_together = ("user", "provider")
 

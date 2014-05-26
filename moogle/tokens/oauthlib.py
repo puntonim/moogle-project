@@ -101,6 +101,10 @@ class AbstractOauthFlowManager(metaclass=ABCMeta):
     def fetch_profile_details(self, user, token_set):
         pass
 
+    @abstractmethod
+    def refresh_token(self):
+        pass
+
 
 class DriveOauthFlowManager(AbstractOauthFlowManager):
     PROVIDER_NAME = Provider.NAME_DRIVE
@@ -125,6 +129,9 @@ class DriveOauthFlowManager(AbstractOauthFlowManager):
         return authorization_url, csrf_code
 
     def fetch_profile_details(self, user, token_set):
+        pass
+
+    def refresh_token(self):
         pass
 
 
@@ -154,6 +161,14 @@ class GmailOauthFlowManager(AbstractOauthFlowManager):
         profiler = GmailProfiler(user, token_set)
         profiler.fetch_profile_details()
 
+    def refresh_token(self, bearertoken):
+        sex = OAuth2Session(self.provider.client_id)
+        token_set = sex.refresh_token(self.provider.token_url,
+                                      refresh_token=bearertoken.refresh_token,
+                                      client_id=self.provider.client_id,
+                                      client_secret=self.provider.client_secret)
+        self._save_token(token_set, bearertoken.user)
+
 
 class FacebookOauthFlowManager(AbstractOauthFlowManager):
     PROVIDER_NAME = Provider.NAME_FACEBOOK
@@ -172,6 +187,9 @@ class FacebookOauthFlowManager(AbstractOauthFlowManager):
         return facebook_compliance_fix(oauth_sex)
 
     def fetch_profile_details(self, user, token_set):
+        pass
+
+    def refresh_token(self):
         pass
 
 
@@ -205,6 +223,9 @@ class TwitterOauthFlowManager(AbstractOauthFlowManager):
     def fetch_profile_details(self, user, token_set):
         pass
 
+    def refresh_token(self):
+        pass
+
 
 class DropboxOauthFlowManager(AbstractOauthFlowManager):
     PROVIDER_NAME = Provider.NAME_DROPBOX
@@ -216,6 +237,9 @@ class DropboxOauthFlowManager(AbstractOauthFlowManager):
         return authorization_url, csrf_code
 
     def fetch_profile_details(self, user, token_set):
+        pass
+
+    def refresh_token(self):
         pass
 
 

@@ -4,6 +4,7 @@ import base64
 import quopri
 
 from tokens.models import Provider, BearerToken
+from tokens.oauthlib import GmailOauthFlowManager
 from profiles.models import GmailProfile
 
 
@@ -78,30 +79,31 @@ class GmailSnooper:
         """
         Build the auth string required for Gmail IMAP.
         """
-        bearertoken = BearerToken.objects.get(user=self.user, provider__name=self.provider_name)
-        return 'user={}\1auth=Bearer {}\1\1'.format(self.email_address, bearertoken.access_token)
+        self.bearertoken = BearerToken.objects.get(user=self.user,
+                                                   provider__name=self.provider_name)
+        return 'user={}\1auth=Bearer {}\1\1'.format(self.email_address,
+                                                    self.bearertoken.access_token)
 
     def _connect(self):
         """
         Open a IMAP connection to Gmail.
         """
-        def do_connect(connection):
+        def do_connect():
+            connection = imaplib.IMAP4_SSL('imap.gmail.com')
+            #connection.debug = 4  # Prints all the steps to stdout.
+            auth_string = self._build_auth_string()
             connection.authenticate('XOAUTH2', lambda x: auth_string)
-
-        connection = imaplib.IMAP4_SSL('imap.gmail.com')
-        #connection.debug = 4  # Prints all the steps to stdout.
-        auth_string = self._build_auth_string()
+            return connection
 
         # TODO: IMAP must be enabled in the Gmail settings for the current user
         try:
-            do_connect(connection)
+            connection = do_connect()
         except imaplib.IMAP4.error as e:
-            # TODO: Manage the expiration of Gmail token (see old project).
             if 'invalid credentials' in str(e).lower():
-                print('YOU HAVE TO REFRESH THE TOKEN')
-                # TODO: first refresh token
-                # TODO: then: do_connect(connection)
-                raise
+                # Time to refresh the token.
+                mgr = GmailOauthFlowManager()
+                mgr.refresh_token(self.bearertoken)
+                connection = do_connect()
             else:
                 raise
         return connection
