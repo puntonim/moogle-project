@@ -30,6 +30,10 @@ Faccio tutto in lingua inglese? Uso il riconoscimento linguistico in Solr?
 * When a user wants to disconnect a provider (so delete a bearer token) then we should warn him
 that also the index will be deleted
 
+* Refresh tokens
+Snooper: done for Gmail, missing for Drive
+Profiler: missing (cause currently the profile is run right after a Provider is added)
+
 
 -- LOW PRIORITY -----------------------------------------------------------------------------------
 

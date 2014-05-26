@@ -3,7 +3,7 @@ Friday 2014.01.17 13:42:13
 
 -- HIGH PRIORITY ----------------------------------------------------------------------------------
 
-* Expired access token?
+* Refresh tokens
 
 * Facebook, Twitter, Dropbox: can we build some inheritance relationships for ApiFacebookResponse
 and similar?
