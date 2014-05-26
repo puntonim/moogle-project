@@ -49,7 +49,6 @@ def callback(request, provider_name):
     """
     The call back of the OAuth protocol. Receive the BearerToken.
     """
-
     # TODO: too similar to add(), refactor it
 
     try:
@@ -63,8 +62,7 @@ def callback(request, provider_name):
     mgr.step2(request)
 
     messages.success(request, '<strong>Well done!</strong> You can now use <em>{}</em>.'.format(
-        provider.get_name_display())
-    )
+        provider.get_name_display()))
 
     return redirect(reverse('tokens_dashboard'))
 

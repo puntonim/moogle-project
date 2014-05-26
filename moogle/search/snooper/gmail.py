@@ -4,13 +4,15 @@ import base64
 import quopri
 
 from tokens.models import Provider, BearerToken
+from profiles.models import GmailProfile
 
 
 class GmailSnooper:
     def __init__(self, user):
         self.user = user
         self.provider_name = Provider.NAME_GMAIL
-        self.email_address = 'johndoe@gmail.com'  # TODO: Read it in the database.
+        profile = GmailProfile.objects.get(user=user)
+        self.email_address = profile.email
 
     def search(self, q):
         imap = self._connect()

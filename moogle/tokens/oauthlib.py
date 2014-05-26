@@ -9,10 +9,11 @@ from requests_oauthlib import OAuth2Session, OAuth1Session
 
 # Imports from local apps
 from .models import Provider, BearerToken
+from profiles.profiler.gmail import GmailProfiler
 
 
 class AbstractOauthFlowManager(metaclass=ABCMeta):
-    # Per terminologia vedi:
+    # Terminology:
     # http://tools.ietf.org/html/rfc6750
     # http://hueniverse.com/oauth/
     # http://oauth.net/
@@ -42,9 +43,9 @@ class AbstractOauthFlowManager(metaclass=ABCMeta):
         # Save the new token
         self._save_token(token_set, request.user)
 
-        # Save profile info
-        # TODO launch a message via Celery asking to fetch profile info
-        # This message is picked up by the profile app
+        # TODO: Query and save profile info.
+        # TODO: This should be a task run asynchronously.
+        self.fetch_profile_details(request.user, token_set)
 
     def _create_oauth_sex(self):
         sex = OAuth2Session(
@@ -96,8 +97,12 @@ class AbstractOauthFlowManager(metaclass=ABCMeta):
     def _get_authorization_url(self, oauth_sex):
         pass
 
+    @abstractmethod
+    def fetch_profile_details(self, user, token_set):
+        pass
 
-class GoogleDriveOauthFlowManager(AbstractOauthFlowManager):
+
+class DriveOauthFlowManager(AbstractOauthFlowManager):
     PROVIDER_NAME = Provider.NAME_DRIVE
 
     def _get_authorization_url(self, oauth_sex):
@@ -119,8 +124,11 @@ class GoogleDriveOauthFlowManager(AbstractOauthFlowManager):
         )
         return authorization_url, csrf_code
 
+    def fetch_profile_details(self, user, token_set):
+        pass
 
-class GoogleGmailOauthFlowManager(AbstractOauthFlowManager):
+
+class GmailOauthFlowManager(AbstractOauthFlowManager):
     PROVIDER_NAME = Provider.NAME_GMAIL
 
     def _get_authorization_url(self, oauth_sex):
@@ -142,6 +150,10 @@ class GoogleGmailOauthFlowManager(AbstractOauthFlowManager):
         )
         return authorization_url, csrf_code
 
+    def fetch_profile_details(self, user, token_set):
+        profiler = GmailProfiler(user, token_set)
+        profiler.fetch_profile_details()
+
 
 class FacebookOauthFlowManager(AbstractOauthFlowManager):
     PROVIDER_NAME = Provider.NAME_FACEBOOK
@@ -159,6 +171,9 @@ class FacebookOauthFlowManager(AbstractOauthFlowManager):
         """
         return facebook_compliance_fix(oauth_sex)
 
+    def fetch_profile_details(self, user, token_set):
+        pass
+
 
 class TwitterOauthFlowManager(AbstractOauthFlowManager):
     PROVIDER_NAME = Provider.NAME_TWITTER
@@ -168,16 +183,14 @@ class TwitterOauthFlowManager(AbstractOauthFlowManager):
             self.provider.client_id,
             client_secret=self.provider.client_secret,
             # TODO: fix this to a proper url
-            callback_uri='http://127.0.0.1:8000' + self.provider.redirect_url
-        )
+            callback_uri='http://127.0.0.1:8000' + self.provider.redirect_url)
 
     def _get_authorization_url(self, oauth_sex):
         # Twitter uses OAuth1.0a which requires a step before getting the authorization_url
         oauth_sex.fetch_request_token(self.provider.request_token_url)
 
         authorization_url = oauth_sex.authorization_url(
-            self.provider.authorization_base_url,
-        )
+            self.provider.authorization_base_url,)
         return authorization_url, None
 
     def _prevent_csrf(self, request):
@@ -187,8 +200,10 @@ class TwitterOauthFlowManager(AbstractOauthFlowManager):
     def _fetch_token(self, oauth_sex, _, request):
         oauth_sex.parse_authorization_response(request.build_absolute_uri())
         return oauth_sex.fetch_access_token(
-            self.provider.token_url,
-        )
+            self.provider.token_url,)
+
+    def fetch_profile_details(self, user, token_set):
+        pass
 
 
 class DropboxOauthFlowManager(AbstractOauthFlowManager):
@@ -200,18 +215,21 @@ class DropboxOauthFlowManager(AbstractOauthFlowManager):
         )
         return authorization_url, csrf_code
 
+    def fetch_profile_details(self, user, token_set):
+        pass
+
 
 class OAuthFlowMangerFactory:
     """
     Abstract Factory o Abstract Method ???? pattern
     """
     _factory_map = {
-        Provider.NAME_DRIVE: GoogleDriveOauthFlowManager,
-        Provider.NAME_GMAIL: GoogleGmailOauthFlowManager,
+        Provider.NAME_DRIVE: DriveOauthFlowManager,
+        Provider.NAME_GMAIL: GmailOauthFlowManager,
         Provider.NAME_FACEBOOK: FacebookOauthFlowManager,
         Provider.NAME_TWITTER: TwitterOauthFlowManager,
         Provider.NAME_DROPBOX: DropboxOauthFlowManager,
-        }
+    }
 
     @staticmethod
     def create_oauth_flow_manger(provider):
