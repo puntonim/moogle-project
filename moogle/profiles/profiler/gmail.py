@@ -34,18 +34,23 @@ class GmailProfiler:
         return r.json()  # Returns a dictionary.
 
     def _store_profile_details(self, data):
-        # `data` is a dictionary like:
-        #{
-        #    "locale": "en",
-        #    "family_name": "Doe",
-        #    "email": "johndoe@gmail.com",
-        #    "link": "https://profiles.google.com/353452857839983457489",
-        #    "verified_email": true,
-        #    "id": "353452857839983457489",
-        #    "gender": "male",
-        #    "given_name": "John",
-        #    "name": "John Doe"
-        #}
+        """
+        Store profile details into `GmailProfile`.
+
+        Parameters:
+        data -- a dictionary like:
+        {
+            "locale": "en",
+            "family_name": "Doe",
+            "email": "johndoe@gmail.com",
+            "link": "https://profiles.google.com/353452857839983457489",
+            "verified_email": true,
+            "id": "353452857839983457489",
+            "gender": "male",
+            "given_name": "John",
+            "name": "John Doe"
+        }
+        """
         profile, __ = GmailProfile.objects.get_or_create(user=self.user)
         profile.family_name = data.get('family_name', '')
         profile.given_name = data.get('given_name', '')
