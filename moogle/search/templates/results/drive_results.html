@@ -2,7 +2,22 @@
 <ul>
     {% for document in drive_results %}
         <li>
-            ID: {{ document.id }}
+            title: {{ document.title }}<br />
+            originalFilename: {{ document.originalFilename }}<br />
+            fileExtension: {{ document.fileExtension }}<br />
+            mimeType: {{ document.mimeType }}<br />
+            kind: {{ document.kind }}<br />
+            fileSize: {{ document.fileSize }}<br />
+            modifiedDate: {{ document.modifiedDate }}<br />
+            createdDate: {{ document.createdDate }}<br />
+            ownerNames: {{ document.ownerNames }}<br />
+            owners: {{ document.owners }}<br />
+            thumbnailLink: {{ document.thumbnailLink }}<br />
+            webContentLink: {{ document.webContentLink }}<br />
+            alternateLink: {{ document.alternateLink }}<br />
+            iconLink: {{ document.iconLink }}<br />
+            exportLinks: {{ document.exportLinks }}<br />
+            embedLink: {{ document.embedLink }}
         </li>
     {% endfor %}
 </ul>
