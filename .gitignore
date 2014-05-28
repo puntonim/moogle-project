@@ -31,3 +31,6 @@ _tmp
 # Test fixtures
 test_user_*_bearertokens.json
 test_bearertokens*.json
+
+# Explicitly ignored
+*_ignore.*
