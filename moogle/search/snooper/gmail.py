@@ -161,10 +161,10 @@ class FetchedEmailParser:
             # PART 1
             (b' 24294 (X-GM-THRID 1447735411271508216 X-GM-MSGID 1447735411271508216 UID 110780
               BODY[HEADER.FIELDS (SUBJECT FROM TO DATE)] {172}',
-             b'Date: Sat, 22 Dec 2007 06:28:42 -0800\r\nFrom: "Il team di Gmail"
+             b'Date: Sat, 22 Dec 2007 06:28:42 -0800\r\nFrom: "Gmail Team"
                <mail-noreply@google.com>\r\nTo: "John Doe" <johndoe@gmail.com>\r\nSubject:
-               =?ISO-8859-1?Q?Gmail_=E8_diverso._Queste_sono_le_informazioni_essen?=\r\n
-               =?ISO-8859-1?Q?ziali_che_devi_conoscere_prima_di_poter_procedere.?=\r\n\r\n'),
+               =?ISO-8859-1?Q?Gmail_is_different._This_is_all_you_have_to_\r\n
+               =?ISO-8859-1?Q?know_before_you_start_using_it.?=\r\n\r\n'),
 
             # PART 2
             (b' BODY[1]<0> {100}',
