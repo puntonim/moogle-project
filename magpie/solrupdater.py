@@ -20,9 +20,6 @@ class AbstractSolrUpdater(metaclass=ABCMeta):
 
         self.solr.update([doc], 'json', commit)
 
-        if commit:
-            self.commit()
-
     def commit(self):
         self.solr.commit()
 

@@ -45,7 +45,7 @@ class AbstractApiResponse(metaclass=ABCMeta):
                 self._hook_parse_first_entry(entry)
                 is_first_entry = False
 
-        if entry:  # if there is any `entry`
+        if entry:  # if there is at least 1 `entry`.
             self._hook_parse_last_entry(entry)
 
         redis.flush_buffer()

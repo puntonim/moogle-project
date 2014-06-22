@@ -27,7 +27,7 @@ class DropboxCrawler(AbstractCrawler):
         def _delta(self, cursor=updates_cursor, *args, **kwargs):
             log.debug("Querying DELTA w/ cursor: {}".format(cursor))
             return client.delta(cursor=cursor, *args, **kwargs)
-                                #path_prefix='/temp/moogletest')  # TODO remove the prefix
+                                #path_prefix='/temp/moogletest', *args, **kwargs)  # TODO remove.
         client.get = _delta
         return client
 
