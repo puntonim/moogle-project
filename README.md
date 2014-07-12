@@ -1,12 +1,11 @@
 MOOGLE PROJECT
 ==============
 
-Imagine you want to search for that sushi restaurant someone recommended you last month: you type
-"sushi restaurant" in your laptop and you get a tweet from a friend about
-Tokyo Sushi. You also get a comment you wrote on Facebook, an SMS message you sent your girlfriend
+Imagine you want to search for that sushi restaurant someone recommended you last month but you don't remember its name: you type "sushi restaurant" in your laptop and you get an old tweet from a friend about
+Tokyo Sushi. You also get a comment you wrote on Facebook, an SMS message you sent your brother
 and a bookmark in your browser, all about the same restaurant. And imagine that you can do this
 with your smart phone, your laptop, tablet or smart TV. Something so basic yet so far from
-the reality...
+the reality...  
 This is **Moogle - My Own Google**, the search engine for *private data*.
 
 The project has 2 main components:
