@@ -10,6 +10,9 @@ and similar?
 
 ---------------------------------------------------------------------------------------------------
 
+* Open source library for WhatsApp in Python:
+http://www.openwhatsapp.org
+https://github.com/tgalal/yowsup
 
 * USE MSG IN Synchronizer
 The Synchronizer launches: Crawler, Downloader, Indexer in sequence
