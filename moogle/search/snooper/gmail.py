@@ -8,6 +8,12 @@ from tokens.oauthlib import GmailOauthFlowManager
 from profiles.models import GmailProfile
 
 
+# Fix to avoid the "Got more than 10000 bytes" error which happens when the search gives back
+# too many results.
+# See: http://stackoverflow.com/a/25457500
+imaplib._MAXLINE = 50000
+
+
 class GmailSnooper:
     def __init__(self, user):
         self.user = user
