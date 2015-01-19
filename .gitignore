@@ -28,6 +28,9 @@ vars.environment
 # Any temp folder
 _tmp
 
+# Old doc folder
+old-docs
+
 # Test fixtures
 test_user_*_bearertokens.json
 test_bearertokens*.json
