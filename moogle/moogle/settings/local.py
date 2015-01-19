@@ -59,3 +59,6 @@ INTERNAL_IPS = ('127.0.0.1',)
 #        url(r'^__debug__/', include(debug_toolbar.urls)),
 #    )
 ########## END TOOLBAR CONFIGURATION
+
+# Solr connection.
+SOLR_URL = 'http://10.211.55.3:8983/solr'
