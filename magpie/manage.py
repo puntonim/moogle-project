@@ -251,12 +251,12 @@ if __name__ == '__main__':
                        help='The provider (Solr core) to reset.')
     sub_subcmd.set_defaults(func=solr_reset)
     # `solr print` sub-subcommand.
-    sub_subcmd = sub_subparsers.add_parser('print', help='Reset Solr index.')
+    sub_subcmd = sub_subparsers.add_parser('print', help='Print Solr index.')
     group = sub_subcmd.add_mutually_exclusive_group(required=True)
     group.add_argument('--bearertoken_id', type=int,
-                        help='The bearertoken_id to reset the Solr index for.')
+                        help='The bearertoken_id to print the Solr index for.')
     group.add_argument('--provider', choices=CORE_NAMES.values(),
-                       help='The provider (Solr core) to reset.')
+                       help='The provider (Solr core) to print.')
     sub_subcmd.set_defaults(func=solr_print)
 
     # `ping` subcommand -- just a mock.
