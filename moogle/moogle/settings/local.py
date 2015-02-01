@@ -61,4 +61,5 @@ INTERNAL_IPS = ('127.0.0.1',)
 ########## END TOOLBAR CONFIGURATION
 
 # Solr connection.
-SOLR_URL = 'http://10.211.55.3:8983/solr'
+#SOLR_URL = 'http://192.168.1.76:8983/solr'
+SOLR_URL = 'http://10.211.55.5:8983/solr'
